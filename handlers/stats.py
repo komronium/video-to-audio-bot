@@ -13,11 +13,11 @@ async def command_stats(message: types.Message, db: Session):
     stats = user_service.get_stats()
 
     text = (
-        f'📊 <b>Bot Statistics:</b>\n\n'
-        f'Total users: <b>{stats['total_users']}</b>\n'
-        f'Active users: <b>{stats['total_active_users']}</b>\n'
-        f'Total conversations: <b>{stats['total_conversations']}</b>\n'
-        f'Users joined today: <b>{stats['users_joined_today']}</b>'
+        f"📊 <b>Bot Statistics:</b>\n\n"
+        f"Total users: <b>{stats['total_users']}</b>\n"
+        f"Active users: <b>{stats['total_active_users']}</b>\n"
+        f"Total conversations: <b>{stats['total_conversations']}</b>\n"
+        f"Users joined today: <b>{stats['users_joined_today']}</b>"
     )
 
     await message.answer(text)
