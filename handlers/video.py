@@ -17,7 +17,7 @@ async def video_handler(message: Message, db: Session):
         await message.reply('Sorry, but we can only process files up to 100 MB in size')
         return
 
-    processing_msg = await message.reply("*Processing... Please wait.*")
+    processing_msg = await message.reply("Converting ... \nPlease wait!")
     file = await message.bot.get_file(video.file_id)
     video_path = file.file_path
     audio_path = None
@@ -26,9 +26,10 @@ async def video_handler(message: Message, db: Session):
         file_name = Path(video.file_name or video.file_unique_id).stem.lower()
         audio_path = convert_video_to_audio(video_path, f'audios/{file_name}')
         audio_file = FSInputFile(path=audio_path)
+        bot = await message.bot.get_me()
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
-        await message.reply_document(audio_file)
+        await message.reply_document(audio_file, caption=f'Converted by @{bot.username}')
     finally:
         os.remove(video_path)
         if audio_path and os.path.exists(audio_path):

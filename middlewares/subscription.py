@@ -17,7 +17,7 @@ class SubscriptionMiddleware(BaseMiddleware):
 
         if chat_member.status in ['left', 'kicked', 'banned']:
             await event.answer(
-                'To continue, please subscribe to our channel first!',
+                'To continue, please subscribe to our channel first.',
                 reply_markup=SubscriptionMiddleware.subscription_keyboard()
             )
             return
@@ -27,7 +27,7 @@ class SubscriptionMiddleware(BaseMiddleware):
     @staticmethod
     def subscription_keyboard():
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='Join the channel', url=settings.CHANNEL_JOIN_LINK)],
+            [InlineKeyboardButton(text='🔗 Join the Channel', url=settings.CHANNEL_JOIN_LINK)],
             [InlineKeyboardButton(text='✅ Check subscription', callback_data='check_subscription')]
         ])
         return keyboard

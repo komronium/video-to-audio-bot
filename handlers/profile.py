@@ -15,13 +15,13 @@ async def profile_handler(message: types.Message, db: Session):
     if user:
         text = (
             f"👤 <b>Your Profile:</b>\n\n"
-            f"ID: <b>{user.user_id}</b>\n"
-            f"Name: <b>{user.name}</b>\n"
-            f"Username: @{user.username if user.username else 'N/A'}\n"
-            f"Conversations: <b>{user.conversation_count}</b>\n"
-            f"Joined: <b>{user.joined_at.strftime('%d-%m-%Y')}</b>"
+            f"🔹 User ID: <b>{user.user_id}</b>\n"
+            f"🔹 Name: <b>{user.name}</b>\n"
+            f"🔹 Username: @{user.username if user.username else 'N/A'}\n"
+            f"🔹 Conversations: <b>{user.conversation_count}</b>\n"
+            f"🔹 Joined: <b>{user.joined_at.strftime('%d-%m-%Y')}</b>"
         )
     else:
         text = "⚠️ You are not registered in the system."
 
-    await message.answer(text, parse_mode="HTML")
+    await message.answer(text)
