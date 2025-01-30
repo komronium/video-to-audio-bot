@@ -1,10 +1,10 @@
 from datetime import date
 from aiogram import Bot
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 
-from config import settings
 from database.models import User
+from utils.notification import notify_group
 
 
 class UserService:
@@ -20,7 +20,7 @@ class UserService:
         self.db.add(user)
         self.db.commit()
         self.db.refresh(user)
-        await UserService.notify_group(bot, user)
+        await notify_group(bot, user)
         return user
 
     def is_user_exists(self, user_id: int):
@@ -33,18 +33,6 @@ class UserService:
             self.db.commit()
 
         return None
-
-    @staticmethod
-    async def notify_group(bot: Bot, user):
-        try:
-            message = (
-                f"<b>New Member!\n</b>"
-                f"<b>Name:</b> {user.name}\n"
-                f"<b>Username:</b> @{user.username if user.username else 'N/A'}"
-            )
-            await bot.send_message(settings.GROUP_ID, message)
-        except Exception as e:
-            print(f"Error notifying group: {e}")
 
     def total_users(self):
         return self.db.query(User).count()
@@ -66,3 +54,6 @@ class UserService:
             "total_conversations": self.total_conversations(),
             "users_joined_today": self.users_joined_today(),
         }
+
+    def get_top_users(self, limit=10):
+        return self.db.query(User).order_by(text('-conversation_count')).limit(limit).all()

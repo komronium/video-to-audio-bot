@@ -7,6 +7,7 @@ async def set_default_commands(bot: Bot):
         BotCommand(command="start", description="Start the bot"),
         BotCommand(command="help", description="Get help information"),
         BotCommand(command="stats", description="View bot statistics"),
+        BotCommand(command="top", description="View the top active users"),        
         BotCommand(command="profile", description="View your profile"),
         BotCommand(command="settings", description="Manage your settings"),
     ])
