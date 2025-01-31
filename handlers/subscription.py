@@ -1,7 +1,6 @@
 from aiogram import types, Router, F
 
 from config import settings
-from middlewares.subscription import SubscriptionMiddleware
 
 router = Router()
 
@@ -20,4 +19,7 @@ async def check_subscription(callback: types.CallbackQuery):
 
     await callback.bot.send_chat_action(callback.message.chat.id, 'typing')
     await callback.message.delete()
-    await callback.message.answer('✅ Thank you for subscribing! You can now use the bot')
+    await callback.message.answer(
+        '✅ Thank you for subscribing! You can now use the bot\n'
+        'Send me a video file, and I will extract its audio for you.'
+    )

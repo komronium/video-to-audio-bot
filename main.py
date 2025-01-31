@@ -1,28 +1,27 @@
 import asyncio
-import logging
+from logging import basicConfig, INFO
 
 from aiogram import Bot, Dispatcher
+from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TelegramAPIServer
 
 from config import settings
 from middlewares import setup_middlewares
-from middlewares.throttling import ThrottlingMiddleware
-from middlewares.subscription import SubscriptionMiddleware
 from handlers import setup_handlers
 from utils.set_commands import set_default_commands
 
 
 async def main():
-    logging.basicConfig(level=logging.INFO)
+    basicConfig(level=INFO)
     local_server = TelegramAPIServer.from_base('http://localhost:8081')
     session = AiohttpSession(api=local_server)
 
     bot = Bot(
         token=settings.BOT_TOKEN,
         session=session,
-        default=DefaultBotProperties(parse_mode='HTML')
+        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
     )
 
     dp = Dispatcher()
