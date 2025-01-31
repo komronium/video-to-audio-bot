@@ -16,6 +16,7 @@ class SubscriptionMiddleware(BaseMiddleware):
         chat_member = await event.bot.get_chat_member(settings.CHANNEL_ID, user_id)
 
         if chat_member.status in ['left', 'kicked', 'banned']:
+            await event.bot.send_chat_action(event.chat.id, 'typing')
             await event.answer(
                 'To continue, please subscribe to our channel first.',
                 reply_markup=SubscriptionMiddleware.subscription_keyboard()

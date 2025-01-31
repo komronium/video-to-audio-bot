@@ -9,6 +9,7 @@ async def notify_group(bot: Bot, user):
             f"<b>Name:</b> {user.name}\n"
             f"<b>Username:</b> @{user.username if user.username else 'N/A'}"
         )
+        await bot.send_chat_action(settings.GROUP_ID, 'typing')
         await bot.send_message(settings.GROUP_ID, message)
     except Exception as e:
         print(f"Error notifying group: {e}")

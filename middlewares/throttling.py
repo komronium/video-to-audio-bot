@@ -19,6 +19,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         user_id = event.from_user.id
 
         if user_id in self.cache:
+            await event.bot.send_chat_action(event.chat.id, 'typing')
             await event.answer('Too many requests! Please wait')
             return
 

@@ -17,4 +17,5 @@ async def command_help(message: types.Message):
         "If you have any questions, feel free to ask! 😊"
     )
 
+    await message.bot.send_chat_action(message.chat.id, 'typing')
     await message.answer(text)

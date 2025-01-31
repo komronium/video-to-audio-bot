@@ -20,4 +20,5 @@ async def command_top(message: types.Message, db: Session):
     for idx, user in enumerate(top_users, start=1):
         text += f"🔹 {idx}. <b>{user.name}</b> – {user.conversation_count}\n"
 
+    await message.bot.send_chat_action(message.chat.id, 'typing')
     await message.answer(text)

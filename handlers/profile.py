@@ -24,4 +24,5 @@ async def profile_handler(message: types.Message, db: Session):
     else:
         text = "⚠️ You are not registered in the system."
 
+    await message.bot.send_chat_action(message.chat.id, 'typing')
     await message.answer(text)
