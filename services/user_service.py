@@ -3,6 +3,7 @@ from aiogram import Bot
 from sqlalchemy.orm import Session
 from sqlalchemy import func, text
 
+from config import settings
 from database.models import User
 from utils.notification import notify_group
 
@@ -14,6 +15,12 @@ class UserService:
 
     def get_user(self, user_id: int):
         return self.db.query(User).filter(User.user_id == user_id).first()
+
+    def get_all_users(self, exclude_admin=False):
+        if exclude_admin:
+            return self.db.query(User).filter(User.user_id != settings.ADMIN_ID)
+
+        return self.db.query(User).all()
 
     async def add_user(self, user_id: int, username: str, name: str, bot: Bot):
         user = User(user_id=user_id, username=username, name=name)
@@ -34,7 +41,10 @@ class UserService:
 
         return None
 
-    def total_users(self):
+    def total_users(self, exclude_admin=False):
+        if exclude_admin:
+            return self.db.query(User).filter(User.user_id != settings.ADMIN_ID).count()
+
         return self.db.query(User).count()
 
     def total_active_users(self):

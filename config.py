@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     CHANNEL_ID: int
     CHANNEL_JOIN_LINK: str
     GROUP_ID: int
+    ADMIN_ID: int
 
     model_config = SettingsConfigDict(
         env_file='.env',

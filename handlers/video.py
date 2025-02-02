@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from services.converter import convert_video_to_audio
 from services.user_service import UserService
 
+SIZE_IN_MB = 120
 
 router = Router()
 
@@ -15,9 +16,9 @@ router = Router()
 @router.message(F.video)
 async def video_handler(message: Message, db: Session):
     video = message.video
-    if video.file_size > 100 * 1024 * 1024:
+    if video.file_size > SIZE_IN_MB * 1024 * 1024:
         await message.bot.send_chat_action(message.chat.id, 'typing')
-        await message.reply('Sorry, but we can only process files up to 100 MB in size')
+        await message.reply(f'Sorry, but we can only process files up to {SIZE_IN_MB} MB in size')
         return
 
     await message.bot.send_chat_action(message.chat.id, 'typing')
