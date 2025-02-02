@@ -1,5 +1,4 @@
 import os
-import asyncio
 from pathlib import Path
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile

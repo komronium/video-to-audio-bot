@@ -1,4 +1,5 @@
 from datetime import datetime
+from asyncio import sleep
 from aiogram import types, Router, F
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
@@ -63,6 +64,9 @@ async def process_post_content(message: types.Message, state: FSMContext, db: Se
                 failed=failed,
                 time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             ))
+
+            if (failed + successful) % 10 == 0:
+                await sleep(2)
 
         await state.clear()
 
