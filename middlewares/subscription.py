@@ -2,25 +2,16 @@ import logging
 from aiogram import BaseMiddleware
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.exceptions import TelegramAPIError
-from cachetools import TTLCache
 
 from config import settings
 
 
 class SubscriptionMiddleware(BaseMiddleware):
 
-    def __init__(self):
-        self.cache = TTLCache(maxsize=10000, ttl=300)
-        super().__init__()
-
     async def check_subscription(self, bot, user_id, channel_id):
         try:
-            if user_id in self.cache:
-                return self.cache[user_id]
-
             member = await bot.get_chat_member(channel_id, user_id)
             is_subscribed = member.status not in ['left', 'kicked', 'banned']
-            self.cache[user_id] = is_subscribed
             return is_subscribed
         except TelegramAPIError as e:
             logging.error(f"Error while checking subscription: {e}")
