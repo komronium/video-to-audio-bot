@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     BOT_TOKEN: str
-    DATABASE_URL: str = 'sqlite:///./database.db'
+    DATABASE_URL: str = 'sqlite+aiosqlite:///./database.db'
     CHANNEL_ID: int
     CHANNEL_JOIN_LINK: str
     GROUP_ID: int

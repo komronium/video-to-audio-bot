@@ -1,3 +1,4 @@
+import asyncio
 from datetime import date
 from sqlalchemy import Column, Integer, String, Date
 from sqlalchemy.orm import declarative_base
@@ -18,4 +19,9 @@ class User(Base):
     joined_at = Column(Date, default=date.today)
 
 
-Base.metadata.create_all(bind=engine)
+async def create_tables():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
+asyncio.run(create_tables())

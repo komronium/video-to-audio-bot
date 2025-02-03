@@ -2,22 +2,22 @@ import os
 from pathlib import Path
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.converter import convert_video_to_audio
 from services.user_service import UserService
 
-SIZE_IN_MB = 120
+MAX_FILE_SIZE = 100 * 1024 * 1024
 
 router = Router()
 
 
 @router.message(F.video)
-async def video_handler(message: Message, db: Session):
+async def video_handler(message: Message, db: AsyncSession):
     video = message.video
-    if video.file_size > SIZE_IN_MB * 1024 * 1024:
+    if video.file_size > MAX_FILE_SIZE:
         await message.bot.send_chat_action(message.chat.id, 'typing')
-        await message.reply(f'Sorry, but we can only process files up to {SIZE_IN_MB} MB in size')
+        await message.reply(f'Sorry, but we can only process files up to {MAX_FILE_SIZE // (2 ** 20)} MB in size')
         return
 
     await message.bot.send_chat_action(message.chat.id, 'typing')

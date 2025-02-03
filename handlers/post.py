@@ -4,7 +4,7 @@ from aiogram import types, Router, F
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from services.user_service import UserService
@@ -31,11 +31,11 @@ async def create_post(message: types.Message, state: FSMContext):
 
 
 @router.message(StateFilter(PostStates.waiting_for_post))
-async def process_post_content(message: types.Message, state: FSMContext, db: Session):
+async def process_post_content(message: types.Message, state: FSMContext, db: AsyncSession):
     if message.from_user.id == settings.ADMIN_ID:
         user_service = UserService(db)
-        users = user_service.get_all_users(exclude_admin=True)
-        total_users = user_service.total_users(exclude_admin=True)
+        users = await user_service.get_all_users(exclude_admin=True)
+        total_users = await user_service.total_users(exclude_admin=True)
 
         successful, failed = 0, 0
         stats_message = (

@@ -1,5 +1,7 @@
 from aiogram import types, Router
 from aiogram.filters import Command
+from aiogram.exceptions import TelegramAPIError
+
 
 router = Router()
 
@@ -17,5 +19,8 @@ async def command_help(message: types.Message):
         "If you have any questions, feel free to ask! 😊"
     )
 
-    await message.bot.send_chat_action(message.chat.id, 'typing')
-    await message.answer(text)
+    try:
+        await message.bot.send_chat_action(message.chat.id, 'typing')
+        await message.answer(text)
+    except TelegramAPIError as e:
+        await message.answer("Sorry, something went wrong. Please try again later.")

@@ -1,6 +1,6 @@
 from aiogram import types, Router
 from aiogram.filters import Command
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
 
@@ -8,9 +8,9 @@ router = Router()
 
 
 @router.message(Command('top'))
-async def command_top(message: types.Message, db: Session):
+async def command_top(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
-    top_users = user_service.get_top_users()
+    top_users = await user_service.get_top_users()
 
     if not top_users:
         await message.answer("🚀 No top users yet.")

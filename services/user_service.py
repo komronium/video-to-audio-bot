@@ -1,7 +1,7 @@
 from datetime import date
 from aiogram import Bot
-from sqlalchemy.orm import Session
-from sqlalchemy import func, text
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import func, select
 
 from config import settings
 from database.models import User
@@ -10,60 +10,78 @@ from utils.notification import notify_group
 
 class UserService:
 
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def get_user(self, user_id: int):
-        return self.db.query(User).filter(User.user_id == user_id).first()
+    async def get_user(self, user_id: int):
+        stmt = select(User).where(User.user_id == user_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().first()
 
-    def get_all_users(self, exclude_admin=False):
+    async def get_all_users(self, exclude_admin=False):
+        stmt = select(User)
         if exclude_admin:
-            return self.db.query(User).filter(User.user_id != settings.ADMIN_ID)
+            stmt = stmt.where(User.user_id != settings.ADMIN_ID)
 
-        return self.db.query(User).all()
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
 
     async def add_user(self, user_id: int, username: str, name: str, bot: Bot):
         user = User(user_id=user_id, username=username, name=name)
         self.db.add(user)
-        self.db.commit()
-        self.db.refresh(user)
+        await self.db.commit()
+        await self.db.refresh(user)
         await notify_group(bot, user)
         return user
 
-    def is_user_exists(self, user_id: int):
-        return self.db.query(User).filter(User.user_id == user_id).first() is not None
+    async def is_user_exists(self, user_id: int):
+        stmt = select(User).where(User.user_id == user_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().first() is not None
 
     async def add_conversation(self, user_id: int):
-        user = self.get_user(user_id)
-        if user:
-            user.conversation_count += 1
-            self.db.commit()
+       user = await self.get_user(user_id)
+       if user:
+           user.conversation_count += 1
+           await self.db.commit()
 
-        return None
-
-    def total_users(self, exclude_admin=False):
+    async def total_users(self, exclude_admin=False):
+        stmt = select(func.count(User.user_id))
         if exclude_admin:
-            return self.db.query(User).filter(User.user_id != settings.ADMIN_ID).count()
+            stmt = stmt.where(User.user_id != settings.ADMIN_ID)
 
-        return self.db.query(User).count()
+        result = await self.db.execute(stmt)
+        return result.scalar()
 
-    def total_active_users(self):
-        return self.db.query(User).filter(User.conversation_count > 0).count()
+    async def total_active_users(self):
+        stmt = select(func.count(User.user_id)).where(User.conversation_count > 0)
+        result = await self.db.execute(stmt)
+        return result.scalar()
 
-    def total_conversations(self):
-        return self.db.query(func.sum(User.conversation_count)).scalar() or 0
+    async def total_conversations(self):
+        stmt = select(func.sum(User.conversation_count))
+        result = await self.db.execute(stmt)
+        return result.scalar() or 0
 
-    def users_joined_today(self):
+    async def users_joined_today(self):
         today = date.today()
-        return self.db.query(User).filter(User.joined_at == today).count()
+        stmt = select(func.count(User.user_id)).where(User.joined_at == today)
+        result = await self.db.execute(stmt)
+        return result.scalar()
 
-    def get_stats(self):
+    async def get_stats(self):
         return {
-            "total_users": self.total_users(),
-            "total_active_users": self.total_active_users(),
-            "total_conversations": self.total_conversations(),
-            "users_joined_today": self.users_joined_today(),
+            "total_users": await self.total_users(),
+            "total_active_users": await self.total_active_users(),
+            "total_conversations": await self.total_conversations(),
+            "users_joined_today": await self.users_joined_today(),
         }
 
-    def get_top_users(self, limit=10):
-        return self.db.query(User).order_by(text('-conversation_count')).limit(limit).all()
+    async def get_top_users(self, limit=10):
+        stmt = (
+            select(User)
+            .order_by(User.conversation_count.desc())
+            .limit(limit)
+        )
+        result = await self.db.execute(stmt)
+        return result.scalars().all()

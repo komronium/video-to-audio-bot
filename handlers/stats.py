@@ -1,6 +1,6 @@
 from aiogram import types, Router
 from aiogram.filters import Command
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import dataclass
 
 from services.user_service import UserService
@@ -40,13 +40,15 @@ def format_stats_message(stats: Stats) -> str:
 
 
 @router.message(Command('stats'))
-async def command_stats(message: types.Message, db: Session):
+async def command_stats(message: types.Message, db: AsyncSession):
     try:
-        user_service = UserService(db)
-        raw_stats = user_service.get_stats()
-        stats = Stats(**raw_stats)
-        text = format_stats_message(stats)
         await message.bot.send_chat_action(message.chat.id, 'typing')
+
+        user_service = UserService(db)
+        raw_stats = await user_service.get_stats()
+        stats = Stats(**raw_stats)
+
+        text = format_stats_message(stats)
         await message.answer(text)
     except Exception as e:
         await message.bot.send_chat_action(message.chat.id, 'typing')
