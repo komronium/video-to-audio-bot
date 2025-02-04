@@ -10,4 +10,5 @@ async def set_default_commands(bot: Bot):
         BotCommand(command="top", description="View the top active users"),        
         BotCommand(command="profile", description="View your profile"),
         BotCommand(command="settings", description="Manage your settings"),
+        BotCommand(command="premium", description="Premium info"),
     ])
