@@ -13,6 +13,14 @@ from handlers import setup_handlers
 from utils.set_commands import set_default_commands
 
 
+async def on_startup(bot: Bot):
+    await bot.send_message(settings.GROUP_ID, "✅ The bot is up and running!")
+
+
+async def on_shutdown(bot: Bot):
+    await bot.send_message(settings.GROUP_ID, "❌ Bot has been suspended!")
+
+
 async def main():
     basicConfig(level=INFO)
     local_server = TelegramAPIServer.from_base('http://localhost:8081')
@@ -25,6 +33,10 @@ async def main():
     )
 
     dp = Dispatcher()
+
+    dp.startup.register(on_startup)
+    dp.shutdown.register(on_shutdown)
+
     setup_middlewares(dp)
     setup_handlers(dp)
 
