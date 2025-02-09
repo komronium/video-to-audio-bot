@@ -24,7 +24,7 @@ async def video_handler(message: Message, db: AsyncSession):
         await message.bot.send_chat_action(message.chat.id, 'typing')
         await message.reply(
             "<b>🚫 File too large!</b>\n"
-            "Your video exceeds the 100MB limit.\n"
+            "Your video exceeds the 100 MB limit.\n"
             "To remove limits and get premium, click /premium"
         )
         return

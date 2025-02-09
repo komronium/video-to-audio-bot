@@ -14,11 +14,11 @@ from utils.set_commands import set_default_commands
 
 
 async def on_startup(bot: Bot):
-    await bot.send_message(settings.GROUP_ID, "✅ The bot is up and running!")
+    await bot.send_message(settings.GROUP_ID, "<b>✅ THE BOT IS UP!</b>")
 
 
 async def on_shutdown(bot: Bot):
-    await bot.send_message(settings.GROUP_ID, "❌ Bot has been suspended!")
+    await bot.send_message(settings.GROUP_ID, "<b>❌ THE BOT HAS BEEN SUSPENDED!</b>")
 
 
 async def main():
