@@ -1,7 +1,7 @@
 import logging
 from aiogram import BaseMiddleware
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.exceptions import TelegramAPIError
+from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError
 
 from config import settings
 
@@ -26,10 +26,13 @@ class SubscriptionMiddleware(BaseMiddleware):
         user_id = event.from_user.id
 
         if not await self.check_subscription(event.bot, user_id, settings.CHANNEL_ID):
-            await event.answer(
-                "To continue, please subscribe to our channel first.",
-                reply_markup=SubscriptionMiddleware.subscription_keyboard()
-            )
+            try:
+                await event.answer(
+                    "To continue, please subscribe to our channel first.",
+                    reply_markup=SubscriptionMiddleware.subscription_keyboard()
+                )
+            except TelegramForbiddenError:
+                logging.warning(f"User {user_id} has blocked the bot. Cannot send message.")
             return
 
         return await handler(event, data)

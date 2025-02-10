@@ -1,5 +1,6 @@
 from datetime import date
 from aiogram import Bot
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func, select
 
@@ -27,12 +28,16 @@ class UserService:
         return result.scalars().all()
 
     async def add_user(self, user_id: int, username: str, name: str, bot: Bot):
-        user = User(user_id=user_id, username=username, name=name)
-        self.db.add(user)
-        await self.db.commit()
-        await self.db.refresh(user)
-        await notify_group(bot, user)
-        return user
+        try:
+            user = User(user_id=user_id, username=username, name=name)
+            self.db.add(user)
+            await self.db.commit()
+            await self.db.refresh(user)
+            await notify_group(bot, user)
+            return user
+        except IntegrityError:
+            await self.db.rollback()
+            return await self.get_user(user_id)
 
     async def is_user_exists(self, user_id: int):
         stmt = select(User).where(User.user_id == user_id)

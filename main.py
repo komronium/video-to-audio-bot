@@ -19,6 +19,7 @@ async def on_startup(bot: Bot):
 
 async def on_shutdown(bot: Bot):
     await bot.send_message(settings.GROUP_ID, "<b>❌ THE BOT HAS BEEN SUSPENDED!</b>")
+    await bot.session.close()
 
 
 async def main():
