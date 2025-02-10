@@ -1,4 +1,6 @@
+import logging
 from aiogram import BaseMiddleware
+from aiogram.exceptions import TelegramForbiddenError
 from datetime import datetime
 from cachetools import TTLCache
 
@@ -19,8 +21,7 @@ class ThrottlingMiddleware(BaseMiddleware):
         user_id = event.from_user.id
 
         if user_id in self.cache:
-            await event.bot.send_chat_action(event.chat.id, 'typing')
-            await event.answer('Too many requests! Please wait')
+            await event.answer('Too many requests! Please wait.')
             return
 
         self.cache[user_id] = datetime.now()
