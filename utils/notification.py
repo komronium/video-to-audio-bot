@@ -15,7 +15,6 @@ async def notify_group(bot: Bot, user):
             name=user.name,
             username=user.username or 'N/A'
         )
-        await bot.send_chat_action(settings.GROUP_ID, 'typing')
         await bot.send_message(settings.GROUP_ID, message.strip())
     except Exception as e:
         logging.error(f"Error while sending notification: {e}")

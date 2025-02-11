@@ -33,5 +33,4 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         joined_at=user.joined_at.strftime('%d-%m-%Y')
     )
 
-    await message.bot.send_chat_action(message.chat.id, 'typing')
     await message.answer(text.strip())

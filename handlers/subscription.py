@@ -17,7 +17,6 @@ async def check_subscription(callback: types.CallbackQuery):
         )
         return
 
-    await callback.bot.send_chat_action(callback.message.chat.id, 'typing')
     await callback.message.delete()
     await callback.message.answer(
         '✅ Thank you for subscribing! You can now use the bot\n'

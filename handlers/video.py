@@ -3,14 +3,14 @@ import redis
 from pathlib import Path
 from datetime import datetime
 from aiogram import Router, F
-from aiogram.types import Message, FSInputFile
+from aiogram.types import Message, FSInputFile, Document
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.converter import convert_video_to_audio
 from services.user_service import UserService
 
 MAX_FILE_SIZE = 100 * 1024 * 1024
-DAILY_LIMIT = 5
+DAILY_LIMIT = 10
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
@@ -18,8 +18,8 @@ router = Router()
 
 
 @router.message(F.video)
-async def video_handler(message: Message, db: AsyncSession):
-    video = message.video
+async def video_handler(message: Message, db: AsyncSession, document: Document = None):
+    video = message.video if not document else document
     if video.file_size > MAX_FILE_SIZE:
         await message.bot.send_chat_action(message.chat.id, 'typing')
         await message.reply(
@@ -42,7 +42,6 @@ async def video_handler(message: Message, db: AsyncSession):
         )
         return
 
-    await message.bot.send_chat_action(message.chat.id, 'typing')
     processing_msg = await message.reply("Downloading ...")
 
     file = await message.bot.get_file(video.file_id)
@@ -72,3 +71,8 @@ async def video_handler(message: Message, db: AsyncSession):
         os.remove(video_path)
         if audio_path and os.path.exists(audio_path):
             os.remove(audio_path)
+
+
+@router.message(F.document.mime_type.startswith('video'))
+async def document_handler(message: Message, db: AsyncSession):
+    await video_handler(message, db, message.document)

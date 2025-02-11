@@ -41,8 +41,6 @@ def format_stats_message(stats: Stats) -> str:
 @router.message(Command('stats'))
 async def command_stats(message: types.Message, db: AsyncSession):
     try:
-        await message.bot.send_chat_action(message.chat.id, 'typing')
-
         user_service = UserService(db)
         raw_stats = await user_service.get_stats()
         stats = Stats(**raw_stats)
@@ -50,6 +48,5 @@ async def command_stats(message: types.Message, db: AsyncSession):
         text = format_stats_message(stats)
         await message.answer(text)
     except Exception as e:
-        await message.bot.send_chat_action(message.chat.id, 'typing')
         await message.answer('❌ Error getting statistics')
         raise
