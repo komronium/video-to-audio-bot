@@ -1,3 +1,5 @@
+import json
+
 import ffmpeg
 from yt_dlp import YoutubeDL
 
@@ -17,12 +19,15 @@ def get_youtube_video(video_url: str):
     ydl_opts = {
         'format': 'bestaudio/best',
         'quiet': True,
-        'outtmpl': output_path
+        'outtmpl': output_path,
+        'cookiefile': 'cookies.txt'
     }
 
     with YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(video_url, download=True)
-        print(ydl.prepare_filename(info))
-        filename = ydl.prepare_filename(info)
+        path = ydl.prepare_filename(info)
+        filename = info.get('title')
+        with open('data.json', 'w') as file:
+            file.write(json.dumps(info, indent=4))
 
-    return filename
+    return path, filename

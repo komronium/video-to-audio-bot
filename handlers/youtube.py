@@ -3,6 +3,7 @@ import os
 import re
 import redis
 from pathlib import Path
+from yt_dlp import YoutubeDL
 from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile, Document
@@ -25,9 +26,17 @@ router = Router()
 async def youtube_video_handler(message: Message, db: AsyncSession):
     video_url = message.text
 
+    with YoutubeDL({'format': 'bestaudio/best', 'quiet': True, 'cookiefile': 'cookies.txt'}) as ydl:
+        info = ydl.extract_info(video_url, download=False)
+        duration = info.get('duration')
+
+    if duration > 30 * 60:
+        await message.reply('Video is too long. Max is 30 minutes')
+        return
+
     processing_msg = await message.reply("Downloading ...")
 
-    video_path = get_youtube_video(video_url)
+    video_path, filename = get_youtube_video(video_url)
 
     user_id = message.from_user.id
     today = datetime.today().strftime('%Y-%m-%d')
@@ -45,17 +54,14 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
     audio_path = None
 
     try:
-        file_name = None
-
         await processing_msg.edit_text("Converting ...")
 
-        audio_path = convert_video_to_audio(video_path, f'audios/avicii')
+        audio_path = convert_video_to_audio(video_path, f'audios/{filename}')
         audio_file = FSInputFile(path=audio_path)
 
         bot = await message.bot.get_me()
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
-        await message.bot.send_chat_action(message.chat.id, 'upload_document')
         await message.reply_document(audio_file, caption=f'Converted by @{bot.username}')
 
         if not r.exists(key):
