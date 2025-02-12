@@ -69,6 +69,8 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
             r.expire(key, 86400)
         else:
             r.incr(key)
+    except Exception as e:
+        await message.answer('⚠️ Too many requests right now. Please try again later.')
     finally:
         os.remove(video_path)
         if audio_path and os.path.exists(audio_path):
