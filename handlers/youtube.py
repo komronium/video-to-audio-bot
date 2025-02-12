@@ -1,8 +1,69 @@
-from aiogram import Router, types
+
+import os
 import re
+import redis
+from pathlib import Path
+from datetime import datetime
+from aiogram import Router, F
+from aiogram.types import Message, FSInputFile, Document
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from services.converter import convert_video_to_audio, get_youtube_video
+from services.user_service import UserService
+
+YOUTUBE_REGEX = r'.*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$)).*'
+
+MAX_FILE_SIZE = 100 * 1024 * 1024
+DAILY_LIMIT = 10
+
+r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 router = Router()
 
-YOUTUBE_REGEX = re.compile(
-    r"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/|live\/|c\/|@)|youtu\.be\/)([\w\-]+)"
-)
+
+@router.message(F.text.regexp(YOUTUBE_REGEX))
+async def youtube_video_handler(message: Message, db: AsyncSession):
+    video_url = message.text
+
+    processing_msg = await message.reply("Downloading ...")
+
+    video_path = get_youtube_video(video_url)
+
+    user_id = message.from_user.id
+    today = datetime.today().strftime('%Y-%m-%d')
+    key = f'user:{user_id}:{today}'
+
+    count = r.get(key)
+
+    if count and int(count) >= DAILY_LIMIT:
+        await message.reply(
+            "❌ Daily limit reached!\n"
+            "To remove limits and get premium, click /premium"
+        )
+        return
+
+    audio_path = None
+
+    try:
+        file_name = None
+
+        await processing_msg.edit_text("Converting ...")
+
+        audio_path = convert_video_to_audio(video_path, f'audios/avicii')
+        audio_file = FSInputFile(path=audio_path)
+
+        bot = await message.bot.get_me()
+        await UserService(db).add_conversation(message.from_user.id)
+        await processing_msg.delete()
+        await message.bot.send_chat_action(message.chat.id, 'upload_document')
+        await message.reply_document(audio_file, caption=f'Converted by @{bot.username}')
+
+        if not r.exists(key):
+            r.set(key, 1)
+            r.expire(key, 86400)
+        else:
+            r.incr(key)
+    finally:
+        os.remove(video_path)
+        if audio_path and os.path.exists(audio_path):
+            os.remove(audio_path)
