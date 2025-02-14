@@ -9,12 +9,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from services.converter import VideoConverter
 from services.user_service import UserService
 
-MAX_FILE_SIZE = 100 * 1024 * 1024
+MAX_FILE_SIZE = 150 * 1024 * 1024
 DAILY_LIMIT = 10
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 router = Router()
+
+
+def generate_name(message: Message) -> str:
+    video = message.video
+
+    if message.caption:
+        return message.caption.lower().replace(' ', '_')
+    
+    if video.file_name:
+        return video.file_name.rsplit('.', 1)[0].lower().replace(' ', '_')
+    
+    user_id = message.from_user.id
+    timestamp = datetime.now().timestamp()
+    return f"audio_{user_id}_{timestamp}.mp3"
 
 
 @router.message(F.video)
@@ -24,7 +38,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         await message.bot.send_chat_action(message.chat.id, 'typing')
         await message.reply(
             "<b>🚫 File too large!</b>\n"
-            "Your video exceeds the 100 MB limit.\n"
+            "Your video exceeds the 150 MB limit.\n"
             "To remove limits and get premium, click /premium"
         )
         return
@@ -49,7 +63,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     audio_path = None
 
     try:
-        file_name = Path(video.file_name or video.file_unique_id).stem.lower()
+        file_name = generate_name(message)
 
         await processing_msg.edit_text("Converting ...")
 
