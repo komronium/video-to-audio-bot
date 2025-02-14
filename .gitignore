@@ -1,6 +1,7 @@
 .fleet/
 .vscode/
 env/
+venv/
 __pycache__/
 
 .env

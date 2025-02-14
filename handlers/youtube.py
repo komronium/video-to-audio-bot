@@ -2,15 +2,14 @@
 import os
 import re
 import redis
-from pathlib import Path
 from yt_dlp import YoutubeDL
 from datetime import datetime
 from aiogram import Router, F
-from aiogram.types import Message, FSInputFile, Document
+from aiogram.types import Message, FSInputFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.converter import convert_video_to_audio, get_youtube_video
 from services.user_service import UserService
+from services.converter import VideoConverter
 
 YOUTUBE_REGEX = r'.*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$)).*'
 
@@ -36,7 +35,7 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
 
     processing_msg = await message.reply("Downloading ...")
 
-    video_path, filename = get_youtube_video(video_url)
+    video_path, filename = await VideoConverter().get_youtube_video(video_url)
 
     user_id = message.from_user.id
     today = datetime.today().strftime('%Y-%m-%d')
@@ -56,7 +55,7 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
     try:
         await processing_msg.edit_text("Converting ...")
 
-        audio_path = convert_video_to_audio(video_path, f'audios/{filename}')
+        audio_path = await VideoConverter().convert_video_to_audio(video_path, f'audios/{filename}')
         audio_file = FSInputFile(path=audio_path)
 
         bot = await message.bot.get_me()
@@ -71,6 +70,7 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
             r.incr(key)
     except Exception as e:
         await message.answer('⚠️ Too many requests right now. Please try again later.')
+        print(e)
     finally:
         os.remove(video_path)
         if audio_path and os.path.exists(audio_path):

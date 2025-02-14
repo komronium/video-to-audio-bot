@@ -6,7 +6,7 @@ from aiogram import Router, F
 from aiogram.types import Message, FSInputFile, Document
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.converter import convert_video_to_audio
+from services.converter import VideoConverter
 from services.user_service import UserService
 
 MAX_FILE_SIZE = 100 * 1024 * 1024
@@ -53,7 +53,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
         await processing_msg.edit_text("Converting ...")
 
-        audio_path = convert_video_to_audio(video_path, f'audios/{file_name}')
+        audio_path = await VideoConverter.convert_video_to_audio(video_path, f'audios/{file_name}')
         audio_file = FSInputFile(path=audio_path)
 
         bot = await message.bot.get_me()
