@@ -53,7 +53,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
         await processing_msg.edit_text("Converting ...")
 
-        audio_path = await VideoConverter.convert_video_to_audio(video_path, f'audios/{file_name}')
+        audio_path = await VideoConverter().convert_video_to_audio(video_path, f'audios/{file_name}')
         audio_file = FSInputFile(path=audio_path)
 
         bot = await message.bot.get_me()
