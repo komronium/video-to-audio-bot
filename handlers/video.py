@@ -66,7 +66,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
     if queue_position > 1:
         queue_message = await message.reply(
-            "<b>⏳ Your request is in queue. Please wait ...</b>\n"
+            "⏳ Your request is in queue. Please wait ...\n"
             f"Position: <b>{queue_position} / {query_length}</b>"
         )
         queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
@@ -76,7 +76,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     while queue_position > 1:
         try:
             await queue_message.edit_text(
-                "<b>⏳ Your request is in queue. Please wait ...</b>\n"
+                "⏳ Your request is in queue. Please wait ...\n"
                 f"Position: <b>{queue_position} / {query_length}</b>"
             )
             await asyncio.sleep(1)
