@@ -1,13 +1,16 @@
 import os
+import asyncio
 import redis
 from pathlib import Path
 from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile, Document
+from aiogram.exceptions import TelegramAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.converter import VideoConverter
 from services.user_service import UserService
+from services.redis_queue import queue_manager
 
 MAX_FILE_SIZE = 150 * 1024 * 1024
 DAILY_LIMIT = 10
@@ -55,7 +58,48 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
             "To remove limits and get premium, click /premium"
         )
         return
+    
+    timestamp = int(message.date.timestamp())
+    queue_position = queue_manager.add_to_queue(user_id, video.file_id, timestamp)
+    query_length = queue_manager.queue_length()
+    queue_message = None
 
+    if queue_position > 1:
+        queue_message = await message.reply(
+            "<b>⏳ Your request is in queue. Please wait ...</b>\n"
+            f"Position: <b>{queue_position} / {query_length}</b>"
+        )
+        queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
+        query_length = queue_manager.queue_length()
+        await asyncio.sleep(2)
+
+    while queue_position > 1:
+        try:
+            await queue_message.edit_text(
+                "<b>⏳ Your request is in queue. Please wait ...</b>\n"
+                f"Position: <b>{queue_position} / {query_length}</b>"
+            )
+            await asyncio.sleep(1)
+            queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
+            query_length = queue_manager.queue_length()
+        except TelegramAPIError:
+            await asyncio.sleep(1)
+            queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
+            query_length = queue_manager.queue_length()
+    
+    if queue_message:
+        await queue_message.delete()
+
+    await process_video(message, db, video)
+
+
+@router.message(F.document.mime_type.startswith('video'))
+async def document_handler(message: Message, db: AsyncSession):
+    await video_handler(message, db, message.document)
+
+
+async def process_video(message: Message, db: AsyncSession, video):
+    user_id = message.from_user.id
     processing_msg = await message.reply("Downloading ...")
 
     file = await message.bot.get_file(video.file_id)
@@ -73,20 +117,12 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         bot = await message.bot.get_me()
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
-        await message.bot.send_chat_action(message.chat.id, 'upload_document')
         await message.reply_document(audio_file, caption=f'Converted by @{bot.username}')
 
-        if not r.exists(key):
-            r.set(key, 1)
-            r.expire(key, 86400)
-        else:
-            r.incr(key)
     finally:
+        timestamp = int(message.date.timestamp())
+        queue_manager.remove_from_queue(user_id, video.file_id, timestamp)
+
         os.remove(video_path)
         if audio_path and os.path.exists(audio_path):
             os.remove(audio_path)
-
-
-@router.message(F.document.mime_type.startswith('video'))
-async def document_handler(message: Message, db: AsyncSession):
-    await video_handler(message, db, message.document)
