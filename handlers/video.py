@@ -1,7 +1,7 @@
 import os
 import asyncio
 import redis
-from pathlib import Path
+import re
 from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile, Document
@@ -23,11 +23,16 @@ router = Router()
 def generate_name(message: Message) -> str:
     video = message.video
 
+    def sanitize_filename(name: str) -> str:
+        return re.sub(r'[^a-zA-Z0-9_-]', '', name)
+
     if message.caption:
-        return message.caption.lower().replace(' ', '_')
+        caption = message.caption[:25] if len(message.caption) > 25 else message.caption
+        return sanitize_filename(caption.lower().replace(' ', '_'))
     
     if video.file_name:
-        return video.file_name.rsplit('.', 1)[0].lower().replace(' ', '_')
+        file_name = video.file_name.rsplit('.', 1)[0]
+        return sanitize_filename(file_name.lower().replace(' ', '_'))
     
     user_id = message.from_user.id
     timestamp = datetime.now().timestamp()
