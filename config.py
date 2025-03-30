@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     GROUP_ID: int
     ADMIN_ID: int
 
+    API_HOST: str = 'youtube-mp36.p.rapidapi.com'
+    API_KEY: str
+
     model_config = SettingsConfigDict(
         env_file='.env',
         env_file_encoding='utf-8',

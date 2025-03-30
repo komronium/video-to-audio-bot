@@ -21,21 +21,31 @@ r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 router = Router()
 
 
+def extract_video_id(url: str) -> str:
+    match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11})', url)
+    if match:
+        return match.group(1)
+    return None
+
+
 @router.message(F.text.regexp(YOUTUBE_REGEX))
 async def youtube_video_handler(message: Message, db: AsyncSession):
     video_url = message.text
+    video_id = extract_video_id(video_url)
 
-    with YoutubeDL({'format': 'bestaudio/best', 'quiet': True, 'cookiefile': 'cookies.txt'}) as ydl:
-        info = ydl.extract_info(video_url, download=False)
-        duration = info.get('duration')
+    if not video_id:
+        await message.reply("Invalid YouTube URL.")
+        return
+    
+    processing_msg = await message.reply("Downloading ...")
+    
+    audio_data = await VideoConverter().get_youtube_video(video_id)
 
-    if duration > 30 * 60:
+    if audio_data['duration'] > 30 * 60:
         await message.reply('Video is too long. Max is 30 minutes')
+        await processing_msg.delete()
         return
 
-    processing_msg = await message.reply("Downloading ...")
-
-    video_path, filename = await VideoConverter().get_youtube_video(video_url)
 
     user_id = message.from_user.id
     today = datetime.today().strftime('%Y-%m-%d')
@@ -50,18 +60,17 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
         )
         return
 
-    audio_path = None
 
     try:
         await processing_msg.edit_text("Converting ...")
 
-        audio_path = await VideoConverter().convert_video_to_audio(video_path, f'audios/{filename}')
-        audio_file = FSInputFile(path=audio_path)
-
         bot = await message.bot.get_me()
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
-        await message.reply_document(audio_file, caption=f'Converted by @{bot.username}')
+        await message.reply_document(FSInputFile(audio_data['file_path']), caption=f'Converted by @{bot.username}')
+
+        await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT\n'
+                             '⭐️ <a href="https://t.me/StarBankGlobalBot?start=_tgr_RK1davQ2NWFi">Click here</a></b>')
 
         if not r.exists(key):
             r.set(key, 1)
@@ -72,6 +81,5 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
         await message.answer('⚠️ Too many requests right now. Please try again later.')
         print(e)
     finally:
-        os.remove(video_path)
-        if audio_path and os.path.exists(audio_path):
-            os.remove(audio_path)
+        if audio_data['file_path'] and os.path.exists(audio_data['file_path']):
+            os.remove(audio_data['file_path'])
