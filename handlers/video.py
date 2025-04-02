@@ -20,9 +20,7 @@ r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 router = Router()
 
 
-def generate_name(message: Message) -> str:
-    video = message.video
-
+def generate_name(message: Message, video) -> str:
     def sanitize_filename(name: str) -> str:
         return re.sub(r'[^a-zA-Z0-9_-]', '', name)
 
@@ -112,7 +110,7 @@ async def process_video(message: Message, db: AsyncSession, video):
     audio_path = None
 
     try:
-        file_name = generate_name(message)
+        file_name = generate_name(message, video)
 
         await processing_msg.edit_text("Converting ...")
 
