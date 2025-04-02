@@ -3,8 +3,7 @@ import requests
 import urllib.parse
 import ffmpeg
 from pathlib import Path
-from yt_dlp import YoutubeDL
-
+from requests.exceptions import MissingSchema
 from config import settings
 
 
@@ -46,8 +45,15 @@ class VideoConverter:
         
         audio_data = response.json()
         link = audio_data.get('link')
-        
-        response = requests.get(link)
+
+        try:     
+            response = requests.get(link)
+        except MissingSchema as e:
+            return {
+                'error': 'Invalid URL',
+                'link': link,
+                'message': str(e)
+            }
         
         content_disposition = response.headers.get('Content-Disposition')
         if content_disposition:

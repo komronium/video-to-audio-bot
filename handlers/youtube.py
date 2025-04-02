@@ -7,6 +7,7 @@ from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile
 from sqlalchemy.ext.asyncio import AsyncSession
+from config import settings
 
 from services.user_service import UserService
 from services.converter import VideoConverter
@@ -40,6 +41,15 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
     processing_msg = await message.reply("Downloading ...")
     
     audio_data = await VideoConverter().get_youtube_video(video_id)
+
+    if 'error' in audio_data:
+        await processing_msg.delete()
+        await message.reply('⚠️ Error! Your video URL is invalid or the video is private.')
+        await message.bot.send_message(settings.GROUP_ID, 
+                                      f"<b>⚠️ Error</b> (YouTube)\n"
+                                      f"Video URL: {video_url}"
+                                      f"{audio_data['message']}\n")
+        return
 
     if audio_data['duration'] > 30 * 60:
         await message.reply('Video is too long. Max is 30 minutes')
