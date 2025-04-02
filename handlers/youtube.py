@@ -2,7 +2,6 @@
 import os
 import re
 import redis
-from yt_dlp import YoutubeDL
 from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile
