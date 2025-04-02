@@ -47,8 +47,8 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
         await message.reply('⚠️ Error! Your video URL is invalid or the video is private.')
         await message.bot.send_message(settings.GROUP_ID, 
                                       f"<b>⚠️ Error</b> (YouTube)\n"
-                                      f"Video URL: {video_url}"
-                                      f"{audio_data['message']}\n")
+                                      f"Video URL: {video_url}\n"
+                                      f"<blockquote>{audio_data['message']}</blockquote>")
         return
 
     if audio_data['duration'] > 30 * 60:
