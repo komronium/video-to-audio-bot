@@ -12,6 +12,8 @@ from services.converter import VideoConverter
 from services.user_service import UserService
 from services.redis_queue import queue_manager
 
+from config import settings
+
 MAX_FILE_SIZE = 150 * 1024 * 1024
 DAILY_LIMIT = 10
 
@@ -115,6 +117,13 @@ async def process_video(message: Message, db: AsyncSession, video):
         await processing_msg.edit_text("Converting ...")
 
         audio_path = await VideoConverter().convert_video_to_audio(video_path, f'audios/{file_name}')
+
+        if type(audio_path) is dict:
+            await processing_msg.edit_text("❌ Error. Please try again later!")
+            await message.bot.send_message(settings.ADMIN_ID, f"<b>❌ Video converting ERROR</b>\n"
+                                                              f"<blockquote>{audio_path['message']}</blockquote>\n")
+            return
+
         audio_file = FSInputFile(path=audio_path)
 
         bot = await message.bot.get_me()

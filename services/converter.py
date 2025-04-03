@@ -16,13 +16,20 @@ class VideoConverter:
     async def convert_video_to_audio(self, video_path: str, output_path: str) -> str:
         try:
             audio_path = f'{output_path}.mp3'
-            await asyncio.to_thread(
-                ffmpeg.input(video_path)
+            process = (
+                ffmpeg
+                .input(video_path)
                 .output(audio_path, format='mp3')
-                .run,
-                overwrite_output=True, 
-                quiet=True
+                .run_async(pipe_stdout=True, pipe_stderr=True)
             )
+            _, error = process.communicate()
+
+            if process.returncode != 0:
+                return {
+                    'error': 'Conversion failed',
+                    'message': error.decode('utf-8')
+                }
+            
             return audio_path
         except Exception as e:
             raise RuntimeError(f'Error during conversion: {e}')
@@ -44,26 +51,6 @@ class VideoConverter:
             raise RuntimeError(f'Error fetching video: {response.status_code}')
         
         audio_data = response.json()
-        link = audio_data.get('link')
-
-        try:     
-            response = requests.get(link)
-        except MissingSchema as e:
-            return {
-                'error': 'Invalid URL',
-                'link': link,
-                'message': str(e)
-            }
         
-        content_disposition = response.headers.get('Content-Disposition')
-        if content_disposition:
-            filename = urllib.parse.unquote(content_disposition.split('filename=')[1].strip('"'))
-            file_path = self.output_dir / filename
-            with open(file_path, 'wb') as f:
-                f.write(response.content)
-        else:
-            raise RuntimeError('No filename in response headers')
-        
-        audio_data['file_path'] = str(file_path)
         return audio_data
       

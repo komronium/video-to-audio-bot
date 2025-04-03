@@ -2,6 +2,12 @@
 import os
 import re
 import redis
+import urllib.parse
+from pathlib import Path
+import requests
+from requests.exceptions import MissingSchema
+
+
 from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile
@@ -41,19 +47,34 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
     
     audio_data = await VideoConverter().get_youtube_video(video_id)
 
-    if 'error' in audio_data:
-        await processing_msg.delete()
-        await message.reply('⚠️ Error! Your video URL is invalid or the video is private.')
-        await message.bot.send_message(settings.GROUP_ID, 
-                                      f"<b>⚠️ Error</b> (YouTube)\n"
-                                      f"Video URL: {video_url}\n"
-                                      f"<blockquote>{audio_data['message']}</blockquote>")
-        return
-
     if audio_data['duration'] > 30 * 60:
         await message.reply('Video is too long. Max is 30 minutes')
         await processing_msg.delete()
         return
+
+    link = audio_data.get('link')
+
+    try:     
+        response = requests.get(link)
+    except MissingSchema as e:
+        return {
+            'error': 'Invalid URL',
+            'link': link,
+            'message': str(e)
+        }
+    
+    content_disposition = response.headers.get('Content-Disposition')
+    if content_disposition:
+        filename = urllib.parse.unquote(content_disposition.split('filename=')[1].strip('"'))
+        file_path = Path('videos') / filename
+        with open(file_path, 'wb') as f:
+            f.write(response.content)
+    else:
+        raise RuntimeError('No filename in response headers')
+    
+    audio_data['file_path'] = str(file_path)
+
+    
 
 
     user_id = message.from_user.id
