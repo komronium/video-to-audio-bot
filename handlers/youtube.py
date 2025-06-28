@@ -100,7 +100,7 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
         await message.reply_document(FSInputFile(audio_data['file_path']), caption=f'Converted by @{bot.username}')
 
         await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT\n'
-                             '⭐️ <a href="https://t.me/StarBankGlobalBot?start=_tgr_RK1davQ2NWFi">Click here</a></b>')
+                             '⭐️ <a href="https://t.me/TelegStarsWalletBot?start=_tgr_eaqwdbsxZTU6">Click here</a></b>')
 
         if not r.exists(key):
             r.set(key, 1)
