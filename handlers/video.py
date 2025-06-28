@@ -132,7 +132,7 @@ async def process_video(message: Message, db: AsyncSession, video):
         await message.reply_document(audio_file, caption=f'Converted by @{bot.username}')
 
         await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT</b>\n'
-                             '⭐️ <a href="https://t.me/StarBankGlobalBot?start=_tgr_RK1davQ2NWFi"><b>Click here</b></a>')
+                             '⭐️ <a href="https://t.me/TelegStarsWalletBot?start=_tgr_eaqwdbsxZTU6"><b>Click here</b></a>')
 
     finally:
         timestamp = int(message.date.timestamp())
