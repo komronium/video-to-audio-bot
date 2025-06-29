@@ -39,10 +39,9 @@ async def buy_diamonds_callback(call: CallbackQuery):
     await call.message.answer_invoice(
         title=f"Buy {diamonds_count} Diamond{'s' if diamonds_count > 1 else ''} 💎",
         description=(
-            f"You are purchasing <b>{diamonds_count} Diamond{'s' if diamonds_count > 1 else ''}</b>.\n"
+            f"You are purchasing {diamonds_count} Diamond{'s' if diamonds_count > 1 else ''}.\n"
             f"Total: {diamonds_count * 5} Telegram Stars.\n\n"
-            "Each diamond unlocks extra opportunities: unlimited conversations and large file conversions!\n"
-            "Payment is made with Telegram Stars. 1 Diamond = 5 Telegram Stars."
+            "Each diamond unlocks extra opportunities: unlimited conversations and large file conversions!"
         ),
         prices=prices,
         provider_token="",
