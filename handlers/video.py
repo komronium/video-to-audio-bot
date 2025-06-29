@@ -171,6 +171,14 @@ async def process_video(message: Message, db: AsyncSession, video):
 
         await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT</b>\n'
                              '⭐️ <a href="https://t.me/TelegStarsWalletBot?start=_tgr_eaqwdbsxZTU6"><b>Click here</b></a>')
+
+        today = datetime.today().strftime('%Y-%m-%d')
+        key = f'user:{user_id}:{today}'
+        if not r.exists(key):
+            r.set(key, 1)
+            r.expire(key, 86400)
+        else:
+            r.incr(key)
     finally:
         timestamp = int(message.date.timestamp())
         queue_manager.remove_from_queue(user_id, video.file_id, timestamp)
