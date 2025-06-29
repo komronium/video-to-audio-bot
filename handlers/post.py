@@ -28,10 +28,11 @@ async def create_post(message: types.Message, state: FSMContext):
             "Please send the post content you want to share with subscribers.",
             reply_markup=get_post_creation_keyboard()
         )
-        (await state.set_state(PostStates.waiting_for_post)
+        await state.set_state(PostStates.waiting_for_post)
+        return
 
 
-@router.message(Command('postdiamonds')))
+@router.message(Command('postdiamonds'))
 async def post_diamonds(message: types.Message, db: AsyncSession, bot: Bot):
     if message.from_user.id == settings.ADMIN_ID:
         user_service = UserService(db)
