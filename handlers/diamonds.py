@@ -26,7 +26,6 @@ async def buy_diamonds_callback(call: CallbackQuery):
         provider_token="",           # <-- o'zingizning tokeningiz
         payload="channel_support",
         currency="XTR",
-        need_name=True,
         need_email=False,
     )
     await call.answer()
@@ -41,11 +40,9 @@ async def buy_lifetime_callback(call: CallbackQuery):
         title="Lifetime Premium 💎",
         description="Unlock unlimited uploads and conversions forever.",
         prices=prices,
-        provider_token="",           # <-- o'zingizning tokeningiz
+        provider_token="",
         payload="channel_support_lifetime",
         currency="XTR",
-        need_name=True,
-        need_email=False,
     )
     await call.answer()
 
