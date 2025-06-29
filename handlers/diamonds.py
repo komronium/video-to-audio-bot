@@ -1,10 +1,12 @@
-from aiogram import Router, F, Bot
+from aiogram import Router, F, Bot, types
+from aiogram.filters import Command
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
+from handlers.video import get_buy_more_keyboard
 from services.user_service import UserService
 
 router = Router()
@@ -109,3 +111,25 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
 
     else:
         await message.answer("<b>Unknown payment type.</b>\nPlease contact support: @TGBots_ContactBot")
+
+
+@router.message(Command('diamonds'))
+async def command_diamonds(message: types.Message, db: AsyncSession):
+    user_service = UserService(db)
+    user = await user_service.get_user(message.from_user.id)
+    is_lifetime = await user_service.is_lifetime(user.id)
+
+    if is_lifetime:
+        await message.answer('<b>💎 Diamonds</b>\nYou have Lifetime Premium access! Enjoy unlimited features forever.')
+    elif user.diamonds > 0:
+        await message.answer(
+            f"<b>💎 Diamonds</b>\nYou currently have <b>{user.diamonds}</b> diamond{'s' if user.diamonds > 1 else ''} in your account.\n"
+            "Use diamonds to unlock extra conversations or features."
+        )
+    else:
+        await message.answer(
+            "<b>💎 Diamonds</b>\nYou have <b>0</b> diamonds in your account.\n\n"
+            "Diamonds are required to unlock extra conversations and features.\n"
+            "Buy more diamonds below:",
+            reply_markup=get_buy_more_keyboard()
+        )
