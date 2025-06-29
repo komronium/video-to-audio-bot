@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
 
@@ -73,9 +74,8 @@ async def pre_checkout_handler(pre_checkout_q: PreCheckoutQuery):
     await pre_checkout_q.answer(ok=True)
 
 @router.message(F.successful_payment)
-async def successful_payment_handler(message: Message):
+async def successful_payment_handler(message: Message, db: AsyncSession):
     user_id = message.from_user.id
-    db = message.conf['db']  # yoki context orqali AsyncSession oling
     user_service = UserService(db)
 
     payload = message.successful_payment.invoice_payload
