@@ -133,7 +133,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     if queue_message:
         await queue_message.delete()
 
-    await process_video(message, db, video, is_extra)
+    await process_video(message, db, video)
 
 
 @router.message(F.document.mime_type.startswith('video'))
@@ -141,7 +141,7 @@ async def document_handler(message: Message, db: AsyncSession):
     await video_handler(message, db, message.document)
 
 
-async def process_video(message: Message, db: AsyncSession, video, is_extra: bool = False):
+async def process_video(message: Message, db: AsyncSession, video):
     user_id = message.from_user.id
     processing_msg = await message.reply("Downloading ...")
 
@@ -171,15 +171,6 @@ async def process_video(message: Message, db: AsyncSession, video, is_extra: boo
 
         await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT</b>\n'
                              '⭐️ <a href="https://t.me/TelegStarsWalletBot?start=_tgr_eaqwdbsxZTU6"><b>Click here</b></a>')
-
-        if is_extra:
-            user_service = UserService(db)
-            increased = await user_service.increase_amount(message.from_user.id)
-
-            if increased:
-                payment = await user_service.get_user_payment(message.from_user.id)
-                amount = payment.amount
-
     finally:
         timestamp = int(message.date.timestamp())
         queue_manager.remove_from_queue(user_id, video.file_id, timestamp)
