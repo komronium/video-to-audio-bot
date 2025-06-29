@@ -26,7 +26,6 @@ async def buy_diamonds_callback(call: CallbackQuery):
         provider_token="",           # <-- o'zingizning tokeningiz
         payload="channel_support",
         currency="XTR",
-        need_email=False,
     )
     await call.answer()
 
@@ -36,6 +35,7 @@ async def buy_lifetime_callback(call: CallbackQuery):
     prices = [
         LabeledPrice(label="💎 Lifetime Premium", amount=250),  # misol uchun 150 star
     ]
+    await call.message.delete()
     await call.message.answer_invoice(
         title="Lifetime Premium 💎",
         description="Unlock unlimited uploads and conversions forever.",
