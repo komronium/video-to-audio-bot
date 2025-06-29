@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from aiogram import Router, F
 from aiogram.types import Message, FSInputFile, Document
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.exceptions import TelegramAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,11 +16,19 @@ from services.redis_queue import queue_manager
 from config import settings
 
 MAX_FILE_SIZE = 150 * 1024 * 1024
-DAILY_LIMIT = 10
+DAILY_LIMIT = 5
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 router = Router()
+
+
+def get_buy_more_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="Buy Extra Conversations ⭐️", callback_data="buy_extra")
+    builder.button(text="💎 Get Lifetime Premium", callback_data="lifetime")
+    builder.adjust(1)
+    return builder.as_markup()
 
 
 def generate_name(message: Message, video) -> str:
@@ -41,15 +50,31 @@ def generate_name(message: Message, video) -> str:
 
 @router.message(F.video)
 async def video_handler(message: Message, db: AsyncSession, document: Document = None):
+    user_service = UserService(db)
+    user = await user_service.get_user(message.from_user.id)
+    is_lifetime = await user_service.is_lifetime(user.id)
+
     video = message.video if not document else document
     if video.file_size > MAX_FILE_SIZE:
-        await message.bot.send_chat_action(message.chat.id, 'typing')
-        await message.reply(
-            "<b>🚫 File too large!</b>\n"
-            "Your video exceeds the 150 MB limit.\n"
-            "To remove limits and get premium, click /premium"
-        )
-        return
+        if not is_lifetime and user.diamonds <= 0:
+            await message.bot.send_chat_action(message.chat.id, 'typing')
+            await message.reply(
+                "💎 <b>File too large!</b>\n"
+                "Your video exceeds the 150 MB limit for free users.\n\n"
+                "You can use a diamond to unlock this feature, buy diamonds below.",
+                reply_markup=get_buy_more_keyboard()
+            )
+            return
+        elif not is_lifetime:
+            used = await user_service.use_diamond(user.user_id)
+            if used:
+                await message.answer("💎 1 diamond used for large file upload. Enjoy!")
+            else:
+                await message.reply(
+                    "💎 <b>No diamonds left!</b> Please buy more diamonds to continue.",
+                    reply_markup=get_buy_more_keyboard()
+                )
+                return
 
     user_id = message.from_user.id
     today = datetime.today().strftime('%Y-%m-%d')
@@ -58,11 +83,24 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     count = r.get(key)
 
     if count and int(count) >= DAILY_LIMIT:
-        await message.reply(
-            "❌ Daily limit reached!\n"
-            "To remove limits and get premium, click /premium"
-        )
-        return
+        if not is_lifetime and user.diamonds <= 0:
+            await message.answer(
+                "💎 <b>Daily limit reached!</b>\n"
+                "You have used your daily free conversations.\n\n"
+                "You can use a diamond to unlock extra conversations, buy below.",
+                reply_markup=get_buy_more_keyboard()
+            )
+            return
+        elif not is_lifetime:
+            used = await user_service.use_diamond(user.user_id)
+            if used:
+                await message.answer("💎 1 diamond used for large file upload. Enjoy!")
+            else:
+                await message.reply(
+                    "💎 <b>No diamonds left!</b> Please buy more diamonds to continue.",
+                    reply_markup=get_buy_more_keyboard()
+                )
+                return
     
     timestamp = int(message.date.timestamp())
     queue_position = queue_manager.add_to_queue(user_id, video.file_id, timestamp)
@@ -95,7 +133,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     if queue_message:
         await queue_message.delete()
 
-    await process_video(message, db, video)
+    await process_video(message, db, video, is_extra)
 
 
 @router.message(F.document.mime_type.startswith('video'))
@@ -103,7 +141,7 @@ async def document_handler(message: Message, db: AsyncSession):
     await video_handler(message, db, message.document)
 
 
-async def process_video(message: Message, db: AsyncSession, video):
+async def process_video(message: Message, db: AsyncSession, video, is_extra: bool = False):
     user_id = message.from_user.id
     processing_msg = await message.reply("Downloading ...")
 
@@ -133,6 +171,14 @@ async def process_video(message: Message, db: AsyncSession, video):
 
         await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT</b>\n'
                              '⭐️ <a href="https://t.me/TelegStarsWalletBot?start=_tgr_eaqwdbsxZTU6"><b>Click here</b></a>')
+
+        if is_extra:
+            user_service = UserService(db)
+            increased = await user_service.increase_amount(message.from_user.id)
+
+            if increased:
+                payment = await user_service.get_user_payment(message.from_user.id)
+                amount = payment.amount
 
     finally:
         timestamp = int(message.date.timestamp())

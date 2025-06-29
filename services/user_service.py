@@ -90,3 +90,34 @@ class UserService:
         )
         result = await self.db.execute(stmt)
         return result.scalars().all()
+
+    async def get_user_diamonds(self, user_id: int) -> int:
+        user = await self.get_user(user_id)
+        if user:
+            return user.diamonds or 0
+        return 0
+
+    async def use_diamond(self, user_id: int) -> bool:
+        """Diamonddan foydalanish (1 dona - universal)"""
+        user = await self.get_user(user_id)
+        if user and user.diamonds > 0:
+            user.diamonds -= 1
+            await self.db.commit()
+            return True
+        return False
+
+    async def add_diamonds(self, user_id: int, count: int):
+        user = await self.get_user(user_id)
+        if user:
+            user.diamonds = (user.diamonds or 0) + count
+            await self.db.commit()
+
+    async def set_lifetime(self, user_id: int):
+        user = await self.get_user(user_id)
+        if user:
+            user.diamonds = 99999  # Cheksiz sifatida ishlatish mumkin
+            await self.db.commit()
+
+    async def is_lifetime(self, user_id: int) -> bool:
+        user = await self.get_user(user_id)
+        return bool(user and user.diamonds >= 99999)

@@ -1,12 +1,13 @@
 from datetime import datetime
 from asyncio import sleep
-from aiogram import types, Router, F
+from aiogram import types, Router, F, Bot
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
+from handlers.video import get_buy_more_keyboard
 from services.user_service import UserService
 from states.post import PostStates
 
@@ -27,7 +28,58 @@ async def create_post(message: types.Message, state: FSMContext):
             "Please send the post content you want to share with subscribers.",
             reply_markup=get_post_creation_keyboard()
         )
-        await state.set_state(PostStates.waiting_for_post)
+        (await state.set_state(PostStates.waiting_for_post)
+
+
+@router.message(Command('postdiamonds')))
+async def post_diamonds(message: types.Message, db: AsyncSession, bot: Bot):
+    if message.from_user.id == settings.ADMIN_ID:
+        user_service = UserService(db)
+        users = await user_service.get_all_users(exclude_admin=True)
+        total_users = await user_service.total_users(exclude_admin=True)
+
+        successful, failed = 0, 0
+        start_time = datetime.now()
+        stats_message = (
+            "<b>📊 Post Sending Statistics:</b>\n\n"
+            "Successful: <b>{successful}</b>\n"
+            "Failed: <b>{failed}</b>\n"
+            f"Total users: <b>{total_users}</b>\n"
+            "Time: <code>{time}</code>"
+        )
+
+        processing_msg = await message.answer(stats_message.format(
+            successful=successful,
+            failed=failed,
+            time='00:00:00'
+        ))
+
+        for user in users:
+            try:
+                await bot.send_message(user.user_id,
+                    '💎 <b>Diamonds — your universal feature!</b>\n\n'
+                    'Each diamond can be used for:\n'
+                    '• Extra conversations beyond the daily limit 💬\n'
+                    '• Uploading and converting large videos (over 150 MB) 🎬\n\n'
+                    'Buy more diamonds to unlock extra possibilities!',
+                    reply_markup=get_buy_more_keyboard()
+                )
+                successful += 1
+            except Exception:
+                failed += 1
+
+            time = datetime.now() - start_time
+            hours: int = time.seconds // 3600
+            minutes = time.seconds % 3600 // 60
+            seconds = time.seconds % 60
+            await processing_msg.edit_text(stats_message.format(
+                successful=successful,
+                failed=failed,
+                time='{:02d}:{:02d}:{:02d}'.format(hours, minutes, seconds)
+            ))
+
+            if (failed + successful) % 10 == 0:
+                await sleep(2)
 
 
 @router.message(StateFilter(PostStates.waiting_for_post))
