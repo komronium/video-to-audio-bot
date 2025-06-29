@@ -25,7 +25,7 @@ router = Router()
 
 def get_buy_more_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.button(text="Buy Extra Conversations ⭐️", callback_data="buy_extra")
+    builder.button(text="Buy Extra Diamonds 💎", callback_data="buy_diamonds")
     builder.button(text="💎 Get Lifetime Premium", callback_data="lifetime")
     builder.adjust(1)
     return builder.as_markup()

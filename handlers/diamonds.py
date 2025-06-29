@@ -32,7 +32,7 @@ async def buy_diamonds_callback(call: CallbackQuery):
     await call.answer()
 
 # --- Callback handler for buying Lifetime Premium ---
-@router.callback_query(F.data == "lifetime-pay")
+@router.callback_query(F.data == "lifetime")
 async def buy_lifetime_callback(call: CallbackQuery):
     prices = [
         LabeledPrice(label="💎 Lifetime Premium", amount=250),  # misol uchun 150 star
