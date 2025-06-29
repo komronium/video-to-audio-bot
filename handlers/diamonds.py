@@ -1,9 +1,10 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config import settings
 from services.user_service import UserService
 
 router = Router()
@@ -74,7 +75,7 @@ async def pre_checkout_handler(pre_checkout_q: PreCheckoutQuery):
     await pre_checkout_q.answer(ok=True)
 
 @router.message(F.successful_payment)
-async def successful_payment_handler(message: Message, db: AsyncSession):
+async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bot):
     user_id = message.from_user.id
     user_service = UserService(db)
 
@@ -97,11 +98,13 @@ async def successful_payment_handler(message: Message, db: AsyncSession):
             await message.answer(
                 f"<b>💎 Congratulations!</b>\n{diamonds} diamonds added to your account.\n"
             )
+            await bot.send_message(settings.GROUP_ID, f'<b>{amount} DIAMONDS</b> added.')
         else:
             await message.answer("❌ Payment received, but no diamonds were credited. Please contact support!")
 
     elif payload == "channel_support_lifetime":
         await user_service.set_lifetime(user_id)
+        await bot.send_message(settings.GROUP_ID, '<b>250 DIAMONDS</b> added.')
         await message.answer("💎 Congratulations! You now have Lifetime Premium access.")
 
     else:
