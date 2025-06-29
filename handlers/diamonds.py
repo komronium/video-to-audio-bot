@@ -1,29 +1,51 @@
 from aiogram import Router, F
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+
 from services.user_service import UserService
 
 router = Router()
 
-# --- Callback handler for buying diamonds via Telegram Stars ---
+
+def get_prices_keyboard():
+    builder = InlineKeyboardBuilder()
+    builder.button(text="1 Diamond 💎", callback_data="buy-1")
+    builder.button(text="2 Diamond 💎", callback_data="buy-2")
+    builder.button(text="4 Diamond 💎", callback_data="buy-4")
+    builder.button(text="10 Diamond 💎", callback_data="buy-10")
+    builder.adjust(1)
+    return builder.as_markup()
+
+
 @router.callback_query(F.data == "buy_diamonds")
 async def buy_diamonds_callback(call: CallbackQuery):
-    # Diamondlar uchun Telegram Starlar soni:
-    # 1 diamond = 5 ta Telegram Star
+    await call.message.delete()
+    await call.message.answer(
+        "<b>Buy Diamonds 💎 via Telegram Stars</b>\n"
+        "Each diamond gives you extra opportunities: unlimited conversations & large file conversions!\n\n"
+        "You pay with Telegram Stars. 1 Diamond = 5 Telegram Stars.",
+        reply_markup=get_prices_keyboard()
+    )
+
+
+# --- Callback handler for buying diamonds via Telegram Stars ---
+@router.callback_query(F.data.startswith("buy-"))
+async def buy_diamonds_callback(call: CallbackQuery):
+    diamonds_count = int(call.data.split('-')[1])
     prices = [
-        LabeledPrice(label="1 Diamond 💎", amount=5),    # 5 star
-        LabeledPrice(label="2 Diamonds 💎", amount=10),  # 10 star
-        LabeledPrice(label="4 Diamonds 💎", amount=20),  # 20 star
-        LabeledPrice(label="10 Diamonds 💎", amount=50), # 50 star
+        LabeledPrice(label=f"{diamonds_count} Diamond 💎", amount=diamonds_count * 5),
     ]
     await call.message.answer_invoice(
-        title="Buy Diamonds 💎 via Telegram Stars",
+        title=f"Buy {diamonds_count} Diamond{'s' if diamonds_count > 1 else ''} 💎",
         description=(
-            "Each diamond gives you extra opportunities: unlimited conversations & large file conversions!\n\n"
-            "You pay with Telegram Stars. 1 Diamond = 5 Telegram Stars."
+            f"You are purchasing <b>{diamonds_count} Diamond{'s' if diamonds_count > 1 else ''}</b>.\n"
+            f"Total: {diamonds_count * 5} Telegram Stars.\n\n"
+            "Each diamond unlocks extra opportunities: unlimited conversations and large file conversions!\n"
+            "Payment is made with Telegram Stars. 1 Diamond = 5 Telegram Stars."
         ),
         prices=prices,
-        provider_token="",           # <-- o'zingizning tokeningiz
+        provider_token="",
         payload="channel_support",
         currency="XTR",
     )
