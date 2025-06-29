@@ -106,4 +106,4 @@ async def successful_payment_handler(message: Message):
         await message.answer("💎 Congratulations! You now have Lifetime Premium access.")
 
     else:
-        await message.answer("Unknown payment type. Please contact support.")
+        await message.answer("<b>Unknown payment type.</b>\nPlease contact support: @TGBots_ContactBot")
