@@ -95,8 +95,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession):
         if diamonds > 0:
             await user_service.add_diamonds(user_id, diamonds)
             await message.answer(
-                f"💎 Congratulations! {diamonds} diamonds added to your account.\n"
-                f"(You spent {amount} Telegram Stars)"
+                f"<b>💎 Congratulations!</b>\n{diamonds} diamonds added to your account.\n"
             )
         else:
             await message.answer("❌ Payment received, but no diamonds were credited. Please contact support!")

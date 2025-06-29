@@ -68,7 +68,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         elif not is_lifetime:
             used = await user_service.use_diamond(user.user_id)
             if used:
-                await message.answer("💎 1 diamond used for large file upload. Enjoy!")
+                await message.answer("<b>💎 1 diamond used for large file upload.</b>")
             else:
                 await message.reply(
                     "💎 <b>No diamonds left!</b> Please buy more diamonds to continue.",
@@ -94,7 +94,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         elif not is_lifetime:
             used = await user_service.use_diamond(user.user_id)
             if used:
-                await message.answer("💎 1 diamond used for large file upload. Enjoy!")
+                await message.answer("<b>💎 1 diamond used for extra conversation.</b>")
             else:
                 await message.reply(
                     "💎 <b>No diamonds left!</b> Please buy more diamonds to continue.",
