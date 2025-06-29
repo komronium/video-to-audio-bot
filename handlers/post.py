@@ -38,31 +38,36 @@ async def process_post_content(message: types.Message, state: FSMContext, db: As
         total_users = await user_service.total_users(exclude_admin=True)
 
         successful, failed = 0, 0
+        start_time = datetime.now()
         stats_message = (
             "<b>📊 Post Sending Statistics:</b>\n\n"
             "Successful: <b>{successful}</b>\n"
             "Failed: <b>{failed}</b>\n"
             f"Total users: <b>{total_users}</b>\n"
-            "Time: <b>{time}</b>"
+            "Time: <code>{time}</code>"
         )
 
-        processing_msg = await  message.answer(stats_message.format(
+        processing_msg = await message.answer(stats_message.format(
             successful=successful,
             failed=failed,
-            time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            time='00:00:00'
         ))
 
         for user in users:
             try:
                 await message.copy_to(user.user_id)
                 successful += 1
-            except Exception as e:
+            except Exception:
                 failed += 1
 
+            time = datetime.now() - start_time
+            hours: int = time.seconds // 3600
+            minutes = time.seconds % 3600 // 60
+            seconds = time.seconds % 60
             await processing_msg.edit_text(stats_message.format(
                 successful=successful,
                 failed=failed,
-                time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                time='{:02d}:{:02d}:{:02d}'.format(hours, minutes, seconds)
             ))
 
             if (failed + successful) % 10 == 0:

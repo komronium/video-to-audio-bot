@@ -33,4 +33,4 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         joined_at=user.joined_at.strftime('%d-%m-%Y')
     )
 
-    await message.answer(text.strip())
+    return await message.answer(text.strip())

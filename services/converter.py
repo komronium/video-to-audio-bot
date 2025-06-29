@@ -1,9 +1,6 @@
-import asyncio
 import requests
-import urllib.parse
 import ffmpeg
 from pathlib import Path
-from requests.exceptions import MissingSchema
 from config import settings
 
 

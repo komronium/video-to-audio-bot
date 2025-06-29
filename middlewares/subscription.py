@@ -8,7 +8,8 @@ from config import settings
 
 class SubscriptionMiddleware(BaseMiddleware):
 
-    async def check_subscription(self, bot, user_id, channel_id):
+    @staticmethod
+    async def check_subscription(bot, user_id, channel_id):
         try:
             member = await bot.get_chat_member(channel_id, user_id)
             is_subscribed = member.status not in ['left', 'kicked', 'banned']
@@ -33,7 +34,7 @@ class SubscriptionMiddleware(BaseMiddleware):
                 )
             except TelegramForbiddenError:
                 logging.warning(f"User {user_id} has blocked the bot. Cannot send message.")
-            return
+            return None
 
         return await handler(event, data)
 

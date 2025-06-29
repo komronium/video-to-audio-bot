@@ -28,3 +28,4 @@ async def errors_handler(error: ErrorEvent):
         return True
 
     logging.exception(f'Unexpected error: {error.exception}')
+    return False

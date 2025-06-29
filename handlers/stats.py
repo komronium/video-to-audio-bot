@@ -47,6 +47,6 @@ async def command_stats(message: types.Message, db: AsyncSession):
 
         text = format_stats_message(stats)
         await message.answer(text)
-    except Exception as e:
+    except Exception:
         await message.answer('❌ Error getting statistics')
         raise

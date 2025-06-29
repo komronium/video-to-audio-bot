@@ -1,6 +1,4 @@
-import logging
 from aiogram import BaseMiddleware
-from aiogram.exceptions import TelegramForbiddenError
 from datetime import datetime
 from cachetools import TTLCache
 
@@ -22,7 +20,7 @@ class ThrottlingMiddleware(BaseMiddleware):
 
         if user_id in self.cache:
             await event.answer('Too many requests! Please wait.')
-            return
+            return None
 
         self.cache[user_id] = datetime.now()
         return await handler(event, data)
