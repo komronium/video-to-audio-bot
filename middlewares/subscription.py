@@ -4,6 +4,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError
 
 from config import settings
+from database.session import get_db
+from handlers.start import get_language_keyboard
+from services.user_service import UserService
+from utils.i18n import i18n
 
 
 class SubscriptionMiddleware(BaseMiddleware):
@@ -28,10 +32,20 @@ class SubscriptionMiddleware(BaseMiddleware):
 
         if not await self.check_subscription(event.bot, user_id, settings.CHANNEL_ID):
             try:
-                await event.answer(
-                    "To continue, please subscribe to our channel first.",
-                    reply_markup=SubscriptionMiddleware.subscription_keyboard()
-                )
+                async with get_db() as db:
+                    service = UserService(db)
+                    lang = service.get_lang(event.from_user.id)
+
+                    if not lang:
+                        return await event.answer(
+                            i18n.get_text('choose_language'),
+                            reply_markup=get_language_keyboard()
+                        )
+
+                    await event.answer(
+                        "To continue, please subscribe to our channel first.",
+                        reply_markup=SubscriptionMiddleware.subscription_keyboard()
+                    )
             except TelegramForbiddenError:
                 logging.warning(f"User {user_id} has blocked the bot. Cannot send message.")
             return None
