@@ -11,11 +11,10 @@ class I18n:
         self.load_locales(locales_dir)
 
     def load_locales(self, locales_dir):
-        print(list(Path(locales_dir).glob('*.json')))
         for loc_file in Path(locales_dir).glob('*.json'):
             lang = loc_file.stem
-            print(lang)
             with open(loc_file, encoding='utf-8') as f:
+                print('---', lang, 'OCHILDI')
                 self.locales[lang] = json.load(f)
                 LANGUAGES.append(self.get_text('lang', lang))
 
