@@ -21,5 +21,6 @@ async def command_help(message: types.Message):
 
     try:
         await message.answer(text)
+        message.from_user.language_code
     except TelegramAPIError:
         await message.answer("Sorry, something went wrong. Please try again later.")

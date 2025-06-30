@@ -8,45 +8,41 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config import settings
 from handlers.video import get_buy_more_keyboard
 from services.user_service import UserService
+from utils.i18n import i18n
 
 router = Router()
 
 
-def get_prices_keyboard():
+def get_prices_keyboard(lang: str):
     builder = InlineKeyboardBuilder()
-    builder.button(text="1 Diamond 💎", callback_data="buy-1")
-    builder.button(text="2 Diamond 💎", callback_data="buy-2")
-    builder.button(text="4 Diamond 💎", callback_data="buy-4")
-    builder.button(text="10 Diamond 💎", callback_data="buy-10")
+    builder.button(text=i18n.get_text('1-diamond', lang), callback_data="buy-1")
+    builder.button(text=i18n.get_text('2-diamond', lang), callback_data="buy-2")
+    builder.button(text=i18n.get_text('4-diamond', lang), callback_data="buy-4")
+    builder.button(text=i18n.get_text('10-diamond', lang), callback_data="buy-10")
     builder.adjust(1)
     return builder.as_markup()
 
 
 @router.callback_query(F.data == "buy_diamonds")
-async def buy_diamonds_callback(call: CallbackQuery):
+async def buy_diamonds_callback(call: CallbackQuery, lang: str):
     await call.message.delete()
     await call.message.answer(
-        "<b>Buy Diamonds 💎 via Telegram Stars</b>\n"
-        "Each diamond gives you extra opportunities: unlimited conversations & large file conversions!\n\n"
-        "You pay with Telegram Stars. 1 Diamond = 5 Telegram Stars.",
-        reply_markup=get_prices_keyboard()
+        i18n.get_text('buy-diamonds', lang),
+        reply_markup=get_prices_keyboard(lang)
     )
 
 
 # --- Callback handler for buying diamonds via Telegram Stars ---
 @router.callback_query(F.data.startswith("buy-"))
-async def buy_diamonds_callback(call: CallbackQuery):
+async def buy_diamonds_callback(call: CallbackQuery, lang: str):
     diamonds_count = int(call.data.split('-')[1])
     prices = [
-        LabeledPrice(label=f"{diamonds_count} Diamond 💎", amount=diamonds_count * 5),
+        LabeledPrice(label=i18n.get_text('diamond-count', lang).format(diamonds_count),
+                     amount=diamonds_count * 5),
     ]
     await call.message.answer_invoice(
-        title=f"Buy {diamonds_count} Diamond{'s' if diamonds_count > 1 else ''} 💎",
-        description=(
-            f"You are purchasing {diamonds_count} Diamond{'s' if diamonds_count > 1 else ''}.\n"
-            f"Total: {diamonds_count * 5} Telegram Stars.\n\n"
-            "Each diamond unlocks extra opportunities: unlimited conversations and large file conversions!"
-        ),
+        title=i18n.get_text('buy-title', lang).format(diamonds_count),
+        description=i18n.get_text('buy-desc', lang).format(diamonds_count, diamonds_count * 5),
         prices=prices,
         provider_token="",
         payload="channel_support",
@@ -56,14 +52,14 @@ async def buy_diamonds_callback(call: CallbackQuery):
 
 # --- Callback handler for buying Lifetime Premium ---
 @router.callback_query(F.data == "lifetime")
-async def buy_lifetime_callback(call: CallbackQuery):
+async def buy_lifetime_callback(call: CallbackQuery, lang: str):
     prices = [
-        LabeledPrice(label="💎 Lifetime Premium", amount=250),  # misol uchun 150 star
+        LabeledPrice(label=i18n.get_text('lifetime-title', lang), amount=250),  # misol uchun 150 star
     ]
     await call.message.delete()
     await call.message.answer_invoice(
-        title="Lifetime Premium 💎",
-        description="Unlock unlimited uploads and conversions forever.",
+        title=i18n.get_text('lifetime-title', lang),
+        description=i18n.get_text('lifetime-desc', lang),
         prices=prices,
         provider_token="",
         payload="channel_support_lifetime",
@@ -71,10 +67,11 @@ async def buy_lifetime_callback(call: CallbackQuery):
     )
     await call.answer()
 
-# --- Successful Payment Handlers ---
+
 @router.pre_checkout_query()
 async def pre_checkout_handler(pre_checkout_q: PreCheckoutQuery):
     await pre_checkout_q.answer(ok=True)
+
 
 @router.message(F.successful_payment)
 async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bot):
@@ -82,7 +79,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
     user_service = UserService(db)
 
     payload = message.successful_payment.invoice_payload
-    amount = message.successful_payment.total_amount  # Bu yerda Telegram Starlar soni (XTR uchun)
+    amount = message.successful_payment.total_amount
 
     if payload == "channel_support":
         diamonds = 0

@@ -1,0 +1,14 @@
+{
+    "lang": "English",
+    "start": "Hello! Please upload your video file, and I'll extract the audio for you. Just send your video, and I'll handle the rest.",
+    "1-diamond": "1 Diamond 💎",
+    "2-diamons": "2 Diamonds 💎",
+    "4-diamons": "4 Diamonds 💎",
+    "10-diamons": "10 Diamonds 💎",
+    "buy-diamonds": "<b>Buy Diamonds \uD83D\uDC8E via Telegram Stars</b>\nEach diamond gives you extra opportunities: unlimited conversations & large file conversions!\n\nYou pay with Telegram Stars. 1 Diamond = 5 Telegram Stars.",
+    "diamond-count": "{} Diamond \uD83D\uDC8E",
+    "buy-title": "Buy {} Diamonds \uD83D\uDC8E",
+    "buy-desc": "You are purchasing {} Diamonds.\nTotal: {} Telegram Stars.\n\nEach diamond unlocks extra opportunities: unlimited conversations and large file conversions!",
+    "lifetime-title": "💎 Lifetime Premium",
+    "lifetime-desc": "Unlock unlimited uploads and conversions forever."
+}
