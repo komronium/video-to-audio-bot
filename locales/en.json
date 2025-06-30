@@ -25,6 +25,7 @@
     "profile": "👤 <b>Your Profile:</b>\n\n🔹 User ID: <b>{}</b>\n🔹 Name: <b>{}</b>\n🔹 Username: @{}\n🔹 Conversations: <b>{}</b>\n🔹 Joined: <b>{}</b>",
     "congrats": "<b>\uD83D\uDC8E Congratulations!</b>\\n{} diamonds have been added to your account.",
     "congrats-lifetime": "💎 Congratulations! You now have Lifetime Premium access.",
+    "subscribe": "To continue, please subscribe to our channel first.",
     "join-channel": "\uD83D\uDD17 Join the Channel",
     "check-subs": "✅ Check subscription"
 }

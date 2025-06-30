@@ -25,6 +25,7 @@
     "profile": "👤 <b>Profiliniz:</b>\n\n🔹 Kullanıcı ID: <b>{}</b>\n🔹 İsim: <b>{}</b>\n🔹 Kullanıcı adı: @{}\n🔹 Sohbetler: <b>{}</b>\n🔹 Katılım: <b>{}</b>",
     "congrats": "<b>💎 Tebrikler!</b>\n{} elmas hesabınıza eklendi.",
     "congrats-lifetime": "💎 Tebrikler! Artık Ömür Boyu Premium erişiminiz var.",
+    "subscribe": "Devam etmek için lütfen önce kanalımıza abone olun.",
     "join-channel": "🔗 Kanala Katıl",
     "check-subs": "✅ Aboneliği kontrol et"
 }

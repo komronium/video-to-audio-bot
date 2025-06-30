@@ -63,10 +63,10 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
         await service.set_lang(call.from_user.id, lang)
         await call.answer()
 
-    is_subscribed = check_subscription(bot, call.from_user.id)
+    is_subscribed = await check_subscription(bot, call.from_user.id)
     if not is_subscribed:
         await call.message.answer(
-            "To continue, please subscribe to our channel first.",
+            i18n.get_text('subscribe', lang),
             reply_markup=subscription_keyboard(lang)
         )
         return None

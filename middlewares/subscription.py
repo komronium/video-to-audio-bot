@@ -43,7 +43,7 @@ class SubscriptionMiddleware(BaseMiddleware):
                         )
 
                     await event.answer(
-                        "To continue, please subscribe to our channel first.",
+                        i18n.get_text('subscribe', lang),
                         reply_markup=SubscriptionMiddleware.subscription_keyboard(lang)
                     )
             except TelegramForbiddenError:
