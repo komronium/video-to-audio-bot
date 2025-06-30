@@ -130,3 +130,16 @@ class UserService:
         user = await self.get_user(user_id)
         user.lang = lang
         await self.db.commit()
+
+    async def get_langs(self):
+        users = await self.get_all_users()
+        langs = {}
+
+        for user in users:
+            lang = user.lang
+            if lang not in langs:
+                langs[lang] = 1
+            else:
+                langs[lang] += 1
+
+        return langs

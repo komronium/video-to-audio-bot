@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import dataclass
 
 from services.user_service import UserService
+from utils.i18n import i18n
 
 router = Router()
 
@@ -50,3 +51,18 @@ async def command_stats(message: types.Message, db: AsyncSession):
     except Exception:
         await message.answer('❌ Error getting statistics')
         raise
+
+
+@router.message(Command('langs'))
+async def command_stats(message: types.Message, db: AsyncSession):
+    user_service = UserService(db)
+    langs = await user_service.get_langs()
+
+    text = ''
+    for lang in langs:
+        if not lang:
+            text += f"<code>{langs[lang]}</code>\t{i18n.get_text('lang', lang)}\n"
+        else:
+            text += f"<code>{langs[lang]}</code>\tNOT SELECTED\n"
+
+    await message.answer(text)
