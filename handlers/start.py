@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
-from utils.i18n import i18n, LANGUAGES
+from utils.i18n import i18n
 
 router = Router()
 
@@ -11,7 +11,7 @@ router = Router()
 def get_language_keyboard():
     buttons = [
         [types.InlineKeyboardButton(text=name, callback_data=f"setlang:{code}")]
-        for code, name in LANGUAGES.items()
+        for code, name in i18n.LANGUAGES.items()
     ]
     return types.InlineKeyboardMarkup(inline_keyboard=buttons)
 

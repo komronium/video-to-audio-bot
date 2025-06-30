@@ -1,14 +1,13 @@
 import json
 from pathlib import Path
 
-LANGUAGES = []
-
 
 class I18n:
     def __init__(self, default_lang='en', locales_dir='locales'):
         self.default_lang = default_lang
         self.locales = {}
         self.load_locales(locales_dir)
+        self.LANGUAGES = []
 
     def load_locales(self, locales_dir):
         for loc_file in Path(locales_dir).glob('*.json'):
@@ -16,7 +15,7 @@ class I18n:
             with open(loc_file, encoding='utf-8') as f:
                 print('---', lang, 'OCHILDI')
                 self.locales[lang] = json.load(f)
-                LANGUAGES.append(self.locales[lang]['lang'])
+                self.LANGUAGES.append(self.locales[lang]['lang'])
 
     def get_text(self, key, lang='en'):
         lang = lang or self.default_lang
