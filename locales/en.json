@@ -1,7 +1,7 @@
 {
     "lang": "\uD83C\uDDFA\uD83C\uDDF8 English",
     "choose_language": "\uD83C\uDF10 Please select your language:",
-    "start": "Hello! Please upload your video file, and I'll extract the audio for you. Just send your video, and I'll handle the rest.",
+    "start": "Hello! Upload your video file, and I'll extract the audio for you. Just send the file, and I'll do the rest.",
     "1-diamond": "1 Diamond 💎",
     "2-diamond": "2 Diamonds 💎",
     "4-diamond": "4 Diamonds 💎",
@@ -16,13 +16,13 @@
     "get-lifetime": "\uD83D\uDC8E Get Lifetime Premium",
     "too-large": "💎 <b>File too large!</b>\nYour video exceeds the 150 MB limit for free users.\n\nYou can use a diamond to unlock this feature, buy diamonds below.",
     "large-used": "<b>\uD83D\uDC8E 1 diamond used for large file upload.</b>",
-    "daily-limit":  "<b>Daily limit reached!</b>\nYou have used your daily free conversations.\n\nYou can use a diamond to unlock extra conversations, buy below.",
+    "daily-limit":  "<b>Daily limit reached!</b>\nYou've used your daily free conversations.\n\nYou can use a diamond to unlock extra conversations, buy below.",
     "extra-used": "<b>\uD83D\uDC8E 1 diamond used for extra conversation.</b>",
-    "queue": "⏳ Your request is in queue. Please wait ...\nPosition: <code>{} / {}</code>",
+    "queue": "⏳ Your request is in the queue. Please wait...\\nPosition: <code>{} / {}</code>",
     "downloading": "Downloading ...",
     "converting": "Converting ...",
     "converted-by": "Converted by @{}",
     "profile": "👤 <b>Your Profile:</b>\n\n🔹 User ID: <b>{}</b>\n🔹 Name: <b>{}</b>\n🔹 Username: @{}\n🔹 Conversations: <b>{}</b>\n🔹 Joined: <b>{}</b>",
-    "congrats": "<b>💎 Congratulations!</b>\n{} diamonds added to your account.",
+    "congrats": "<b>\uD83D\uDC8E Congratulations!</b>\\n{} diamonds have been added to your account.",
     "congrats-lifetime": "💎 Congratulations! You now have Lifetime Premium access."
 }

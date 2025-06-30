@@ -12,8 +12,8 @@
     "buy-desc": "Anda membeli {} Berlian.\nTotal: {} Telegram Stars.\n\nSetiap berlian membuka peluang ekstra: percakapan tanpa batas dan konversi file besar!",
     "lifetime-title": "💎 Premium Seumur Hidup",
     "lifetime-desc": "Buka unggahan dan konversi tanpa batas selamanya.",
-    "buy-extra": "Beli Berlian Ekstra \uD83D\uDC8E",
-    "get-lifetime": "\uD83D\uDC8E Dapatkan Premium Seumur Hidup",
+    "buy-extra": "Berlian Ekstra \uD83D\uDC8E",
+    "get-lifetime": "\uD83D\uDC8E Premium Seumur Hidup",
     "too-large": "💎 <b>Berkas terlalu besar!</b>\nVideo Anda melebihi batas 150 MB untuk pengguna gratis.\n\nAnda dapat menggunakan berlian untuk membuka fitur ini, beli berlian di bawah.",
     "large-used": "<b>\uD83D\uDC8E 1 berlian digunakan untuk unggahan berkas besar.</b>",
     "daily-limit":  "<b>Batas harian tercapai!</b>\nAnda telah menggunakan percakapan gratis harian Anda.\n\nAnda dapat menggunakan berlian untuk membuka percakapan ekstra, beli di bawah.",
@@ -24,5 +24,5 @@
     "converted-by": "Dikonversi oleh @{}",
     "profile": "👤 <b>Profil Anda:</b>\n\n🔹 ID Pengguna: <b>{}</b>\n🔹 Nama: <b>{}</b>\n🔹 Username: @{}\n🔹 Percakapan: <b>{}</b>\n🔹 Bergabung: <b>{}</b>",
     "congrats": "<b>💎 Selamat!</b>\n{} berlian telah ditambahkan ke akun Anda.",
-    "congrats-lifetime": "💎 Selamat! Anda sekarang memiliki akses Premium Seumur Hidup."
+    "congrats-lifetime": "\uD83D\uDC8E Selamat! Kini Anda memiliki akses Premium Seumur Hidup."
 }
