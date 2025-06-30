@@ -34,7 +34,7 @@ class SubscriptionMiddleware(BaseMiddleware):
             try:
                 async with get_db() as db:
                     service = UserService(db)
-                    lang = service.get_lang(event.from_user.id)
+                    lang = await service.get_lang(event.from_user.id)
 
                     if not lang:
                         return await event.answer(
