@@ -42,4 +42,4 @@ async def buy_diamonds_callback(call: CallbackQuery):
         await service.set_lang(call.from_user.id, lang)
         await call.answer()
 
-    await call.message.answer(i18n.get_text('start', lang))
+    await call.message.edit_text(i18n.get_text('start', lang))
