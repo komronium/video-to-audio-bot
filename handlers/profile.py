@@ -3,17 +3,10 @@ from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
+from utils.i18n import i18n
 
 router = Router()
 
-PROFILE_TEMPLATE = (
-    "👤 <b>Your Profile:</b>\n\n"
-    "🔹 User ID: <b>{user_id}</b>\n"
-    "🔹 Name: <b>{name}</b>\n"
-    "🔹 Username: @{username}\n"
-    "🔹 Conversations: <b>{conversation_count}</b>\n"
-    "🔹 Joined: <b>{joined_at}</b>"
-)
 NOT_REGISTERED_TEXT = "⚠️ You are not registered in the system."
 
 
@@ -21,11 +14,12 @@ NOT_REGISTERED_TEXT = "⚠️ You are not registered in the system."
 async def profile_handler(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     user = await user_service.get_user(message.from_user.id)
+    lang = await user_service.get_lang(message.from_user.id)
 
     if not user:
         return await message.answer(NOT_REGISTERED_TEXT)
 
-    text = PROFILE_TEMPLATE.format(
+    text = i18n.get_text('profile', lang).format(
         user_id=user.user_id,
         name=user.name,
         username=user.username or 'N/A',

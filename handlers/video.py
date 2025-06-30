@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from services.converter import VideoConverter
 from services.user_service import UserService
 from services.redis_queue import queue_manager
+from utils.i18n import i18n
 
 from config import settings
 
@@ -23,10 +24,10 @@ r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 router = Router()
 
 
-def get_buy_more_keyboard():
+def get_buy_more_keyboard(lang: str):
     builder = InlineKeyboardBuilder()
-    builder.button(text="Buy Extra Diamonds 💎", callback_data="buy_diamonds")
-    builder.button(text="💎 Get Lifetime Premium", callback_data="lifetime")
+    builder.button(text=i18n.get_text('buy-extra', lang), callback_data="buy_diamonds")
+    builder.button(text=i18n.get_text('get-lifetime', lang), callback_data="lifetime")
     builder.adjust(1)
     return builder.as_markup()
 
@@ -52,6 +53,7 @@ def generate_name(message: Message, video) -> str:
 async def video_handler(message: Message, db: AsyncSession, document: Document = None):
     user_service = UserService(db)
     user = await user_service.get_user(message.from_user.id)
+    lang = await user_service.get_lang(message.from_user.id)
     is_lifetime = await user_service.is_lifetime(user.id)
 
     video = message.video if not document else document
@@ -59,20 +61,18 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         if not is_lifetime and user.diamonds <= 0:
             await message.bot.send_chat_action(message.chat.id, 'typing')
             await message.reply(
-                "💎 <b>File too large!</b>\n"
-                "Your video exceeds the 150 MB limit for free users.\n\n"
-                "You can use a diamond to unlock this feature, buy diamonds below.",
-                reply_markup=get_buy_more_keyboard()
+                i18n.get_text('buy-extra', lang),
+                reply_markup=get_buy_more_keyboard(lang)
             )
             return
         elif not is_lifetime:
             used = await user_service.use_diamond(user.user_id)
             if used:
-                await message.answer("<b>💎 1 diamond used for large file upload.</b>")
+                await message.answer(i18n.get_text('large-used', lang))
             else:
                 await message.reply(
                     "💎 <b>No diamonds left!</b> Please buy more diamonds to continue.",
-                    reply_markup=get_buy_more_keyboard()
+                    reply_markup=get_buy_more_keyboard(lang)
                 )
                 return
 
@@ -85,20 +85,18 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     if count and int(count) >= DAILY_LIMIT:
         if not is_lifetime and user.diamonds <= 0:
             await message.answer(
-                "💎 <b>Daily limit reached!</b>\n"
-                "You have used your daily free conversations.\n\n"
-                "You can use a diamond to unlock extra conversations, buy below.",
-                reply_markup=get_buy_more_keyboard()
+                i18n.get_text('daily-limit', lang),
+                reply_markup=get_buy_more_keyboard(lang)
             )
             return
         elif not is_lifetime:
             used = await user_service.use_diamond(user.user_id)
             if used:
-                await message.answer("<b>💎 1 diamond used for extra conversation.</b>")
+                await message.answer(i18n.get_text('extra-used', lang))
             else:
                 await message.reply(
                     "💎 <b>No diamonds left!</b> Please buy more diamonds to continue.",
-                    reply_markup=get_buy_more_keyboard()
+                    reply_markup=get_buy_more_keyboard(lang)
                 )
                 return
     
@@ -109,8 +107,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
     if queue_position > 1:
         queue_message = await message.reply(
-            "⏳ Your request is in queue. Please wait ...\n"
-            f"Position: <b>{queue_position} / {query_length}</b>"
+            i18n.get_text('extra-used', lang).format(queue_position, query_length)
         )
         queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
         query_length = queue_manager.queue_length()
@@ -119,8 +116,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     while queue_position > 1:
         try:
             await queue_message.edit_text(
-                "⏳ Your request is in queue. Please wait ...\n"
-                f"Position: <b>{queue_position} / {query_length}</b>"
+                i18n.get_text('extra-used', lang).format(queue_position, query_length)
             )
             await asyncio.sleep(1)
             queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
@@ -133,7 +129,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     if queue_message:
         await queue_message.delete()
 
-    await process_video(message, db, video)
+    await process_video(message, db, video, lang)
 
 
 @router.message(F.document.mime_type.startswith('video'))
@@ -141,9 +137,9 @@ async def document_handler(message: Message, db: AsyncSession):
     await video_handler(message, db, message.document)
 
 
-async def process_video(message: Message, db: AsyncSession, video):
+async def process_video(message: Message, db: AsyncSession, video, lang: str):
     user_id = message.from_user.id
-    processing_msg = await message.reply("Downloading ...")
+    processing_msg = await message.reply(i18n.get_text('downloading', lang))
 
     file = await message.bot.get_file(video.file_id)
     video_path = file.file_path
@@ -152,7 +148,7 @@ async def process_video(message: Message, db: AsyncSession, video):
     try:
         file_name = generate_name(message, video)
 
-        await processing_msg.edit_text("Converting ...")
+        await processing_msg.edit_text(i18n.get_text('converting', lang))
 
         audio_path = await VideoConverter().convert_video_to_audio(video_path, f'audios/{file_name}')
 
@@ -167,7 +163,7 @@ async def process_video(message: Message, db: AsyncSession, video):
         bot = await message.bot.get_me()
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
-        await message.reply_document(audio_file, caption=f'Converted by @{bot.username}')
+        await message.reply_document(audio_file, caption=i18n.get_text('converted-by', lang).format(bot.username))
 
         await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT</b>\n'
                              '⭐️ <a href="https://t.me/TelegStarsWalletBot?start=_tgr_eaqwdbsxZTU6"><b>Click here</b></a>')

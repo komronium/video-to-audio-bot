@@ -77,6 +77,7 @@ async def pre_checkout_handler(pre_checkout_q: PreCheckoutQuery):
 async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bot):
     user_id = message.from_user.id
     user_service = UserService(db)
+    lang = await user_service.get_lang(message.from_user.id)
 
     payload = message.successful_payment.invoice_payload
     amount = message.successful_payment.total_amount
@@ -95,7 +96,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
         if diamonds > 0:
             await user_service.add_diamonds(user_id, diamonds)
             await message.answer(
-                f"<b>💎 Congratulations!</b>\n{diamonds} diamonds added to your account.\n"
+                i18n.get_text('congrats', lang).format(diamonds)
             )
             await bot.send_message(settings.GROUP_ID, f'<b>{amount} DIAMONDS</b> added.')
         else:
@@ -104,7 +105,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
     elif payload == "channel_support_lifetime":
         await user_service.set_lifetime(user_id)
         await bot.send_message(settings.GROUP_ID, '<b>250 DIAMONDS</b> added.')
-        await message.answer("💎 Congratulations! You now have Lifetime Premium access.")
+        await message.answer(i18n.get_text('congrats-lifetime', lang))
 
     else:
         await message.answer("<b>Unknown payment type.</b>\nPlease contact support: @TGBots_ContactBot")
@@ -114,6 +115,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
 async def command_diamonds(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     user = await user_service.get_user(message.from_user.id)
+    lang = await user_service.get_lang(message.from_user.id)
     is_lifetime = await user_service.is_lifetime(user.id)
 
     if is_lifetime:
@@ -128,5 +130,5 @@ async def command_diamonds(message: types.Message, db: AsyncSession):
             "<b>💎 Diamonds</b>\nYou have <b>0</b> diamonds in your account.\n\n"
             "Diamonds are required to unlock extra conversations and features.\n"
             "Buy more diamonds below:",
-            reply_markup=get_buy_more_keyboard()
+            reply_markup=get_buy_more_keyboard(lang)
         )
