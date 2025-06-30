@@ -1,11 +1,30 @@
 from aiogram import types, Router
 from aiogram.filters import Command
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from utils.i18n import i18n
+from services.user_service import UserService
+from utils.i18n import i18n, LANGUAGES
 
 router = Router()
 
 
+def get_language_keyboard():
+    buttons = [
+        [types.InlineKeyboardButton(text=name, callback_data=f"setlang:{code}")]
+        for code, name in LANGUAGES.items()
+    ]
+    return types.InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 @router.message(Command('start'))
-async def command_start(message: types.Message, lang: str):
+async def command_start(message: types.Message, db: AsyncSession):
+    service = UserService(db)
+    lang = service.get_lang(message.from_user.id)
+
+    if not lang:
+        await message.answer(
+            i18n.get_text('choose_language'),
+            reply_markup=get_language_keyboard()
+        )
+
     await message.reply(i18n.get_text('start', lang))

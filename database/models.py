@@ -18,6 +18,7 @@ class User(Base):
     conversation_count = Column(Integer, default=0)
     joined_at = Column(Date, default=date.today)
     diamonds = Column(Integer, default=0)
+    lang = Column(String(2), nullable=True)
 
     payments = relationship("Payment", back_populates="user")
 

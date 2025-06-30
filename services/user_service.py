@@ -121,3 +121,12 @@ class UserService:
     async def is_lifetime(self, user_id: int) -> bool:
         user = await self.get_user(user_id)
         return bool(user and user.diamonds >= 99999)
+
+    async def get_lang(self, user_id: int):
+        user = await self.get_user(user_id)
+        return user.lang
+
+    async def set_lang(self, user_id: int, lang: str):
+        user = await self.get_user(user_id)
+        user.lang = lang
+        await self.db.commit()
