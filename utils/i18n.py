@@ -11,7 +11,7 @@ class I18n:
         self.load_locales(locales_dir)
 
     def load_locales(self, locales_dir):
-        print(Path(locales_dir).glob('*.json'))
+        print(list(Path(locales_dir).glob('*.json')))
         for loc_file in Path(locales_dir).glob('*.json'):
             lang = loc_file.stem
             print(lang)
