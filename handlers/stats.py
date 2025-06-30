@@ -60,9 +60,9 @@ async def command_stats(message: types.Message, db: AsyncSession):
 
     text = ''
     for lang in langs:
-        if not lang:
-            text += f"<code>{langs[lang]}</code>\t{i18n.get_text('lang', lang)}\n"
+        if lang:
+            text += f"<code>{langs[lang]}</code>\t\t{i18n.get_text('lang', lang)}\n"
         else:
-            text += f"<code>{langs[lang]}</code>\tNOT SELECTED\n"
+            text += f"<code>{langs[lang]}</code>\t\tNOT SELECTED\n"
 
     await message.answer(text)
