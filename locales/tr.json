@@ -27,5 +27,7 @@
     "congrats-lifetime": "💎 Tebrikler! Artık Ömür Boyu Premium erişiminiz var.",
     "subscribe": "Devam etmek için lütfen önce kanalımıza abone olun.",
     "join-channel": "🔗 Kanala Katıl",
-    "check-subs": "✅ Aboneliği kontrol et"
+    "check-subs": "✅ Aboneliği kontrol et",
+    "not-sub": "❌ Henüz kanala abone olmadınız. Devam etmek için lütfen abone olun!",
+    "thank-sub": "✅ Abone olduğunuz için teşekkürler! Artık botu kullanabilirsiniz\nBana bir video dosyası gönderin, ben de sizin için sesini çıkarayım."
 }

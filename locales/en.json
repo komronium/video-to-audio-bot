@@ -27,5 +27,7 @@
     "congrats-lifetime": "💎 Congratulations! You now have Lifetime Premium access.",
     "subscribe": "To continue, please subscribe to our channel first.",
     "join-channel": "\uD83D\uDD17 Join the Channel",
-    "check-subs": "✅ Check subscription"
+    "check-subs": "✅ Check subscription",
+    "not-sub": "❌ You haven't subscribed to the channel yet. Please subscribe to continue!",
+    "thank-sub": "✅ Thank you for subscribing! You can now use the bot\nSend me a video file, and I will extract its audio for you."
 }
