@@ -13,7 +13,7 @@ from utils.i18n import i18n
 class SubscriptionMiddleware(BaseMiddleware):
 
     @staticmethod
-    async def check_subscription(bot, user_id, channel_id):
+    async def check_subscription(bot, user_id, channel_id=settings.CHANNEL_ID):
         try:
             member = await bot.get_chat_member(channel_id, user_id)
             is_subscribed = member.status not in ['left', 'kicked', 'banned']
@@ -44,7 +44,7 @@ class SubscriptionMiddleware(BaseMiddleware):
 
                     await event.answer(
                         "To continue, please subscribe to our channel first.",
-                        reply_markup=SubscriptionMiddleware.subscription_keyboard()
+                        reply_markup=SubscriptionMiddleware.subscription_keyboard(lang)
                     )
             except TelegramForbiddenError:
                 logging.warning(f"User {user_id} has blocked the bot. Cannot send message.")
@@ -53,9 +53,9 @@ class SubscriptionMiddleware(BaseMiddleware):
         return await handler(event, data)
 
     @staticmethod
-    def subscription_keyboard():
+    def subscription_keyboard(lang: str):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='🔗 Join the Channel', url=settings.CHANNEL_JOIN_LINK)],
-            [InlineKeyboardButton(text='✅ Check subscription', callback_data='check_subscription')]
+            [InlineKeyboardButton(text=i18n.get_text('join-channel', lang), url=settings.CHANNEL_JOIN_LINK)],
+            [InlineKeyboardButton(text=i18n.get_text('check-subs', lang), callback_data='check_subscription')]
         ])
         return keyboard

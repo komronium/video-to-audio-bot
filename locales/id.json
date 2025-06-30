@@ -24,5 +24,7 @@
     "converted-by": "Dikonversi oleh @{}",
     "profile": "👤 <b>Profil Anda:</b>\n\n🔹 ID Pengguna: <b>{}</b>\n🔹 Nama: <b>{}</b>\n🔹 Username: @{}\n🔹 Percakapan: <b>{}</b>\n🔹 Bergabung: <b>{}</b>",
     "congrats": "<b>💎 Selamat!</b>\n{} berlian telah ditambahkan ke akun Anda.",
-    "congrats-lifetime": "\uD83D\uDC8E Selamat! Kini Anda memiliki akses Premium Seumur Hidup."
+    "congrats-lifetime": "\uD83D\uDC8E Selamat! Kini Anda memiliki akses Premium Seumur Hidup.",
+    "join-channel": "🔗 Gabung ke Channel",
+    "check-subs": "✅ Periksa langganan"
 }

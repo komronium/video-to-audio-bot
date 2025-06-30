@@ -1,9 +1,10 @@
-from aiogram import types, Router, F
+from aiogram import types, Router, F, Bot
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.session import get_db
+from middlewares.subscription import SubscriptionMiddleware
 from services.user_service import UserService
 from utils.i18n import i18n
 
@@ -35,14 +36,22 @@ async def command_start(message: types.Message, db: AsyncSession):
 
 
 @router.callback_query(F.data.startswith('setlang:'))
-async def buy_diamonds_callback(call: CallbackQuery):
+async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
     lang = call.data.split(':')[1]
     async with get_db() as db:
         service = UserService(db)
         await service.set_lang(call.from_user.id, lang)
         await call.answer()
 
-    await call.message.edit_text(i18n.get_text('start', lang))
+    is_subscribed = SubscriptionMiddleware.check_subscription(bot, call.from_user.id)
+    if not is_subscribed:
+        await call.message.answer(
+            "To continue, please subscribe to our channel first.",
+            reply_markup=SubscriptionMiddleware.subscription_keyboard(lang)
+        )
+        return None
+
+    return await call.message.edit_text(i18n.get_text('start', lang))
 
 
 @router.message(Command('lang'))

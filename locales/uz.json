@@ -24,5 +24,7 @@
     "converted-by": "@{} tomonidan konvertatsiya qilindi",
     "profile": "👤 <b>Sizning profilingiz:</b>\n\n🔹 Foydalanuvchi ID: <b>{}</b>\n🔹 Ism: <b>{}</b>\n🔹 Username: @{}\n🔹 Suhbatlar: <b>{}</b>\n🔹 Qo‘shilgan: <b>{}</b>",
     "congrats": "<b>💎 Tabriklaymiz!</b>\n{} olmos hisobingizga qo‘shildi.",
-    "congrats-lifetime": "💎 Tabriklaymiz! Endi sizda Doimiy Premium mavjud."
+    "congrats-lifetime": "💎 Tabriklaymiz! Endi sizda Doimiy Premium mavjud.",
+    "join-channel": "🔗 Kanalga qo'shilish",
+    "check-subs": "✅ Obunani tekshirish"
 }
