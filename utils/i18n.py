@@ -13,9 +13,8 @@ class I18n:
         for loc_file in Path(locales_dir).glob('*.json'):
             lang = loc_file.stem
             with open(loc_file, encoding='utf-8') as f:
-                print('---', lang, 'OCHILDI')
                 self.locales[lang] = json.load(f)
-                self.LANGUAGES.append(self.locales[lang]['lang'])
+                self.LANGUAGES.append(lang)
 
     def get_text(self, key, lang='en'):
         lang = lang or self.default_lang
