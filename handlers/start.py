@@ -19,7 +19,7 @@ def get_language_keyboard():
 @router.message(Command('start'))
 async def command_start(message: types.Message, db: AsyncSession):
     service = UserService(db)
-    lang = service.get_lang(message.from_user.id)
+    lang = await service.get_lang(message.from_user.id)
 
     if not lang:
         await message.answer(
