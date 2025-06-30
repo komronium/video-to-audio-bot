@@ -1,10 +1,13 @@
+import logging
+
 from aiogram import types, Router, F, Bot
+from aiogram.exceptions import TelegramAPIError
 from aiogram.filters import Command
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config import settings
 from database.session import get_db
-from middlewares.subscription import SubscriptionMiddleware
 from services.user_service import UserService
 from utils.i18n import i18n
 
@@ -35,6 +38,23 @@ async def command_start(message: types.Message, db: AsyncSession):
     return None
 
 
+async def check_subscription(bot, user_id, channel_id=settings.CHANNEL_ID):
+    try:
+        member = await bot.get_chat_member(channel_id, user_id)
+        is_subscribed = member.status not in ['left', 'kicked', 'banned']
+        return is_subscribed
+    except TelegramAPIError as e:
+        logging.error(f"Error while checking subscription: {e}")
+        raise
+
+def subscription_keyboard(lang: str):
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=i18n.get_text('join-channel', lang), url=settings.CHANNEL_JOIN_LINK)],
+        [InlineKeyboardButton(text=i18n.get_text('check-subs', lang), callback_data='check_subscription')]
+    ])
+    return keyboard
+
+
 @router.callback_query(F.data.startswith('setlang:'))
 async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
     lang = call.data.split(':')[1]
@@ -43,11 +63,11 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
         await service.set_lang(call.from_user.id, lang)
         await call.answer()
 
-    is_subscribed = SubscriptionMiddleware.check_subscription(bot, call.from_user.id)
+    is_subscribed = check_subscription(bot, call.from_user.id)
     if not is_subscribed:
         await call.message.answer(
             "To continue, please subscribe to our channel first.",
-            reply_markup=SubscriptionMiddleware.subscription_keyboard(lang)
+            reply_markup=subscription_keyboard(lang)
         )
         return None
 
