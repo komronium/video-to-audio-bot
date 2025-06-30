@@ -10,8 +10,8 @@ router = Router()
 
 def get_language_keyboard():
     buttons = [
-        [types.InlineKeyboardButton(text=name, callback_data=f"setlang:{code}")]
-        for code, name in i18n.LANGUAGES.items()
+        [types.InlineKeyboardButton(text=i18n.get_text('lang', lang), callback_data=f"setlang:{lang}")]
+        for lang in i18n.LANGUAGES
     ]
     return types.InlineKeyboardMarkup(inline_keyboard=buttons)
 
