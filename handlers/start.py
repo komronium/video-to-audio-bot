@@ -25,12 +25,13 @@ async def command_start(message: types.Message, db: AsyncSession):
     lang = await service.get_lang(message.from_user.id)
 
     if not lang:
-        await message.answer(
+        return await message.answer(
             i18n.get_text('choose_language'),
             reply_markup=get_language_keyboard()
         )
 
     await message.reply(i18n.get_text('start', lang))
+    return None
 
 
 @router.callback_query(F.data.startswith('setlang:'))
@@ -41,4 +42,4 @@ async def buy_diamonds_callback(call: CallbackQuery):
         await service.set_lang(call.from_user.id, lang)
         await call.answer()
 
-    await command_start(call.message, db)
+    await call.message.answer(i18n.get_text('start', lang))
