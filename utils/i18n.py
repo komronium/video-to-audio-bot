@@ -6,8 +6,8 @@ class I18n:
     def __init__(self, default_lang='en', locales_dir='locales'):
         self.default_lang = default_lang
         self.locales = {}
-        self.load_locales(locales_dir)
         self.LANGUAGES = []
+        self.load_locales(locales_dir)
 
     def load_locales(self, locales_dir):
         for loc_file in Path(locales_dir).glob('*.json'):
