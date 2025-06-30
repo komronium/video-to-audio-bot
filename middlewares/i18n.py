@@ -9,9 +9,6 @@ class I18nMiddleware(BaseMiddleware):
             event,
             data
     ):
-        return await handler(event, data)
-
-    async def on_pre_process_message(self, message: Message, data: dict):
-        # Foydalanuvchi tilini aniqlash (masalan, Telegram til kodi)
-        lang = message.from_user.language_code or 'en'
+        lang = event.from_user.language_code or 'en'
         data['lang'] = lang
+        return await handler(event, data)
