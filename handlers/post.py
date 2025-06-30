@@ -7,9 +7,11 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
+from handlers.start import get_language_keyboard
 from handlers.video import get_buy_more_keyboard
 from services.user_service import UserService
 from states.post import PostStates
+from utils.i18n import i18n
 
 router = Router()
 
@@ -32,7 +34,7 @@ async def create_post(message: types.Message, state: FSMContext):
         return
 
 
-@router.message(Command('postdiamonds'))
+@router.message(Command('postlang'))
 async def post_diamonds(message: types.Message, db: AsyncSession, bot: Bot):
     if message.from_user.id == settings.ADMIN_ID:
         user_service = UserService(db)
@@ -57,13 +59,10 @@ async def post_diamonds(message: types.Message, db: AsyncSession, bot: Bot):
 
         for user in users:
             try:
-                await bot.send_message(user.user_id,
-                    '💎 <b>Diamonds — your universal feature!</b>\n\n'
-                    'Each diamond can be used for:\n'
-                    '• Extra conversations beyond the daily limit 💬\n'
-                    '• Uploading and converting large videos (over 150 MB) 🎬\n\n'
-                    'Buy more diamonds to unlock extra possibilities!',
-                    reply_markup=get_buy_more_keyboard()
+                await bot.send_message(
+                    user.user_id,
+                    i18n.get_text('choose_language'),
+                    reply_markup=get_language_keyboard()
                 )
                 successful += 1
             except Exception:
