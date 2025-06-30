@@ -6,6 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
+from database.session import get_db
 from handlers.video import get_buy_more_keyboard
 from services.user_service import UserService
 from utils.i18n import i18n
@@ -24,48 +25,57 @@ def get_prices_keyboard(lang: str):
 
 
 @router.callback_query(F.data == "buy_diamonds")
-async def buy_diamonds_callback(call: CallbackQuery, lang: str):
-    await call.message.delete()
-    await call.message.answer(
-        i18n.get_text('buy-diamonds', lang),
-        reply_markup=get_prices_keyboard(lang)
-    )
+async def buy_diamonds_callback(call: CallbackQuery):
+    async with get_db() as db:
+        service = UserService(db)
+        lang = await service.get_lang(call.from_user.id)
+        await call.message.delete()
+        await call.message.answer(
+            i18n.get_text('buy-diamonds', lang),
+            reply_markup=get_prices_keyboard(lang)
+        )
 
 
 # --- Callback handler for buying diamonds via Telegram Stars ---
 @router.callback_query(F.data.startswith("buy-"))
-async def buy_diamonds_callback(call: CallbackQuery, lang: str):
-    diamonds_count = int(call.data.split('-')[1])
-    prices = [
-        LabeledPrice(label=i18n.get_text('diamond-count', lang).format(diamonds_count),
-                     amount=diamonds_count * 5),
-    ]
-    await call.message.answer_invoice(
-        title=i18n.get_text('buy-title', lang).format(diamonds_count),
-        description=i18n.get_text('buy-desc', lang).format(diamonds_count, diamonds_count * 5),
-        prices=prices,
-        provider_token="",
-        payload="channel_support",
-        currency="XTR",
-    )
-    await call.answer()
+async def buy_diamonds_callback(call: CallbackQuery):
+    async with get_db() as db:
+        service = UserService(db)
+        lang = await service.get_lang(call.from_user.id)
+        diamonds_count = int(call.data.split('-')[1])
+        prices = [
+            LabeledPrice(label=i18n.get_text('diamond-count', lang).format(diamonds_count),
+                         amount=diamonds_count * 5),
+        ]
+        await call.message.answer_invoice(
+            title=i18n.get_text('buy-title', lang).format(diamonds_count),
+            description=i18n.get_text('buy-desc', lang).format(diamonds_count, diamonds_count * 5),
+            prices=prices,
+            provider_token="",
+            payload="channel_support",
+            currency="XTR",
+        )
+        await call.answer()
 
 # --- Callback handler for buying Lifetime Premium ---
 @router.callback_query(F.data == "lifetime")
-async def buy_lifetime_callback(call: CallbackQuery, lang: str):
-    prices = [
-        LabeledPrice(label=i18n.get_text('lifetime-title', lang), amount=250),  # misol uchun 150 star
-    ]
-    await call.message.delete()
-    await call.message.answer_invoice(
-        title=i18n.get_text('lifetime-title', lang),
-        description=i18n.get_text('lifetime-desc', lang),
-        prices=prices,
-        provider_token="",
-        payload="channel_support_lifetime",
-        currency="XTR",
-    )
-    await call.answer()
+async def buy_lifetime_callback(call: CallbackQuery):
+    async with get_db() as db:
+        service = UserService(db)
+        lang = await service.get_lang(call.from_user.id)
+        prices = [
+            LabeledPrice(label=i18n.get_text('lifetime-title', lang), amount=250),  # misol uchun 150 star
+        ]
+        await call.message.delete()
+        await call.message.answer_invoice(
+            title=i18n.get_text('lifetime-title', lang),
+            description=i18n.get_text('lifetime-desc', lang),
+            prices=prices,
+            provider_token="",
+            payload="channel_support_lifetime",
+            currency="XTR",
+        )
+        await call.answer()
 
 
 @router.pre_checkout_query()
