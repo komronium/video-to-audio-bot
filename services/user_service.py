@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 from aiogram import Bot
 from sqlalchemy.exc import IntegrityError
@@ -115,12 +116,13 @@ class UserService:
     async def set_lifetime(self, user_id: int):
         user = await self.get_user(user_id)
         if user:
-            user.diamonds = 99999  # Cheksiz sifatida ishlatish mumkin
+            user.diamonds = 99999
             await self.db.commit()
 
     async def is_lifetime(self, user_id: int) -> bool:
         user = await self.get_user(user_id)
-        return bool(user and user.diamonds >= 99999)
+        logging.warning(f"is_lifetime: {user}, diamonds: {user.diamonds if user else 'None'}, {user and user.diamonds >= 99999}")
+        return user and user.diamonds >= 99999
 
     async def get_lang(self, user_id: int):
         user = await self.get_user(user_id)
