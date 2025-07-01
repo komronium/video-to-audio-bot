@@ -1,5 +1,3 @@
-import logging
-
 from aiogram import types, Router, F
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,9 +6,6 @@ from utils.i18n import i18n
 
 
 router = Router()
-
-logging.warn(str(i18n.LANGUAGES))
-
 
 @router.message(F.text.in_([
     i18n.get_text('help-button', lang) for lang in i18n.LANGUAGES

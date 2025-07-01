@@ -128,7 +128,7 @@ async def command_diamonds(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     user = await user_service.get_user(message.from_user.id)
     lang = await user_service.get_lang(message.from_user.id)
-    is_lifetime = await user_service.is_lifetime(user.id)
+    is_lifetime = await user_service.is_lifetime(user.user_id)
 
     if is_lifetime:
         await message.answer('<b>💎 Diamonds</b>\nYou have Lifetime Premium access! Enjoy unlimited features forever.')
