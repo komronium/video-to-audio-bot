@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import dataclass
 
+from config import settings
 from services.user_service import UserService
 from utils.i18n import i18n
 
@@ -78,8 +79,8 @@ async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
 
     for user in users:
         try:
-            user_info = await bot.get_chat(user.user_id)
-            lang = user_info.language_code
+            user_info = await bot.get_chat_member(settings.CHANNEL_ID, user.user_id)
+            lang = user_info.user.language_code
 
             if lang not in langs:
                 langs[lang] = 1
