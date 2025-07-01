@@ -21,11 +21,11 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         return await message.answer(NOT_REGISTERED_TEXT)
 
     text = i18n.get_text('profile', lang).format(
-        user_id=user.user_id,
-        name=user.name,
-        username=user.username or 'N/A',
-        conversation_count=user.conversation_count,
-        joined_at=user.joined_at.strftime('%d-%m-%Y')
+        user.user_id,
+        user.name,
+        user.username or 'N/A',
+        user.conversation_count,
+        user.joined_at.strftime('%d-%m-%Y')
     )
 
     return await message.answer(text.strip())
