@@ -36,10 +36,10 @@ class Stats:
 def format_stats_message(stats: Stats) -> str:
     return (
         f"📊 <b>BOT STATISTICS:</b>\n\n"
-        f"🔹 Total Users: <b>{stats.total_users}</b>\n"
-        f"🔹 Active Users: <b>{stats.total_active_users}</b> ({stats.active_users_percentage}%)\n"
-        f"🔹 Total Conversations: <b>{stats.total_conversations}</b> ({stats.avg_conversations})\n"
-        f"🔹 New Users Today: <b>{stats.users_joined_today}</b>"
+        f"🔹 Total Users: <code>{stats.total_users}</code>\n"
+        f"🔹 Active Users: <code>{stats.total_active_users} ({stats.active_users_percentage}%)</code>\n"
+        f"🔹 Total Conversations: <code>{stats.total_conversations} ({stats.avg_conversations})</code>\n"
+        f"🔹 New Users Today: <code>{stats.users_joined_today}</code>"
     )
 
 
