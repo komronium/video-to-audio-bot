@@ -1,7 +1,7 @@
 import logging
 from collections import Counter
 
-from aiogram import types, Router, Bot
+from aiogram import types, Router, Bot, F
 from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import dataclass
@@ -43,7 +43,9 @@ def format_stats_message(stats: Stats) -> str:
     )
 
 
-@router.message(Command('stats'))
+@router.message(F.text.in_([
+    i18n.get_text('stats-button', lang) for lang in i18n.LANGUAGES
+]))
 async def command_stats(message: types.Message, db: AsyncSession):
     try:
         user_service = UserService(db)

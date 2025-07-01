@@ -121,7 +121,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
         await message.answer("<b>Unknown payment type.</b>\nPlease contact support: @TGBots_ContactBot")
 
 
-@router.message(F.in_([
+@router.message(F.text.in_([
     i18n.get_text('diamonds-button', lang) for lang in i18n.LANGUAGES
 ]))
 async def command_diamonds(message: types.Message, db: AsyncSession):

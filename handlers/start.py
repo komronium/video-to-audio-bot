@@ -95,7 +95,7 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
     return await call.message.edit_text(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
 
 
-@router.message(F.in_([
+@router.message(F.text.in_([
     i18n.get_text('lang-button', lang) for lang in i18n.LANGUAGES
 ]))
 async def command_start(message: types.Message, db: AsyncSession):

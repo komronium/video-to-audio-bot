@@ -1,15 +1,17 @@
-from aiogram import types, Router
-from aiogram.filters import Command
+from aiogram import types, Router, F
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
+from utils.i18n import i18n
 
 EMOJIES = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 
 router = Router()
 
 
-@router.message(Command('top'))
+@router.message(F.text.in_([
+    i18n.get_text('top-button', lang) for lang in i18n.LANGUAGES
+]))
 async def command_top(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     top_users = await user_service.get_top_users()
