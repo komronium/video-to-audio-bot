@@ -92,7 +92,8 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
         )
         return None
 
-    return await call.message.edit_text(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
+    await call.message.answer(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
+    return await call.message.delete()
 
 
 @router.message(F.text.in_([
