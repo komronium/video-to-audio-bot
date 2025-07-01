@@ -1,4 +1,4 @@
-from aiogram import types, Router
+from aiogram import types, Router, Bot
 from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import dataclass
@@ -57,6 +57,34 @@ async def command_stats(message: types.Message, db: AsyncSession):
 async def command_stats(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     langs = await user_service.get_langs()
+
+    text = ''
+    for lang in langs:
+        if lang:
+            text += f"<code>{langs[lang]}</code>\t\t{i18n.get_text('lang', lang)}\n"
+        else:
+            text += f"<code>{langs[lang]}</code>\t\tNOT SELECTED\n"
+
+    await message.answer(text)
+
+
+@router.message(Command('deflangs'))
+async def command_stats(message: types.Message, db: AsyncSession, bot: Bot):
+    service = UserService(db)
+    users = await service.get_all_users()
+    langs = dict()
+
+    for user in users:
+        try:
+            user_info = await bot.get_chat(user.user_id)
+            lang = user_info.language_code
+
+            if lang not in langs:
+                langs[lang] = 1
+            else:
+                langs[lang] += 1
+        except Exception:
+            pass
 
     text = ''
     for lang in langs:

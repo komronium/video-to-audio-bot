@@ -27,20 +27,4 @@ class DatabaseMiddleware(BaseMiddleware):
             if not await user_service.is_user_exists(user_id):
                 await user_service.add_user(user_id, username, name, event.bot)
 
-                lang = event.from_user.language_code
-                global count, LANGS
-                count += 1
-
-                if lang in LANGS:
-                    LANGS[lang] += 1
-                else:
-                    LANGS[lang] = 1
-
-                if count % 10 == 0:
-                    text = ''
-
-                    for lang in LANGS:
-                        text += f"<code>{lang} {LANGS[lang]}</code>\n"
-                    await event.bot.send_message(settings.GROUP_ID, text)
-
             return await handler(event, data)
