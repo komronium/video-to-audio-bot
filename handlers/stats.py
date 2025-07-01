@@ -1,4 +1,5 @@
 import logging
+from collections import Counter
 
 from aiogram import types, Router, Bot
 from aiogram.filters import Command
@@ -89,8 +90,12 @@ async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
         except Exception as e:
             logging.error(e)
 
+    langs = Counter(langs)
+    langs = dict(langs.most_common(10))
+
     text = ''
     for lang in langs:
-        text += f"<code>{lang} {langs[lang]}</code>\n"
-        
+        if lang:
+            text += f"<code>{lang} | {langs[lang]}</code>\n"
+
     await message.answer(text)
