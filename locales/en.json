@@ -35,5 +35,6 @@
     "stats-button": "📊 Stats",
     "profile-button": "👤 Profile",
     "top-button": "🏆 Top Users",
-    "diamonds-button": "💎 Diamonds"
+    "diamonds-button": "💎 Diamonds",
+    "help-text": "🆘 <b>How to Use the Bot</b>\n\n1️⃣ <b>Send a video file</b> — Just upload your video here.\n2️⃣ <b>Wait for processing</b> — The bot will extract the audio automatically.\n3️⃣ <b>Download the audio</b> — You’ll receive the audio file ready to save or share.\n\n💎 <b>Need more?</b> Use diamonds for unlimited conversions and large files.\n\nIf you have questions or need help, just ask!"
 }

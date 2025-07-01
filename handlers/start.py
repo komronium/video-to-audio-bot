@@ -26,12 +26,18 @@ def get_language_keyboard():
 def get_menu_keyboard(lang: str):
     return types.ReplyKeyboardMarkup(
         keyboard=[
-            [types.KeyboardButton(text=i18n.get_text('lang-button', lang))],
-            [types.KeyboardButton(text=i18n.get_text('help-button', lang))],
-            [types.KeyboardButton(text=i18n.get_text('stats-button', lang))],
-            [types.KeyboardButton(text=i18n.get_text('profile-button', lang))],
-            [types.KeyboardButton(text=i18n.get_text('top-button', lang))],
-            [types.KeyboardButton(text=i18n.get_text('diamonds-button', lang))],
+            [
+                types.KeyboardButton(text=i18n.get_text('lang-button', lang)),
+                types.KeyboardButton(text=i18n.get_text('help-button', lang))
+            ],
+            [
+                types.KeyboardButton(text=i18n.get_text('stats-button', lang)),
+                types.KeyboardButton(text=i18n.get_text('profile-button', lang))
+            ],
+            [
+                types.KeyboardButton(text=i18n.get_text('top-button', lang)),
+                types.KeyboardButton(text=i18n.get_text('diamonds-button', lang))
+            ],
         ],
         resize_keyboard=True
     )
@@ -89,7 +95,9 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
     return await call.message.edit_text(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
 
 
-@router.message(Command('lang'))
+@router.message(F.in_([
+    i18n.get_text('lang-button', lang) for lang in i18n.LANGUAGES
+]))
 async def command_start(message: types.Message, db: AsyncSession):
     service = UserService(db)
     lang = await service.get_lang(message.from_user.id)

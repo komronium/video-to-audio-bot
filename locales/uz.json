@@ -35,5 +35,6 @@
     "stats-button": "📊 Statistika",
     "profile-button": "👤 Profil",
     "top-button": "🏆 Eng yaxshi foydalanuvchilar",
-    "diamonds-button": "💎 Olmoslar"
+    "diamonds-button": "💎 Olmoslar",
+    "help-text": "🆘 <b>Botdan foydalanish</b>\n\n1️⃣ <b>Video fayl yuboring</b> — Videongizni shu yerga yuklang.\n2️⃣ <b>Qayta ishlashni kuting</b> — Bot avtomatik tarzda audioni ajratib oladi.\n3️⃣ <b>Audioni yuklab oling</b> — Tayyor audio faylni saqlab olishingiz yoki ulashishingiz mumkin.\n\n💎 <b>Ko‘proq ma'lumot kerakmi?</b> Cheksiz konvertatsiya va katta fayllar uchun olmoslardan foydalaning.\n\nSavollaringiz bo‘lsa yoki yordam kerak bo‘lsa, bemalol so‘rashingiz mumkin!"
 }

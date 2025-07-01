@@ -35,5 +35,6 @@
     "stats-button": "📊 Statistik",
     "profile-button": "👤 Profil",
     "top-button": "🏆 Pengguna Teratas",
-    "diamonds-button": "💎 Berlian"
+    "diamonds-button": "💎 Berlian",
+    "help-text": "🆘 <b>Cara Menggunakan Bot</b>\n\n1️⃣ <b>Kirim file video</b> — Cukup unggah video Anda di sini.\n2️⃣ <b>Tunggu proses selesai</b> — Bot akan mengekstrak audio secara otomatis.\n3️⃣ <b>Unduh audio</b> — Anda akan menerima file audio yang siap disimpan atau dibagikan.\n\n💎 <b>Butuh lebih?</b> Gunakan berlian untuk konversi tanpa batas dan file besar.\n\nJika Anda memiliki pertanyaan atau butuh bantuan, silakan tanya!"
 }
