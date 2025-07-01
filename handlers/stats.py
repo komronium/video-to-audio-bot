@@ -91,9 +91,6 @@ async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
 
     text = ''
     for lang in langs:
-        if lang:
-            text += f"<code>{langs[lang]}</code>\t\t{i18n.get_text('lang', lang)}\n"
-        else:
-            text += f"<code>{langs[lang]}</code>\t\tNOT SELECTED\n"
-
+        text += f"<code>{lang} {langs[lang]}</code>\n"
+        
     await message.answer(text)
