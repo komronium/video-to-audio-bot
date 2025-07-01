@@ -1,3 +1,5 @@
+import logging
+
 from aiogram import types, Router, Bot
 from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -83,8 +85,8 @@ async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
                 langs[lang] = 1
             else:
                 langs[lang] += 1
-        except Exception:
-            pass
+        except Exception as e:
+            logging.error(e)
 
     text = ''
     for lang in langs:
