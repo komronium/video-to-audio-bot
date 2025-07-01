@@ -69,7 +69,7 @@ async def command_stats(message: types.Message, db: AsyncSession):
 
 
 @router.message(Command('deflangs'))
-async def command_stats(message: types.Message, db: AsyncSession, bot: Bot):
+async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
     service = UserService(db)
     users = await service.get_all_users()
     langs = dict()
