@@ -29,5 +29,11 @@
     "join-channel": "🔗 Kanalga qo'shilish",
     "check-subs": "✅ Obunani tekshirish",
     "not-sub": "❌ Siz hali kanalga obuna bo'lmagansiz. Davom etish uchun obuna bo'ling!",
-    "thank-sub": "✅ Obuna bo'lganingiz uchun rahmat! Endi botdan foydalanishingiz mumkin\nMenga video fayl yuboring, men sizga uning audiosini ajratib beraman."
+    "thank-sub": "✅ Obuna bo'lganingiz uchun rahmat! Endi botdan foydalanishingiz mumkin\nMenga video fayl yuboring, men sizga uning audiosini ajratib beraman.",
+    "lang-button": "🌐 Tilni o'zgartirish",
+    "help-button": "❓ Yordam",
+    "stats-button": "📊 Statistika",
+    "profile-button": "👤 Profil",
+    "top-button": "🏆 Eng yaxshi foydalanuvchilar",
+    "diamonds-button": "💎 Olmoslar"
 }

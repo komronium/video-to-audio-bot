@@ -90,6 +90,7 @@ async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
         except Exception as e:
             logging.error(e)
 
+    del langs[None]
     langs = Counter(langs)
     langs = dict(langs.most_common(10))
 

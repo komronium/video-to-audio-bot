@@ -29,5 +29,11 @@
     "join-channel": "🔗 Gabung ke Channel",
     "check-subs": "✅ Periksa langganan",
     "not-sub": "❌ Anda belum berlangganan ke channel. Silakan berlangganan untuk melanjutkan!",
-    "thank-sub": "✅ Terima kasih telah berlangganan! Sekarang Anda dapat menggunakan bot\nKirimkan file video, dan saya akan mengekstrak audionya untuk Anda."
+    "thank-sub": "✅ Terima kasih telah berlangganan! Sekarang Anda dapat menggunakan bot\nKirimkan file video, dan saya akan mengekstrak audionya untuk Anda.",
+    "lang-button": "🌐 Bahasa",
+    "help-button": "❓ Bantuan",
+    "stats-button": "📊 Statistik",
+    "profile-button": "👤 Profil",
+    "top-button": "🏆 Pengguna Teratas",
+    "diamonds-button": "💎 Berlian"
 }
