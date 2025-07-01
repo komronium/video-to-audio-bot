@@ -12,7 +12,7 @@ router = Router()
 logging.warn(str(i18n.LANGUAGES))
 
 
-@router.message(F.in_([
+@router.message(F.text.in_([
     i18n.get_text('help-button', lang) for lang in i18n.LANGUAGES
 ]))
 async def command_help(message: types.Message, db: AsyncSession):
