@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from collections import Counter
 
@@ -80,25 +81,26 @@ async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
     users = await service.get_all_users()
     langs = dict()
 
-    for user in users:
+    async def get_lang(user):
         try:
             user_info = await bot.get_chat_member(settings.CHANNEL_ID, user.user_id)
-            lang = user_info.user.language_code
-
-            if lang not in langs:
-                langs[lang] = 1
-            else:
-                langs[lang] += 1
+            return user_info.user.language_code
         except Exception as e:
             logging.error(e)
+            return None
 
-    del langs[None]
+    results = await asyncio.gather(*(get_lang(user) for user in users))
+
+    for lang in results:
+        if lang:
+            langs[lang] = langs.get(lang, 0) + 1
+
     langs = Counter(langs)
     langs = dict(langs.most_common(10))
 
+
     text = ''
-    for lang in langs:
-        if lang:
-            text += f"<code>{lang} | {langs[lang]}</code>\n"
+    for lang, count in langs.items():
+        text += f"<code>{lang} | {count}</code>\n"
 
     await message.answer(text)
