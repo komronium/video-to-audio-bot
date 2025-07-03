@@ -16,7 +16,7 @@
     "get-lifetime": "\uD83D\uDC8E Doimiy Premiumga ega bo‘ling",
     "too-large": "💎 <b>Fayl juda katta!</b>\nVideongiz bepul foydalanuvchilar uchun 150 MB limitdan oshib ketdi.\n\nBu funksiyani ochish uchun olmos ishlatishingiz mumkin, quyida olmos sotib oling.",
     "large-used": "<b>\uD83D\uDC8E Katta fayl yuklash uchun 1 olmos ishlatildi.</b>",
-    "daily-limit":  "<b>Kundalik limitdan o‘tdingiz!</b>\nSiz kunlik bepul suhbatlaringizdan foydalandingiz.\n\nQo‘shimcha suhbat uchun olmos ishlatishingiz mumkin, quyida sotib oling.",
+    "daily-limit": "<b>Kundalik limitdan o‘tdingiz!</b>\nSiz kunlik bepul suhbatlaringizdan foydalandingiz.\n\nQo‘shimcha suhbat uchun olmos ishlatishingiz mumkin, quyida sotib oling.",
     "extra-used": "<b>\uD83D\uDC8E Qo‘shimcha suhbat uchun 1 olmos ishlatildi.</b>",
     "queue": "⏳ So‘rovingiz navbatda. Iltimos, kuting ...\nPozitsiya: <code>{} / {}</code>",
     "downloading": "Yuklanmoqda ...",
@@ -36,5 +36,6 @@
     "profile-button": "👤 Profil",
     "top-button": "🏆 Eng yaxshi foydalanuvchilar",
     "diamonds-button": "💎 Olmoslar",
-    "help-text": "🆘 <b>Botdan foydalanish</b>\n\n1️⃣ <b>Video fayl yuboring</b> — Videongizni shu yerga yuklang.\n2️⃣ <b>Qayta ishlashni kuting</b> — Bot avtomatik tarzda audioni ajratib oladi.\n3️⃣ <b>Audioni yuklab oling</b> — Tayyor audio faylni saqlab olishingiz yoki ulashishingiz mumkin.\n\n💎 <b>Ko‘proq ma'lumot kerakmi?</b> Cheksiz konvertatsiya va katta fayllar uchun olmoslardan foydalaning.\n\nSavollaringiz bo‘lsa yoki yordam kerak bo‘lsa, bemalol so‘rashingiz mumkin!"
+    "help-text": "🆘 <b>Botdan foydalanish</b>\n\n1️⃣ <b>Video fayl yuboring</b> — Videongizni shu yerga yuklang.\n2️⃣ <b>Qayta ishlashni kuting</b> — Bot avtomatik tarzda audioni ajratib oladi.\n3️⃣ <b>Audioni yuklab oling</b> — Tayyor audio faylni saqlab olishingiz yoki ulashishingiz mumkin.\n\n💎 <b>Ko‘proq ma'lumot kerakmi?</b> Cheksiz konvertatsiya va katta fayllar uchun olmoslardan foydalaning.\n\nSavollaringiz bo‘lsa yoki yordam kerak bo‘lsa, bemalol so‘rashingiz mumkin!",
+    "stat-text": "📈 <b>BOT STATISTIKASI:</b>\n\n🔹 Jami foydalanuvchilar: <code>{}</code>\n🔹 Faol foydalanuvchilar: <code>{} ({}%)</code>\n🔹 Jami konversiyalar: <code>{} ({})</code>\n🔹 Bugun qo‘shilgan foydalanuvchilar: <code>{}</code>"
 }

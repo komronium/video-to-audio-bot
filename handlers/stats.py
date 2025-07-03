@@ -34,13 +34,14 @@ class Stats:
         return round(self.total_conversations / self.total_active_users, 1)
 
 
-def format_stats_message(stats: Stats) -> str:
-    return (
-        f"📊 <b>BOT STATISTICS:</b>\n\n"
-        f"🔹 Total Users: <code>{stats.total_users}</code>\n"
-        f"🔹 Active Users: <code>{stats.total_active_users} ({stats.active_users_percentage}%)</code>\n"
-        f"🔹 Total Conversations: <code>{stats.total_conversations} ({stats.avg_conversations})</code>\n"
-        f"🔹 New Users Today: <code>{stats.users_joined_today}</code>"
+def format_stats_message(stats: Stats, lang: str) -> str:
+    return i18n.get_text('stats-text', lang).format(
+        stats.total_users,
+        stats.total_active_users,
+        stats.active_users_percentage,
+        stats.total_conversations,
+        stats.avg_conversations,
+        stats.users_joined_today
     )
 
 
