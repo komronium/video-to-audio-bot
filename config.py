@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     GROUP_ID: int
     ADMIN_ID: int
 
+    DIAMONDS_PRICE: int = 2
+    LIFETIME_PREMIUM_PRICE: int = 250
+
     API_HOST: str = 'youtube-mp36.p.rapidapi.com'
     API_KEY: str
 

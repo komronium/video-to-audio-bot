@@ -20,12 +20,15 @@ async def profile_handler(message: types.Message, db: AsyncSession):
     if not user:
         return await message.answer(NOT_REGISTERED_TEXT)
 
+    diamonds = user.diamonds
+
     text = i18n.get_text('profile', lang).format(
         user.user_id,
         user.name,
         user.username or 'N/A',
         user.conversation_count,
-        user.joined_at.strftime('%d-%m-%Y')
+        user.joined_at.strftime('%d-%m-%Y'),
+        diamonds if diamonds < 99999 else '∞',
     )
 
     return await message.answer(text.strip())

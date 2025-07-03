@@ -34,10 +34,6 @@ def get_menu_keyboard(lang: str):
                 types.KeyboardButton(text=i18n.get_text('stats-button', lang)),
                 types.KeyboardButton(text=i18n.get_text('profile-button', lang))
             ],
-            [
-                types.KeyboardButton(text=i18n.get_text('top-button', lang)),
-                types.KeyboardButton(text=i18n.get_text('diamonds-button', lang))
-            ],
         ],
         resize_keyboard=True
     )

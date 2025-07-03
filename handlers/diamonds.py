@@ -1,5 +1,4 @@
 from aiogram import Router, F, Bot, types
-from aiogram.filters import Command
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -45,11 +44,14 @@ async def buy_diamonds_callback(call: CallbackQuery):
         diamonds_count = int(call.data.split('-')[1])
         prices = [
             LabeledPrice(label=i18n.get_text('diamond-count', lang).format(diamonds_count),
-                         amount=diamonds_count * 5),
+                         amount=diamonds_count * settings.DIAMONDS_PRICE),
         ]
         await call.message.answer_invoice(
             title=i18n.get_text('buy-title', lang).format(diamonds_count),
-            description=i18n.get_text('buy-desc', lang).format(diamonds_count, diamonds_count * 5),
+            description=i18n.get_text('buy-desc', lang).format(
+                diamonds_count,
+                diamonds_count * settings.DIAMONDS_PRICE
+            ),
             prices=prices,
             provider_token="",
             payload="channel_support",
@@ -64,7 +66,7 @@ async def buy_lifetime_callback(call: CallbackQuery):
         service = UserService(db)
         lang = await service.get_lang(call.from_user.id)
         prices = [
-            LabeledPrice(label=i18n.get_text('lifetime-title', lang), amount=250),  # misol uchun 150 star
+            LabeledPrice(label=i18n.get_text('lifetime-title', lang), amount=settings.LIFETIME_PREMIUM_PRICE),
         ]
         await call.message.delete()
         await call.message.answer_invoice(
@@ -93,15 +95,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
     amount = message.successful_payment.total_amount
 
     if payload == "channel_support":
-        diamonds = 0
-        if amount == 5:
-            diamonds = 1
-        elif amount == 10:
-            diamonds = 2
-        elif amount == 20:
-            diamonds = 4
-        elif amount == 50:
-            diamonds = 10
+        diamonds = amount * settings.DIAMONDS_PRICE
 
         if diamonds > 0:
             await user_service.add_diamonds(user_id, diamonds)
@@ -114,33 +108,8 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
 
     elif payload == "channel_support_lifetime":
         await user_service.set_lifetime(user_id)
-        await bot.send_message(settings.GROUP_ID, '<b>250 DIAMONDS</b> added.')
+        await bot.send_message(settings.GROUP_ID, f'<b>{settings.LIFETIME_PREMIUM_PRICE} STARS</b> added.')
         await message.answer(i18n.get_text('congrats-lifetime', lang))
 
     else:
         await message.answer("<b>Unknown payment type.</b>\nPlease contact support: @TGBots_ContactBot")
-
-
-@router.message(F.text.in_([
-    i18n.get_text('diamonds-button', lang) for lang in i18n.LANGUAGES
-]))
-async def command_diamonds(message: types.Message, db: AsyncSession):
-    user_service = UserService(db)
-    user = await user_service.get_user(message.from_user.id)
-    lang = await user_service.get_lang(message.from_user.id)
-    is_lifetime = await user_service.is_lifetime(user.user_id)
-
-    if is_lifetime:
-        await message.answer('<b>💎 Diamonds</b>\nYou have Lifetime Premium access! Enjoy unlimited features forever.')
-    elif user.diamonds > 0:
-        await message.answer(
-            f"<b>💎 Diamonds</b>\nYou currently have <b>{user.diamonds}</b> diamond{'s' if user.diamonds > 1 else ''} in your account.\n"
-            "Use diamonds to unlock extra conversations or features."
-        )
-    else:
-        await message.answer(
-            "<b>💎 Diamonds</b>\nYou have <b>0</b> diamonds in your account.\n\n"
-            "Diamonds are required to unlock extra conversations and features.\n"
-            "Buy more diamonds below:",
-            reply_markup=get_buy_more_keyboard(lang)
-        )
