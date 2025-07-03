@@ -51,10 +51,11 @@ def format_stats_message(stats: Stats, lang: str) -> str:
 async def command_stats(message: types.Message, db: AsyncSession):
     try:
         user_service = UserService(db)
+        lang = await user_service.get_lang(message.from_user.id)
         raw_stats = await user_service.get_stats()
         stats = Stats(**raw_stats)
 
-        text = format_stats_message(stats)
+        text = format_stats_message(stats, lang)
         await message.answer(text)
     except Exception:
         await message.answer('❌ Error getting statistics')
