@@ -35,7 +35,7 @@ class Stats:
 
 
 def format_stats_message(stats: Stats, lang: str) -> str:
-    return i18n.get_text('stats-text', lang).format(
+    return i18n.get_text('stat-text', lang).format(
         stats.total_users,
         stats.total_active_users,
         stats.active_users_percentage,
