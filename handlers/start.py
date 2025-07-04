@@ -79,14 +79,14 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
         await service.set_lang(call.from_user.id, lang)
         await call.answer()
 
-    is_subscribed = await check_subscription(bot, call.from_user.id)
-    if not is_subscribed:
-        await call.message.delete()
-        await call.message.answer(
-            i18n.get_text('subscribe', lang),
-            reply_markup=subscription_keyboard(lang)
-        )
-        return None
+    # is_subscribed = await check_subscription(bot, call.from_user.id)
+    # if not is_subscribed:
+    #     await call.message.delete()
+    #     await call.message.answer(
+    #         i18n.get_text('subscribe', lang),
+    #         reply_markup=subscription_keyboard(lang)
+    #     )
+    #     return None
 
     await call.message.answer(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
     return await call.message.delete()

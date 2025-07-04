@@ -8,4 +8,4 @@ from .database import DatabaseMiddleware
 def setup_middlewares(dp: Dispatcher):
     dp.message.middleware(DatabaseMiddleware())
     dp.message.middleware(ThrottlingMiddleware())
-    dp.message.middleware(SubscriptionMiddleware())
+    # dp.message.middleware(SubscriptionMiddleware())
