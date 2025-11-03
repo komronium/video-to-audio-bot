@@ -37,20 +37,16 @@ class Stats:
 
 
 def format_stats_message(stats: Stats, lang: str) -> str:
-    def render_progress(pct: float) -> str:
-        pct = max(0.0, min(100.0, pct))
-        filled = int(round(pct / 10))  # 10-slot bar
-        empty = 10 - filled
-        return f"|{'█' * filled}{'░' * empty}| {pct:.0f}%"
-
-    # Universal, emoji-forward layout that reads well in any language
+    # Minimal, emoji-free layout
+    pct = max(0.0, min(100.0, stats.active_users_percentage))
     return (
-        "📊 <b>Bot Stats</b>\n\n"
-        f"👥 Users: <b>{stats.total_users}</b>\n"
-        f"🟢 Active: <b>{stats.total_active_users}</b>  {render_progress(stats.active_users_percentage)}\n"
-        f"💬 Conversations: <b>{stats.total_conversations}</b>\n"
-        f"➗ Avg per active: <b>{stats.avg_conversations}</b>\n"
-        f"🆕 Today: <b>{stats.users_joined_today}</b>"
+        "<u><b>Statistics</b></u>\n"
+        "<i>Overview of usage</i>\n\n"
+        f"<b>Users</b>: <code>{stats.total_users}</code>\n"
+        f"<b>Active</b>: <code>{stats.total_active_users}</code> (<code>{pct:.0f}%</code>)\n"
+        f"<b>Conversations</b>: <code>{stats.total_conversations}</code>\n"
+        f"<b>Average per active</b>: <code>{stats.avg_conversations}</code>\n"
+        f"<b>New today</b>: <code>{stats.users_joined_today}</code>"
     )
 
 
@@ -157,27 +153,17 @@ async def command_admin_stats(message: types.Message, db: AsyncSession):
     active_pct = round((total_active * 100 / total_users), 1) if total_users else 0.0
     avg_conv = round((total_conversations / total_active), 2) if total_active else 0.0
 
-    def render_progress(pct: float) -> str:
-        pct = max(0.0, min(100.0, pct))
-        filled = int(round(pct / 10))
-        empty = 10 - filled
-        return f"|{'█' * filled}{'░' * empty}| {pct:.0f}%"
-
     text = (
-        "<b>📊 Admin Stats</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"👥 Users: <b>{total_users}</b>\n"
-        f"🟢 Active: <b>{total_active}</b>  {render_progress(active_pct)}\n"
-        f"💬 Conversations: <b>{total_conversations}</b>\n"
-        f"➗ Avg per active: <b>{avg_conv}</b>\n"
-        f"🆕 Today: <b>{base.get('users_joined_today') or 0}</b>  |  7d: <b>{joined_last_week}</b>\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"🌐 Top langs: {top_langs}\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        f"💎 Diamonds sold: <b>{diamonds_total}</b>  |  👑 Lifetime: <b>{lifetime_total}</b>\n"
-        f"⭐️ Stars est.: <b>{stars_total}</b>\n"
-        f"   ├─ Diamonds: <code>{stars_from_diamonds}</code>\n"
-        f"   └─ Lifetime: <code>{stars_from_lifetime}</code>"
+        "<u><b>Admin Statistics</b></u>\n"
+        "<i>Key metrics at a glance</i>\n\n"
+        f"<b>Users</b>: <code>{total_users}</code>\n"
+        f"<b>Active</b>: <code>{total_active}</code> (<code>{active_pct:.0f}%</code>)\n"
+        f"<b>Conversations</b>: <code>{total_conversations}</code>\n"
+        f"<b>Average per active</b>: <code>{avg_conv}</code>\n"
+        f"<b>New users</b>: today <code>{base.get('users_joined_today') or 0}</code> | last 7d <code>{joined_last_week}</code>\n\n"
+        f"<u><b>Top languages</b></u>: {top_langs or '—'}\n\n"
+        f"<u><b>Sales</b></u> — diamonds: <code>{diamonds_total}</code> | lifetime: <code>{lifetime_total}</code>\n"
+        f"<b>Stars (est.)</b>: <code>{stars_total}</code>  (diamonds: <code>{stars_from_diamonds}</code>, lifetime: <code>{stars_from_lifetime}</code>)"
     )
 
     await message.answer(text)
