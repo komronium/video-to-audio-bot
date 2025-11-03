@@ -30,7 +30,7 @@ async def buy_diamonds_callback(call: CallbackQuery):
         lang = await service.get_lang(call.from_user.id)
         await call.message.delete()
         await call.message.answer(
-            i18n.get_text('buy-diamonds', lang),
+            i18n.get_text('buy-diamonds', lang).format(settings.DIAMONDS_PRICE),
             reply_markup=get_prices_keyboard(lang)
         )
 

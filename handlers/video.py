@@ -60,10 +60,9 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     if video.file_size > MAX_FILE_SIZE:
         if not is_lifetime and user.diamonds <= 0:
             await message.bot.send_chat_action(message.chat.id, 'typing')
-            await message.reply(
-                i18n.get_text('buy-extra', lang),
-                reply_markup=get_buy_more_keyboard(lang)
-            )
+            size_mb = int(MAX_FILE_SIZE / (1024 * 1024))
+            await message.reply(i18n.get_text('too-large', lang).format(size_mb))
+            await message.reply(i18n.get_text('buy-extra', lang), reply_markup=get_buy_more_keyboard(lang))
             return
         elif not is_lifetime:
             used = await user_service.use_diamond(user.user_id)
