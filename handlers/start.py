@@ -19,7 +19,7 @@ def get_language_keyboard():
         types.InlineKeyboardButton(text=i18n.get_text('lang', lang), callback_data=f"setlang:{lang}")
         for lang in i18n.LANGUAGES
     ]
-    buttons = [buttons[i : i + 3] for i in range(0, len(buttons), 3)]
+    buttons = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
     return types.InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
