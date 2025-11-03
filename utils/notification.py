@@ -2,11 +2,7 @@ import logging
 from aiogram import Bot
 from config import settings
 
-MESSAGE_TEMPLATE = (
-    "<b>New User Joined!</b>\n"
-    "<b>Name:</b> {name}\n"
-    "<b>Username:</b> @{username}"
-)
+MESSAGE_TEMPLATE = "<b>{name}</b> (@{username}) joined"
 
 
 async def notify_group(bot: Bot, user):
