@@ -40,13 +40,12 @@ def format_stats_message(stats: Stats, lang: str) -> str:
     # Minimal, emoji-free layout
     pct = max(0.0, min(100.0, stats.active_users_percentage))
     return (
-        "<u><b>Statistics</b></u>\n"
-        "<i>Overview of usage</i>\n\n"
-        f"<b>Users</b>: <code>{stats.total_users}</code>\n"
-        f"<b>Active</b>: <code>{stats.total_active_users}</code> (<code>{pct:.0f}%</code>)\n"
-        f"<b>Conversations</b>: <code>{stats.total_conversations}</code>\n"
-        f"<b>Average per active</b>: <code>{stats.avg_conversations}</code>\n"
-        f"<b>New today</b>: <code>{stats.users_joined_today}</code>"
+        "<b>Statistics</b>\n\n"
+        f"🔹 Users: <code>{stats.total_users}</code>\n"
+        f"🔹 Active: <code>{stats.total_active_users}</code> (<code>{pct:.0f}%</code>)\n"
+        f"🔹 Conversations: <code>{stats.total_conversations}</code>\n"
+        f"🔹 Average per active: <code>{stats.avg_conversations}</code>\n"
+        f"🔹 New today: <code>{stats.users_joined_today}</code>"
     )
 
 
@@ -154,16 +153,15 @@ async def command_admin_stats(message: types.Message, db: AsyncSession):
     avg_conv = round((total_conversations / total_active), 2) if total_active else 0.0
 
     text = (
-        "<u><b>Admin Statistics</b></u>\n"
-        "<i>Key metrics at a glance</i>\n\n"
-        f"<b>Users</b>: <code>{total_users}</code>\n"
-        f"<b>Active</b>: <code>{total_active}</code> (<code>{active_pct:.0f}%</code>)\n"
-        f"<b>Conversations</b>: <code>{total_conversations}</code>\n"
-        f"<b>Average per active</b>: <code>{avg_conv}</code>\n"
-        f"<b>New users</b>: today <code>{base.get('users_joined_today') or 0}</code> | last 7d <code>{joined_last_week}</code>\n\n"
-        f"<u><b>Top languages</b></u>: {top_langs or '—'}\n\n"
-        f"<u><b>Sales</b></u> — diamonds: <code>{diamonds_total}</code> | lifetime: <code>{lifetime_total}</code>\n"
-        f"<b>Stars (est.)</b>: <code>{stars_total}</code>  (diamonds: <code>{stars_from_diamonds}</code>, lifetime: <code>{stars_from_lifetime}</code>)"
+        "<b>Admin Statistics</b>\n\n"
+        f"🔹 Users: <code>{total_users}</code>\n"
+        f"🔹 Active: <code>{total_active}</code> (<code>{active_pct:.0f}%</code>)\n"
+        f"🔹 Conversations: <code>{total_conversations}</code>\n"
+        f"🔹 Average per active: <code>{avg_conv}</code>\n"
+        f"🔹 New users: today <code>{base.get('users_joined_today') or 0}</code> | last 7d <code>{joined_last_week}</code>\n"
+        f"🔹 Top languages: {top_langs or '—'}\n"
+        f"🔹 Sales — diamonds: <code>{diamonds_total}</code> | lifetime: <code>{lifetime_total}</code>\n"
+        f"🔹 Stars (est.): <code>{stars_total}</code>  (diamonds: <code>{stars_from_diamonds}</code>, lifetime: <code>{stars_from_lifetime}</code>)"
     )
 
     await message.answer(text)
