@@ -163,8 +163,7 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
         await processing_msg.delete()
         await message.reply_document(audio_file, caption=i18n.get_text('converted-by', lang).format(bot.username))
 
-        await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT</b>\n'
-                             '⭐️ <a href="https://t.me/TelegStarsWalletBot?start=_tgr_eaqwdbsxZTU6"><b>Click here</b></a>')
+        await message.answer(i18n.get_text('promo-links', lang))
 
         today = datetime.today().strftime('%Y-%m-%d')
         key = f'user:{user_id}:{today}'

@@ -37,5 +37,6 @@
     "top-button": "🏆 Eng yaxshi foydalanuvchilar",
     "diamonds-button": "💎 Olmoslar",
     "help-text": "🆘 <b>Botdan foydalanish</b>\n\n1️⃣ <b>Video fayl yuboring</b> — Videongizni shu yerga yuklang.\n2️⃣ <b>Qayta ishlashni kuting</b> — Bot avtomatik tarzda audioni ajratib oladi.\n3️⃣ <b>Audioni yuklab oling</b> — Tayyor audio faylni saqlab olishingiz yoki ulashishingiz mumkin.\n\n💎 <b>Ko‘proq ma'lumot kerakmi?</b> Cheksiz konvertatsiya va katta fayllar uchun olmoslardan foydalaning.\n\nSavollaringiz bo‘lsa yoki yordam kerak bo‘lsa, bemalol so‘rashingiz mumkin!",
-    "stat-text": "📈 <b>BOT STATISTIKASI:</b>\n\n🔹 Jami foydalanuvchilar: <code>{}</code>\n🔹 Faol foydalanuvchilar: <code>{} ({}%)</code>\n🔹 Jami konversiyalar: <code>{} ({})</code>\n🔹 Bugun qo‘shilgan foydalanuvchilar: <code>{}</code>"
+    "stat-text": "📈 <b>BOT STATISTIKASI:</b>\n\n🔹 Jami foydalanuvchilar: <code>{}</code>\n🔹 Faol foydalanuvchilar: <code>{} ({}%)</code>\n🔹 Jami konversiyalar: <code>{} ({})</code>\n🔹 Bugun qo‘shilgan foydalanuvchilar: <code>{}</code>",
+    "promo-links": "🔗 <b>Foydali Telegram botlar va linklar</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>"
 }

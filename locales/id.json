@@ -37,5 +37,6 @@
     "top-button": "🏆 Pengguna Teratas",
     "diamonds-button": "💎 Berlian",
     "help-text": "🆘 <b>Cara Menggunakan Bot</b>\n\n1️⃣ <b>Kirim file video</b> — Cukup unggah video Anda di sini.\n2️⃣ <b>Tunggu proses selesai</b> — Bot akan mengekstrak audio secara otomatis.\n3️⃣ <b>Unduh audio</b> — Anda akan menerima file audio yang siap disimpan atau dibagikan.\n\n💎 <b>Butuh lebih?</b> Gunakan berlian untuk konversi tanpa batas dan file besar.\n\nJika Anda memiliki pertanyaan atau butuh bantuan, silakan tanya!",
-    "stat-text": "📈 <b>Statistik Bot:</b>\n\n🔹 Total Pengguna: <code>{}</code>\n🔹 Pengguna Aktif: <code>{} ({}%)</code>\n🔹 Total Percakapan: <code>{} ({})</code>\n🔹 Pengguna Baru Hari Ini: <code>{}</code>"
+    "stat-text": "📈 <b>Statistik Bot:</b>\n\n🔹 Total Pengguna: <code>{}</code>\n🔹 Pengguna Aktif: <code>{} ({}%)</code>\n🔹 Total Percakapan: <code>{} ({})</code>\n🔹 Pengguna Baru Hari Ini: <code>{}</code>",
+    "promo-links": "🔗 <b>Bot dan tautan Telegram yang bermanfaat</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>"
 }
