@@ -16,7 +16,7 @@ from utils.i18n import i18n
 
 from config import settings
 
-MAX_FILE_SIZE = 150 * 1024 * 1024
+MAX_FILE_SIZE = 25 * 1024 * 1024
 DAILY_LIMIT = 5
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
