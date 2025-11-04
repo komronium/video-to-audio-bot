@@ -25,3 +25,14 @@ async def command_top(message: types.Message, db: AsyncSession):
         text += f"{EMOJIES[idx]}  <b>{user.name}</b> – {user.conversation_count}\n"
 
     await message.answer(text)
+
+
+@router.message(commands={"rank"})
+async def command_rank(message: types.Message, db: AsyncSession):
+    service = UserService(db)
+    user = await service.get_user(message.from_user.id)
+    if not user:
+        await message.answer("⚠️ You are not registered.")
+        return
+    rank = await service.get_user_rank(user.user_id)
+    await message.answer(f"🏅 Your rank: <b>#{rank}</b> — conversations: <code>{user.conversation_count}</code>")

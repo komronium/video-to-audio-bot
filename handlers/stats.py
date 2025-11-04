@@ -164,5 +164,13 @@ async def command_admin_stats(message: types.Message, db: AsyncSession):
         f"🔹 Stars (est.): <code>{stars_total}</code>  (diamonds: <code>{stars_from_diamonds}</code>, lifetime: <code>{stars_from_lifetime}</code>)"
     )
 
+    # Append Top 10 users by conversations
+    top_users = await service.get_top_users(limit=10)
+    if top_users:
+        text += "\n\n<b>Top 10 users</b>\n"
+        for idx, user in enumerate(top_users, start=1):
+            name = user.name or (f"@{user.username}" if user.username else str(user.user_id))
+            text += f"{idx}. {name} — <code>{user.conversation_count}</code>\n"
+
 
     await message.answer(text)
