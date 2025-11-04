@@ -22,8 +22,6 @@ async def notify_group(bot: Bot, user, db: AsyncSession):
         message = MESSAGE_TEMPLATE.format(
             name=user.name,
             username=user.username or 'N/A',
-            user_id=user.user_id,
-            joined=getattr(user, 'joined_at', ''),
             lang=lang,
             total=total,
         )
