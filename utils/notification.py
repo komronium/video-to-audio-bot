@@ -5,24 +5,18 @@ from config import settings
 
 MESSAGE_TEMPLATE = (
     "<b>New user!</b>\n"
-    "<b>Name:</b> {name}"
+    "<b>Name:</b> {name}\n"
     "<b>Username:</b> @{username}\n"
     "<b>Language:</b> <code>{lang}</code>\n"
-    "<b>Total users:</b> <code>{total}</code>"
 )
 
 
 async def notify_group(bot: Bot, user, lang: str, db: AsyncSession):
     try:
-        from services.user_service import UserService
-        service = UserService(db)
-        total = await service.total_users()
-
         message = MESSAGE_TEMPLATE.format(
             name=user.name,
             username=user.username or 'N/A',
             lang=lang,
-            total=total,
         )
         await bot.send_message(settings.GROUP_ID, message.strip())
     except Exception as e:
