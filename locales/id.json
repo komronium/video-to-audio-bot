@@ -21,7 +21,7 @@
     "queue": "⏳ Permintaan Anda dalam antrean. Mohon tunggu ...\nPosisi: <code>{} / {}</code>",
     "downloading": "Mengunduh ...",
     "converting": "Mengonversi ...",
-    "converted-by": "Dikonversi oleh @{}",
+    "converted-by": "via @{}",
     "profile": "👤 <b>Profil Anda:</b>\n\n🔹 ID Pengguna: <code>{}</code>\n🔹 Nama: <b>{}</b>\n🔹 Username: @{}\n🔹 Percakapan: <code>{}</code>\n🔹 Bergabung: <code>{}</code>\n🔹 Berlian: <code>{}</code>",
     "congrats": "<b>💎 Selamat!</b>\n{} berlian telah ditambahkan ke akun Anda.",
     "congrats-lifetime": "\uD83D\uDC8E Selamat! Kini Anda memiliki akses Premium Seumur Hidup.",

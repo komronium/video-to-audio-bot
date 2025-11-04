@@ -21,7 +21,7 @@
     "queue": "⏳ So‘rovingiz navbatda. Iltimos, kuting ...\nPozitsiya: <code>{} / {}</code>",
     "downloading": "Yuklanmoqda ...",
     "converting": "Konvertatsiya qilinmoqda ...",
-    "converted-by": "@{} tomonidan konvertatsiya qilindi",
+    "converted-by": "@{} orqali",
     "profile": "👤 <b>Sizning profilingiz:</b>\n\n🔹 Foydalanuvchi ID: <code>{}</code>\n🔹 Ism: <b>{}</b>\n🔹 Username: @{}\n🔹 Konversatsiyalar: <code>{}</code>\n🔹 Qo‘shilgan sana: <code>{}</code>\n🔹 Olmoslar: <code>{}</code>",
     "congrats": "<b>💎 Tabriklaymiz!</b>\n{} olmos hisobingizga qo‘shildi.",
     "congrats-lifetime": "💎 Tabriklaymiz! Endi sizda Doimiy Premium mavjud.",

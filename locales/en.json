@@ -21,7 +21,7 @@
     "queue": "⏳ Your request is in the queue. Please wait...\\nPosition: <code>{} / {}</code>",
     "downloading": "Downloading ...",
     "converting": "Converting ...",
-    "converted-by": "Converted by @{}",
+    "converted-by": "via @{}",
     "profile": "👤 <b>Your Profile:</b>\n\n🔹 User ID: <code>{}</code>\n🔹 Name: <b>{}</b>\n🔹 Username: @{}\n🔹 Conversations: <code>{}</code>\n🔹 Joined: <code>{}</code>\n\uD83D\uDD39 Diamonds: <code>{}</code>",
     "congrats": "<b>\uD83D\uDC8E Congratulations!</b>\\n{} diamonds have been added to your account.",
     "congrats-lifetime": "💎 Congratulations! You now have Lifetime Premium access.",
