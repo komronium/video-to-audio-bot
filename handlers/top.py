@@ -1,4 +1,5 @@
 from aiogram import types, Router, F
+from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
@@ -27,7 +28,7 @@ async def command_top(message: types.Message, db: AsyncSession):
     await message.answer(text)
 
 
-@router.message(commands={"rank"})
+@router.message(Command("rank"))
 async def command_rank(message: types.Message, db: AsyncSession):
     service = UserService(db)
     user = await service.get_user(message.from_user.id)
