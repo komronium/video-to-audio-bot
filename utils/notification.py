@@ -6,7 +6,7 @@ from config import settings
 MESSAGE_TEMPLATE = (
     "<b>New user!</b>\n"
     "<b>Name:</b> {name}"
-    "<b>Username:</b> @{username or 'N/A'}\n"
+    "<b>Username:</b> @{username}\n"
     "<b>Language:</b> <code>{lang}</code>\n"
     "<b>Total users:</b> <code>{total}</code>"
 )
