@@ -54,9 +54,12 @@ async def command_start(message: types.Message, db: AsyncSession):
             reply_markup=get_language_keyboard()
         )
 
-    # Funnel: start
-    today_str = datetime.today().strftime('%Y-%m-%d')
-    r.incr(f"metrics:funnel:{today_str}:start")
+    # Funnel: start (ignore Redis errors)
+    try:
+        today_str = datetime.today().strftime('%Y-%m-%d')
+        r.incr(f"metrics:funnel:{today_str}:start")
+    except Exception:
+        pass
 
     await message.reply(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
     return None
@@ -96,9 +99,12 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
     #     )
     #     return None
 
-    # Funnel: start (after language set)
-    today_str = datetime.today().strftime('%Y-%m-%d')
-    r.incr(f"metrics:funnel:{today_str}:start")
+    # Funnel: start (after language set) — ignore Redis errors
+    try:
+        today_str = datetime.today().strftime('%Y-%m-%d')
+        r.incr(f"metrics:funnel:{today_str}:start")
+    except Exception:
+        pass
 
     await call.message.answer(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
     return await call.message.delete()
