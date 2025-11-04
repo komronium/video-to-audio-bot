@@ -6,7 +6,7 @@ from sqlalchemy import func, select
 
 from config import settings
 from database.models import User
-from utils.notification import notify_group
+from utils.notification import notify_group, notify_milestone
 
 
 class UserService:
@@ -33,7 +33,10 @@ class UserService:
             self.db.add(user)
             await self.db.commit()
             await self.db.refresh(user)
-            await notify_group(bot, user)
+            await notify_group(bot, user, self.db)
+            # Milestone facts after user created
+            total = await self.total_users()
+            await notify_milestone(bot, total)
             return user
         except IntegrityError:
             await self.db.rollback()
@@ -154,3 +157,16 @@ class UserService:
                 langs[lang] += 1
 
         return langs
+
+    async def get_top_language(self):
+        """Return most popular language."""
+        stmt = (
+            select(User.lang, func.count(User.user_id).label('count'))
+            .where(User.lang.is_not(None))
+            .group_by(User.lang)
+            .order_by(func.count(User.user_id).desc())
+            .limit(1)
+        )
+        result = await self.db.execute(stmt)
+        row = result.first()
+        return row[0] if row else None
