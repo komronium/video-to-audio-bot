@@ -91,18 +91,6 @@ class UserService:
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def get_user_rank(self, user_id: int) -> int | None:
-        """Return 1-based rank by conversation_count. None if user not found."""
-        user = await self.get_user(user_id)
-        if not user:
-            return None
-
-        # Count users with strictly higher conversation_count
-        higher_stmt = select(func.count(User.user_id)).where(User.conversation_count > user.conversation_count)
-        result = await self.db.execute(higher_stmt)
-        higher = result.scalar() or 0
-        return higher + 1
-
     async def get_user_diamonds(self, user_id: int) -> int:
         user = await self.get_user(user_id)
         if user:

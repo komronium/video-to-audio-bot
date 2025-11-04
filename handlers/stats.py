@@ -1,6 +1,4 @@
 import asyncio
-from datetime import date, timedelta, datetime
-import redis
 import logging
 from collections import Counter
 
@@ -16,8 +14,6 @@ from sqlalchemy import func, select
 from database.models import User, Payment
 
 router = Router()
-
-r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 
 @dataclass
@@ -41,21 +37,15 @@ class Stats:
 
 
 def format_stats_message(stats: Stats, lang: str) -> str:
+    # Minimal, emoji-free layout (original)
     pct = max(0.0, min(100.0, stats.active_users_percentage))
-    title = i18n.get_text('stats-title', lang)
-    users_label = i18n.get_text('stats-users', lang)
-    active_label = i18n.get_text('stats-active', lang)
-    conv_label = i18n.get_text('stats-conversations', lang)
-    avg_label = i18n.get_text('stats-avg-per-active', lang)
-    new_today_label = i18n.get_text('stats-new-today', lang)
-
     return (
-        f"<b>{title}</b>\n\n"
-        f"🔹 {users_label}: <code>{stats.total_users}</code>\n"
-        f"🔹 {active_label}: <code>{stats.total_active_users}</code> (<code>{pct:.0f}%</code>)\n"
-        f"🔹 {conv_label}: <code>{stats.total_conversations}</code>\n"
-        f"🔹 {avg_label}: <code>{stats.avg_conversations}</code>\n"
-        f"🔹 {new_today_label}: <code>{stats.users_joined_today}</code>"
+        "<b>Statistics</b>\n\n"
+        f"🔹 Users: <code>{stats.total_users}</code>\n"
+        f"🔹 Active: <code>{stats.total_active_users}</code> (<code>{pct:.0f}%</code>)\n"
+        f"🔹 Conversations: <code>{stats.total_conversations}</code>\n"
+        f"🔹 Average per active: <code>{stats.avg_conversations}</code>\n"
+        f"🔹 New today: <code>{stats.users_joined_today}</code>"
     )
 
 
@@ -132,6 +122,7 @@ async def command_admin_stats(message: types.Message, db: AsyncSession):
     base = await service.get_stats()
 
     # Users joined last 7 days
+    from datetime import date, timedelta
     today = date.today()
     last_week = today - timedelta(days=6)
     joined_last_week_stmt = select(func.count(User.user_id)).where(User.joined_at >= last_week)
@@ -173,72 +164,5 @@ async def command_admin_stats(message: types.Message, db: AsyncSession):
         f"🔹 Stars (est.): <code>{stars_total}</code>  (diamonds: <code>{stars_from_diamonds}</code>, lifetime: <code>{stars_from_lifetime}</code>)"
     )
 
-    # ===== Activity metrics (DAU/WAU/MAU) and Retention =====
-    def active_users_on(day: date) -> set[int]:
-        dstr = day.strftime('%Y-%m-%d')
-        # Keys like user:{user_id}:{YYYY-MM-DD}
-        active_ids: set[int] = set()
-        cursor = '0'
-        pattern = f"user:*:{dstr}"
-        while True:
-            cursor, keys = r.scan(cursor=cursor, match=pattern, count=1000)
-            for k in keys:
-                try:
-                    parts = k.split(':')
-                    active_ids.add(int(parts[1]))
-                except Exception:
-                    continue
-            if cursor == '0':
-                break
-        return active_ids
-
-    today_set = active_users_on(today)
-    dau = len(today_set)
-
-    def union_over(days: int) -> set[int]:
-        s: set[int] = set()
-        for i in range(days):
-            s |= active_users_on(today - timedelta(days=i))
-        return s
-
-    wau = len(union_over(7))
-    mau = len(union_over(30))
-
-    # Retention: among today's actives, what % also active 1/7/30 days ago
-    def retention_pct(diff_days: int) -> float:
-        if not today_set:
-            return 0.0
-        past = active_users_on(today - timedelta(days=diff_days))
-        return round(100.0 * len(today_set & past) / len(today_set), 1)
-
-    r1 = retention_pct(1)
-    r7 = retention_pct(7)
-    r30 = retention_pct(30)
-
-    text += (
-        "\n\n<b>Activity</b>\n"
-        f"DAU: <code>{dau}</code> | WAU: <code>{wau}</code> | MAU: <code>{mau}</code>\n"
-        f"Retention — 1d: <code>{r1}%</code> | 7d: <code>{r7}%</code> | 30d: <code>{r30}%</code>"
-    )
-
-    # ===== Funnel (Start → Upload → Convert → Download) =====
-    dstr = today.strftime('%Y-%m-%d')
-    start_cnt = int(r.get(f"metrics:funnel:{dstr}:start") or 0)
-    upload_cnt = int(r.get(f"metrics:funnel:{dstr}:upload") or 0)
-    convert_cnt = int(r.get(f"metrics:funnel:{dstr}:convert") or 0)
-    download_cnt = int(r.get(f"metrics:funnel:{dstr}:download") or 0)
-
-    text += (
-        "\n\n<b>Funnel (today)</b>\n"
-        f"Start: <code>{start_cnt}</code> → Upload: <code>{upload_cnt}</code> → Convert: <code>{convert_cnt}</code> → Download: <code>{download_cnt}</code>"
-    )
-
-    # Append Top 10 users by conversations
-    top_users = await service.get_top_users(limit=10)
-    if top_users:
-        text += "\n\n<b>Top 10 users</b>\n"
-        for idx, user in enumerate(top_users, start=1):
-            name = user.name or (f"@{user.username}" if user.username else str(user.user_id))
-            text += f"{idx}. {name} — <code>{user.conversation_count}</code>\n"
 
     await message.answer(text)

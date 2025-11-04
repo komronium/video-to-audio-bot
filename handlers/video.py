@@ -57,10 +57,6 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     is_lifetime = await user_service.is_lifetime(user.id)
 
     video = message.video if not document else document
-    # Funnel: upload
-    today_str = datetime.today().strftime('%Y-%m-%d')
-    r.incr(f"metrics:funnel:{today_str}:upload")
-    file_unique_id = video.file_unique_id
     if video.file_size > MAX_FILE_SIZE:
         if not is_lifetime and user.diamonds <= 0:
             await message.bot.send_chat_action(message.chat.id, 'typing')
@@ -80,23 +76,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
     user_id = message.from_user.id
 
-    # Reuse cache if same file was processed before
-    cache_key = f"cache:{file_unique_id}"
-    cached_path = r.get(cache_key)
-    if cached_path and os.path.exists(cached_path):
-        audio_file = FSInputFile(path=cached_path)
-        bot = await message.bot.get_me()
-        await UserService(db).add_conversation(message.from_user.id)
-        await message.reply_document(audio_file, caption=i18n.get_text('converted-by', lang).format(bot.username))
-        # increment daily counter
-        today = datetime.today().strftime('%Y-%m-%d')
-        key = f'user:{user_id}:{today}'
-        if not r.exists(key):
-            r.set(key, 1)
-            r.expire(key, 86400)
-        else:
-            r.incr(key)
-        return
+    
     today = datetime.today().strftime('%Y-%m-%d')
     key = f'user:{user_id}:{today}'
 
@@ -149,7 +129,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     if queue_message:
         await queue_message.delete()
 
-    await process_video(message, db, video, lang, file_unique_id)
+    await process_video(message, db, video, lang)
 
 
 @router.message(F.document.mime_type.startswith('video'))
@@ -157,7 +137,7 @@ async def document_handler(message: Message, db: AsyncSession):
     await video_handler(message, db, message.document)
 
 
-async def process_video(message: Message, db: AsyncSession, video, lang: str, file_unique_id: str):
+async def process_video(message: Message, db: AsyncSession, video, lang: str):
     user_id = message.from_user.id
     processing_msg = await message.reply(i18n.get_text('downloading', lang))
 
@@ -171,12 +151,9 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str, fi
         await processing_msg.edit_text(i18n.get_text('converting', lang))
 
         audio_path = await VideoConverter().convert_video_to_audio(video_path, f'audios/{file_name}')
-        # Funnel: convert attempt
-        today_str = datetime.today().strftime('%Y-%m-%d')
-        r.incr(f"metrics:funnel:{today_str}:convert")
 
         if type(audio_path) is dict:
-            await processing_msg.edit_text(i18n.get_text('error-server', lang))
+            await processing_msg.edit_text("❌ Error. Please try again later!")
             await message.bot.send_message(settings.ADMIN_ID, f"<b>❌ Video converting ERROR</b>\n"
                                                               f"<blockquote>{audio_path['message']}</blockquote>\n")
             return
@@ -187,15 +164,10 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str, fi
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
         await message.reply_document(audio_file, caption=i18n.get_text('converted-by', lang).format(bot.username))
-        # Funnel: download
-        r.incr(f"metrics:funnel:{today_str}:download")
 
         await message.answer(i18n.get_text('promo-links', lang))
 
-        # Save cache mapping for future reuse (30 days)
-        cache_key = f"cache:{file_unique_id}"
-        r.set(cache_key, audio_path)
-        r.expire(cache_key, 30 * 86400)
+        
 
         today = datetime.today().strftime('%Y-%m-%d')
         key = f'user:{user_id}:{today}'
@@ -209,4 +181,5 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str, fi
         queue_manager.remove_from_queue(user_id, video.file_id, timestamp)
 
         os.remove(video_path)
-        # Keep produced audio on disk for caching/reuse
+        if audio_path and os.path.exists(audio_path):
+            os.remove(audio_path)
