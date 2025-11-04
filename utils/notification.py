@@ -12,12 +12,11 @@ MESSAGE_TEMPLATE = (
 )
 
 
-async def notify_group(bot: Bot, user, db: AsyncSession):
+async def notify_group(bot: Bot, user, lang: str, db: AsyncSession):
     try:
         from services.user_service import UserService
         service = UserService(db)
         total = await service.total_users()
-        lang = getattr(user, 'lang', None) or '—'
 
         message = MESSAGE_TEMPLATE.format(
             name=user.name,

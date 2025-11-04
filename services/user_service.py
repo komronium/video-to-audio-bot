@@ -27,13 +27,13 @@ class UserService:
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def add_user(self, user_id: int, username: str, name: str, bot: Bot):
+    async def add_user(self, user_id: int, username: str, name: str, lang: str, bot: Bot):
         try:
             user = User(user_id=user_id, username=username, name=name)
             self.db.add(user)
             await self.db.commit()
             await self.db.refresh(user)
-            await notify_group(bot, user, self.db)
+            await notify_group(bot, user, lang, self.db)
             # Milestone facts after user created
             total = await self.total_users()
             await notify_milestone(bot, total)
