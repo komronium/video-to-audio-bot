@@ -1,4 +1,6 @@
 import logging
+from datetime import datetime
+import redis
 
 from aiogram import types, Router, F, Bot
 from aiogram.exceptions import TelegramAPIError
@@ -12,6 +14,8 @@ from services.user_service import UserService
 from utils.i18n import i18n
 
 router = Router()
+
+r = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
 
 def get_language_keyboard():
@@ -50,6 +54,10 @@ async def command_start(message: types.Message, db: AsyncSession):
             reply_markup=get_language_keyboard()
         )
 
+    # Funnel: start
+    today_str = datetime.today().strftime('%Y-%m-%d')
+    r.incr(f"metrics:funnel:{today_str}:start")
+
     await message.reply(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
     return None
 
@@ -87,6 +95,10 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
     #         reply_markup=subscription_keyboard(lang)
     #     )
     #     return None
+
+    # Funnel: start (after language set)
+    today_str = datetime.today().strftime('%Y-%m-%d')
+    r.incr(f"metrics:funnel:{today_str}:start")
 
     await call.message.answer(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
     return await call.message.delete()

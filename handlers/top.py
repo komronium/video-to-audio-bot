@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from services.user_service import UserService
 from utils.i18n import i18n
 
-EMOJIES = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+EMOJIES = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 
 router = Router()
 
@@ -22,6 +22,7 @@ async def command_top(message: types.Message, db: AsyncSession):
 
     text = "🏆 <b>TOP 10 MOST ACTIVE USERS:</b>\n\n"
     for idx, user in enumerate(top_users):
-        text += f"{EMOJIES[idx]}  <b>{user.name}</b> – {user.conversation_count}\n"
+        display = user.name or (f"@{user.username}" if user.username else str(user.user_id))
+        text += f"{EMOJIES[idx]}  <b>{display}</b> — <code>{user.conversation_count}</code>\n"
 
     await message.answer(text)

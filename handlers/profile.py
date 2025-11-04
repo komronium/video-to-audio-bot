@@ -22,6 +22,12 @@ async def profile_handler(message: types.Message, db: AsyncSession):
 
     diamonds = user.diamonds
 
+    badge = ''
+    rank = await user_service.get_user_rank(message.from_user.id)
+    if rank and rank <= 10:
+        # 🏅 Top User badge with rank number
+        badge = f"\n🏅 Top User — #{rank}"
+
     text = i18n.get_text('profile', lang).format(
         user.user_id,
         user.name,
@@ -31,4 +37,4 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         diamonds if diamonds < 99999 else '♾️',
     )
 
-    return await message.answer(text.strip())
+    return await message.answer((text.strip() + badge))
