@@ -58,7 +58,7 @@ async def admin_restart_bot(message: types.Message):
     await message.answer("Restarting service…")
     try:
         proc = await asyncio.create_subprocess_shell(
-            "sudo systemctl restart video-to-aduio-bot",
+            "sudo systemctl restart video-to-audio-bot",
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )
