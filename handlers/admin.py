@@ -1,5 +1,4 @@
-from aiogram import types, Router, F
-from aiogram.filters import Command
+from aiogram import types, Router, F, Bot
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from sqlalchemy.ext.asyncio import AsyncSession
 import asyncio
@@ -19,18 +18,14 @@ def get_admin_keyboard(lang: str) -> ReplyKeyboardMarkup:
             KeyboardButton(text="🔁 Restart bot"),
         ],
         [
+            KeyboardButton(text="🌍 Languages"),
+            KeyboardButton(text="📈 Default langs"),
+        ],
+        [
             KeyboardButton(text="⬅️ Back"),
         ],
     ]
     return ReplyKeyboardMarkup(keyboard=keyboard, resize_keyboard=True)
-
-
-@router.message(Command('admin'))
-async def admin_menu_cmd(message: types.Message, db: AsyncSession):
-    if message.from_user.id != settings.ADMIN_ID:
-        return
-    lang = await UserService(db).get_lang(message.from_user.id)
-    await message.answer("Admin menu:", reply_markup=get_admin_keyboard(lang))
 
 
 @router.message(F.text == "Admin")
@@ -45,10 +40,9 @@ async def admin_menu_btn(message: types.Message, db: AsyncSession):
 async def admin_extended_stats(message: types.Message, db: AsyncSession):
     if message.from_user.id != settings.ADMIN_ID:
         return
-    # Reuse existing /adminstats logic by invoking the command handler via message bot API
-    # Alternatively, import and call the function. We'll send the command text to keep it simple.
-    await message.bot.delete_message(message.chat.id, message.message_id) if message.chat.type in ("private", "group", "supergroup") else None
-    await message.answer("/adminstats")
+    # Call internal admin stats logic directly
+    from .stats import adminstats_internal
+    await adminstats_internal(message, db)
 
 
 @router.message(F.text == "🔁 Restart bot")
@@ -70,6 +64,22 @@ async def admin_restart_bot(message: types.Message):
             await message.answer(f"❌ Failed to restart: <code>{err}</code>")
     except Exception as e:
         await message.answer(f"❌ Exception: <code>{e}</code>")
+
+
+@router.message(F.text == "🌍 Languages")
+async def admin_languages(message: types.Message, db: AsyncSession):
+    if message.from_user.id != settings.ADMIN_ID:
+        return
+    from .stats import langs_internal
+    await langs_internal(message, db)
+
+
+@router.message(F.text == "📈 Default langs")
+async def admin_default_langs(message: types.Message, db: AsyncSession, bot: Bot):
+    if message.from_user.id != settings.ADMIN_ID:
+        return
+    from .stats import deflangs_internal
+    await deflangs_internal(message, db, bot)
 
 
 @router.message(F.text.in_(["⬅️ Back"]))

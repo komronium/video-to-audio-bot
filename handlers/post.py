@@ -23,8 +23,7 @@ def get_post_creation_keyboard():
     return keyboard
 
 
-@router.message(Command('post'))
-async def create_post(message: types.Message, state: FSMContext):
+async def create_post_internal(message: types.Message, state: FSMContext):
     if message.from_user.id == settings.ADMIN_ID:
         await message.reply(
             "Please send the post content you want to share with subscribers.",
@@ -34,8 +33,7 @@ async def create_post(message: types.Message, state: FSMContext):
         return
 
 
-@router.message(Command('postlang'))
-async def post_diamonds(message: types.Message, db: AsyncSession, bot: Bot):
+async def postlang_internal(message: types.Message, db: AsyncSession, bot: Bot):
     if message.from_user.id == settings.ADMIN_ID:
         user_service = UserService(db)
         users = await user_service.get_all_users(exclude_admin=True)

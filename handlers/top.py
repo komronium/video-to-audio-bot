@@ -28,8 +28,7 @@ async def command_top(message: types.Message, db: AsyncSession):
     await message.answer(text)
 
 
-@router.message(Command("rank"))
-async def command_rank(message: types.Message, db: AsyncSession):
+async def rank_internal(message: types.Message, db: AsyncSession):
     service = UserService(db)
     user = await service.get_user(message.from_user.id)
     if not user:

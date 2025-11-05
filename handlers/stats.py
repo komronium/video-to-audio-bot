@@ -66,8 +66,7 @@ async def command_stats(message: types.Message, db: AsyncSession):
         raise
 
 
-@router.message(Command('langs'))
-async def command_stats(message: types.Message, db: AsyncSession):
+async def langs_internal(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     langs = await user_service.get_langs()
 
@@ -81,8 +80,7 @@ async def command_stats(message: types.Message, db: AsyncSession):
     await message.answer(text)
 
 
-@router.message(Command('deflangs'))
-async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
+async def deflangs_internal(message: types.Message, db: AsyncSession, bot: Bot):
     service = UserService(db)
     users = await service.get_all_users()
     langs = dict()
@@ -112,8 +110,7 @@ async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
     await message.answer(text)
 
 
-@router.message(Command('adminstats'))
-async def command_admin_stats(message: types.Message, db: AsyncSession):
+async def adminstats_internal(message: types.Message, db: AsyncSession):
     if message.from_user.id != settings.ADMIN_ID:
         return
 
