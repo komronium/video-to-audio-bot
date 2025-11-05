@@ -18,6 +18,7 @@ def get_admin_keyboard(lang: str) -> ReplyKeyboardMarkup:
             KeyboardButton(text="🔁 Restart bot"),
         ],
         [
+            KeyboardButton(text="⬇️ Update bot"),
             KeyboardButton(text="🌍 Languages"),
             KeyboardButton(text="📈 Default langs"),
         ],
@@ -62,6 +63,35 @@ async def admin_restart_bot(message: types.Message):
         else:
             err = stderr.decode().strip() or stdout.decode().strip() or "Unknown error"
             await message.answer(f"❌ Failed to restart: <code>{err}</code>")
+    except Exception as e:
+        await message.answer(f"❌ Exception: <code>{e}</code>")
+
+
+@router.message(F.text == "⬇️ Update bot")
+async def admin_update_bot(message: types.Message):
+    if message.from_user.id != settings.ADMIN_ID:
+        return
+    await message.answer("Updating bot…")
+    try:
+        # Pull latest code, reload systemd units, and restart the service
+        cmd = (
+            "git pull --rebase --autostash && "
+            "sudo systemctl daemon-reload && "
+            "sudo systemctl restart video-to-audio-bot"
+        )
+        proc = await asyncio.create_subprocess_shell(
+            cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        stdout, stderr = await proc.communicate()
+        if proc.returncode in [0, -15]:
+            out = stdout.decode().strip()
+            msg = "✅ Updated and restarted.\n" + (f"<code>{out}</code>" if out else "")
+            await message.answer(msg)
+        else:
+            err = stderr.decode().strip() or stdout.decode().strip() or "Unknown error"
+            await message.answer(f"❌ Update failed: <code>{err}</code>")
     except Exception as e:
         await message.answer(f"❌ Exception: <code>{e}</code>")
 
