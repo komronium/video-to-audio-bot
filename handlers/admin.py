@@ -63,11 +63,11 @@ async def admin_restart_bot(message: types.Message):
             stderr=asyncio.subprocess.PIPE,
         )
         stdout, stderr = await proc.communicate()
-        if proc.returncode == 0:
+        if proc.returncode in [0, -15]:
             await message.answer("✅ Bot restart command sent.")
         else:
             err = stderr.decode().strip() or stdout.decode().strip() or "Unknown error"
-            await message.answer(f"❌ Failed to restart: <code>{err} {proc.returncode} {stdout.decode().strip()} {stderr.decode().strip()}</code>")
+            await message.answer(f"❌ Failed to restart: <code>{err}</code>")
     except Exception as e:
         await message.answer(f"❌ Exception: <code>{e}</code>")
 
