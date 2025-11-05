@@ -27,9 +27,6 @@ def get_menu_keyboard(lang: str, is_admin: bool = False):
     rows = [
         [
             types.KeyboardButton(text=i18n.get_text('lang-button', lang)),
-            types.KeyboardButton(text=i18n.get_text('help-button', lang))
-        ],
-        [
             types.KeyboardButton(text=i18n.get_text('stats-button', lang)),
             types.KeyboardButton(text=i18n.get_text('profile-button', lang))
         ],
