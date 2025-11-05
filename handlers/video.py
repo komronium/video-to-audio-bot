@@ -107,7 +107,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
     if queue_position > 1:
         queue_message = await message.reply(
-            i18n.get_text('extra-used', lang).format(queue_position, query_length)
+            i18n.get_text('queue', lang).format(queue_position, query_length)
         )
         queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
         query_length = queue_manager.queue_length()
@@ -116,7 +116,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     while queue_position > 1:
         try:
             await queue_message.edit_text(
-                i18n.get_text('extra-used', lang).format(queue_position, query_length)
+                i18n.get_text('queue', lang).format(queue_position, query_length)
             )
             await asyncio.sleep(1)
             queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)

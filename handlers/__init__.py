@@ -1,6 +1,6 @@
 from aiogram import Dispatcher
 
-from . import start, help, stats, top, profile, subscription, video, post, youtube, error, diamonds
+from . import start, help, stats, top, profile, subscription, video, post, youtube, error, diamonds, admin
 
 
 def setup_handlers(dp: Dispatcher):
@@ -15,3 +15,4 @@ def setup_handlers(dp: Dispatcher):
     dp.include_router(youtube.router)
     dp.include_router(error.router)
     dp.include_router(diamonds.router)
+    dp.include_router(admin.router)
