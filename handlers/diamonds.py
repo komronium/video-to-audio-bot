@@ -3,6 +3,7 @@ from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
+from html import escape
 
 from config import settings
 from database.session import get_db
@@ -89,27 +90,32 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
     user_id = message.from_user.id
     user_service = UserService(db)
     lang = await user_service.get_lang(message.from_user.id)
+    user = await user_service.get_user(user_id)
 
     payload = message.successful_payment.invoice_payload
     amount = message.successful_payment.total_amount
 
     if payload == "channel_support":
-        diamonds = amount * settings.DIAMONDS_PRICE
+        diamonds = amount // settings.DIAMONDS_PRICE
 
         if diamonds > 0:
             await user_service.add_diamonds(user_id, diamonds)
+            new_balance = await user_service.get_user_diamonds(user_id)
             await message.answer(
                 i18n.get_text('congrats', lang).format(diamonds)
             )
-            user = message.from_user
-            mention = f'<a href="tg://user?id={user.id}">{user.full_name}</a>'
+            display_name = escape(
+                (user.name if user and user.name else message.from_user.full_name) or "User"
+            )
+            mention = f'<a href="tg://user?id={user_id}">{display_name}</a>'
             await bot.send_message(
                 settings.GROUP_ID,
                 (
-                    f"💎 <b>Diamonds Purchased</b>\n"
+                    "💎 <b>DIAMOND DROP!</b>\n"
                     f"👤 {mention}\n"
-                    f"✨ Diamonds: <b>{diamonds}</b>\n"
-                    f"⭐️ Stars spent: <b>{amount}</b>"
+                    f"✨ Purchased: <b>{diamonds}</b> diamonds\n"
+                    f"⭐️ Stars spent: <b>{amount}</b>\n"
+                    f"💠 New balance: <b>{new_balance}</b>"
                 )
             )
         else:
@@ -117,12 +123,14 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
 
     elif payload == "channel_support_lifetime":
         await user_service.set_lifetime(user_id)
-        user = message.from_user
-        mention = f'<a href=\"tg://user?id={user.id}\">{user.full_name}</a>'
+        display_name = escape(
+            (user.name if user and user.name else message.from_user.full_name) or "User"
+        )
+        mention = f'<a href="tg://user?id={user_id}">{display_name}</a>'
         await bot.send_message(
             settings.GROUP_ID,
             (
-                f"👑 <b>Lifetime Premium Activated</b>\n"
+                "👑 <b>LIFETIME PREMIUM UNLOCKED!</b>\n"
                 f"👤 {mention}\n"
                 f"⭐️ Stars spent: <b>{settings.LIFETIME_PREMIUM_PRICE}</b>"
             )

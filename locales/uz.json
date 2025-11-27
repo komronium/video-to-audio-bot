@@ -18,7 +18,7 @@
     "large-used": "<b>\uD83D\uDC8E Katta fayl yuklash uchun 1 olmos ishlatildi.</b>",
     "daily-limit": "<b>Kundalik limitdan o‘tdingiz!</b>\nSiz kunlik bepul suhbatlaringizdan foydalandingiz.\n\nQo‘shimcha suhbat uchun olmos ishlatishingiz mumkin, quyida sotib oling.",
     "extra-used": "<b>\uD83D\uDC8E Qo‘shimcha suhbat uchun 1 olmos ishlatildi.</b>",
-    "queue": "⏳ So‘rovingiz navbatda. Iltimos, kuting ...\nPozitsiya: <code>{} / {}</code>",
+    "queue": "⏳ <b>So‘rovingiz navbatda. Iltimos, kuting...</b>\n<b>Pozitsiya:</b> <code>{} / {}</code>",
     "downloading": "Yuklanmoqda ...",
     "converting": "Konvertatsiya qilinmoqda ...",
     "converted-by": "@{} orqali",

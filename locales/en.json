@@ -18,7 +18,7 @@
     "large-used": "<b>\uD83D\uDC8E 1 diamond used for large file upload.</b>",
     "daily-limit":  "<b>Daily limit reached!</b>\nYou’ve reached today’s free usage limit.\\nUse a diamond for more, or buy extra below.",
     "extra-used": "<b>\uD83D\uDC8E 1 diamond used for extra conversation.</b>",
-    "queue": "⏳ Your request is in the queue. Please wait...\\nPosition: <code>{} / {}</code>",
+    "queue": "⏳ <b>Your request is in the queue. Please wait...</b>\\n<b>Position:</b> <code>{} / {}</code>",
     "downloading": "Downloading ...",
     "converting": "Converting ...",
     "converted-by": "via @{}",
