@@ -12,6 +12,7 @@ router = Router()
 
 
 BTN_STATS_EXTENDED = "📊 Stats+"
+BTN_CHARTS = "📈 Charts"
 BTN_RESTART = "🔁 Restart"
 BTN_UPDATE = "⬇️ Update"
 BTN_LANGS = "🌍 Langs"
@@ -37,6 +38,7 @@ def get_admin_keyboard(lang: str) -> ReplyKeyboardMarkup:
     keyboard = [
         [
             KeyboardButton(text=BTN_STATS_EXTENDED),
+            KeyboardButton(text=BTN_CHARTS),
             KeyboardButton(text=BTN_RESTART),
         ],
         [
@@ -75,6 +77,15 @@ async def admin_extended_stats(message: types.Message, db: AsyncSession):
     # Call internal admin stats logic directly
     from .stats import adminstats_internal
     await adminstats_internal(message, db)
+
+
+@router.message(F.text == BTN_CHARTS)
+async def admin_charts_btn(message: types.Message, db: AsyncSession, bot: Bot):
+    if not is_admin(message.from_user.id):
+        return
+    # Call internal charts sending logic
+    from .stats import charts_internal
+    await charts_internal(message, db, bot)
 
 
 @router.message(F.text == BTN_RESTART)

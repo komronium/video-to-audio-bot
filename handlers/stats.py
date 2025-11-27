@@ -15,6 +15,7 @@ from sqlalchemy import func, select
 from database.models import User, Payment
 from services.stats_service import joins_per_days, create_join_chart_image
 from aiogram.types import InputFile
+import traceback
 
 router = Router()
 
@@ -111,7 +112,19 @@ async def deflangs_internal(message: types.Message, db: AsyncSession, bot: Bot):
         text += f"<code>{lang} | {count}</code>\n"
 
     await message.answer(text)
-    # Generate and send charts for admin: 7-day and 30-day new users
+    # Charts are sent by a separate handler/button to avoid blocking
+    pass
+
+
+async def charts_internal(message: types.Message, db: AsyncSession, bot: Bot):
+    """Generate and send charts (7d and 30d) to the admin who requested them.
+
+    On error, send the full traceback to the admin's Telegram (settings.ADMIN_ID)
+    so they can see exactly what failed.
+    """
+    if message.from_user.id != settings.ADMIN_ID:
+        return
+
     try:
         dates7, vals7 = await joins_per_days(db, 7)
         buf7 = create_join_chart_image(dates7, vals7, title="New users — last 7 days")
@@ -120,8 +133,20 @@ async def deflangs_internal(message: types.Message, db: AsyncSession, bot: Bot):
         dates30, vals30 = await joins_per_days(db, 30)
         buf30 = create_join_chart_image(dates30, vals30, title="New users — last 30 days")
         await message.answer_photo(photo=InputFile(buf30, filename="joins_30d.png"), caption="New users — last 30 days")
-    except Exception as e:
-        logging.debug(f"Chart generation skipped or failed: {e}")
+    except Exception:
+        tb = traceback.format_exc()
+        logging.exception("Chart generation failed")
+        # Try to notify admin with exact traceback
+        try:
+            await bot.send_message(settings.ADMIN_ID, f"❌ Chart generation error:\n<pre>{tb}</pre>", parse_mode="HTML")
+        except Exception:
+            # If sending to admin fails, log it — nothing else we can do here
+            logging.exception("Failed to send chart error traceback to admin")
+        # Notify the user who pressed the button (admin) in short form
+        try:
+            await message.answer('❌ Chart generation failed. Admin has been notified with details.')
+        except Exception:
+            pass
 
 
 async def adminstats_internal(message: types.Message, db: AsyncSession):
