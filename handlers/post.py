@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from handlers.start import get_language_keyboard
-from handlers.video import get_buy_more_keyboard
 from services.user_service import UserService
 from states.post import PostStates
 from utils.i18n import i18n

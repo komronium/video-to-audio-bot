@@ -61,7 +61,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         if not is_lifetime and user.diamonds <= 0:
             await message.bot.send_chat_action(message.chat.id, 'typing')
             await message.reply(
-                i18n.get_text('buy-extra', lang),
+                i18n.get_text('too-large', lang),
                 reply_markup=get_buy_more_keyboard(lang)
             )
             return
@@ -107,7 +107,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
     if queue_position > 1:
         queue_message = await message.reply(
-            i18n.get_text('extra-used', lang).format(queue_position, query_length)
+            i18n.get_text('queue', lang).format(queue_position, query_length)
         )
         queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
         query_length = queue_manager.queue_length()
@@ -116,7 +116,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     while queue_position > 1:
         try:
             await queue_message.edit_text(
-                i18n.get_text('extra-used', lang).format(queue_position, query_length)
+                i18n.get_text('queue', lang).format(queue_position, query_length)
             )
             await asyncio.sleep(1)
             queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
@@ -164,9 +164,6 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
         await message.reply_document(audio_file, caption=i18n.get_text('converted-by', lang).format(bot.username))
-
-        await message.answer('<b>⭐️ Exchange Telegram Stars to TON / USDT</b>\n'
-                             '⭐️ <a href="https://t.me/TelegStarsWalletBot?start=_tgr_eaqwdbsxZTU6"><b>Click here</b></a>')
 
         today = datetime.today().strftime('%Y-%m-%d')
         key = f'user:{user_id}:{today}'

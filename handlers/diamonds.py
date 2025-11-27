@@ -1,4 +1,4 @@
-from aiogram import Router, F, Bot, types
+from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from database.session import get_db
-from handlers.video import get_buy_more_keyboard
 from services.user_service import UserService
 from utils.i18n import i18n
 
