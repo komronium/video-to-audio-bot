@@ -112,7 +112,9 @@ class UserService:
         return 0
 
     async def use_diamond(self, user_id: int) -> bool:
-        """Diamonddan foydalanish (1 dona - universal)"""
+        if await self.is_lifetime(user_id):
+            return True
+        
         user = await self.get_user(user_id)
         if user and user.diamonds > 0:
             user.diamonds -= 1
