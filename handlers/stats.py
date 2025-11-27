@@ -145,8 +145,21 @@ async def charts_internal(message: types.Message, db: AsyncSession, bot: Bot):
                 f30.write(buf30.getvalue())
                 tmp30 = f30.name
 
-            await message.answer_photo(photo=InputFile(tmp7), caption="New users — last 7 days")
-            await message.answer_photo(photo=InputFile(tmp30), caption="New users — last 30 days")
+            # Use bot.send_photo with open file objects to avoid InputFile instantiation issues
+            f7 = open(tmp7, 'rb')
+            f30 = open(tmp30, 'rb')
+            try:
+                await bot.send_photo(chat_id=message.chat.id, photo=f7, caption="New users — last 7 days")
+                await bot.send_photo(chat_id=message.chat.id, photo=f30, caption="New users — last 30 days")
+            finally:
+                try:
+                    f7.close()
+                except Exception:
+                    pass
+                try:
+                    f30.close()
+                except Exception:
+                    pass
         finally:
             for p in (tmp7, tmp30):
                 try:
