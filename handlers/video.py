@@ -105,9 +105,21 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     query_length = queue_manager.queue_length()
     queue_message = None
 
+    def format_queue_message(pos: int, total: int, anim: str = "⏳") -> str:
+        """Format queue message with progress bar and animation"""
+        if total == 0:
+            total = 1
+        progress = max(0, min(100, int((total - pos + 1) / total * 100)))
+        filled = int(progress / 10)
+        bar = "█" * filled + "░" * (10 - filled)
+        return i18n.get_text('queue', lang).format(anim, pos, total, progress, bar)
+
+    animations = ["⏳", "🔄"]
+    anim_index = 0
+    
     if queue_position > 1:
         queue_message = await message.reply(
-            i18n.get_text('queue', lang).format(queue_position, query_length)
+            format_queue_message(queue_position, query_length, animations[anim_index])
         )
         queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)
         query_length = queue_manager.queue_length()
@@ -115,8 +127,9 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
     while queue_position > 1:
         try:
+            anim_index = (anim_index + 1) % len(animations)
             await queue_message.edit_text(
-                i18n.get_text('queue', lang).format(queue_position, query_length)
+                format_queue_message(queue_position, query_length, animations[anim_index])
             )
             await asyncio.sleep(1)
             queue_position = queue_manager.get_queue_position(user_id, video.file_id, timestamp)

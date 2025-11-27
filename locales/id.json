@@ -18,7 +18,7 @@
     "large-used": "<b>\uD83D\uDC8E 1 berlian digunakan untuk unggahan berkas besar.</b>",
     "daily-limit":  "<b>Batas harian tercapai!</b>\nAnda telah menggunakan percakapan gratis harian Anda.\n\nAnda dapat menggunakan berlian untuk membuka percakapan ekstra, beli di bawah.",
     "extra-used": "<b>\uD83D\uDC8E 1 berlian digunakan untuk percakapan ekstra.</b>",
-    "queue": "⏳ <b>Permintaan Anda sedang dalam antrean. Mohon tunggu...</b>\n<b>Posisi:</b> <code>{} / {}</code>",
+    "queue": "{} <b>Memproses dalam antrean...</b>\n\n📊 <b>Posisi:</b> <code>{} / {}</code>\n📈 <b>Kemajuan:</b> <code>{}%</code>\n\n<code>{}</code>",
     "downloading": "Mengunduh ...",
     "converting": "Mengonversi ...",
     "converted-by": "via @{}",
