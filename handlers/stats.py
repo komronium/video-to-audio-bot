@@ -15,6 +15,8 @@ from sqlalchemy import func, select
 from database.models import User, Payment
 from services.stats_service import joins_per_days, create_join_chart_image
 from aiogram.types import InputFile
+import tempfile
+import os
 import traceback
 
 router = Router()
@@ -128,11 +130,30 @@ async def charts_internal(message: types.Message, db: AsyncSession, bot: Bot):
     try:
         dates7, vals7 = await joins_per_days(db, 7)
         buf7 = create_join_chart_image(dates7, vals7, title="New users — last 7 days")
-        await message.answer_photo(photo=InputFile(buf7, filename="joins_7d.png"), caption="New users — last 7 days")
-
         dates30, vals30 = await joins_per_days(db, 30)
         buf30 = create_join_chart_image(dates30, vals30, title="New users — last 30 days")
-        await message.answer_photo(photo=InputFile(buf30, filename="joins_30d.png"), caption="New users — last 30 days")
+
+        # Write buffers to temporary files because aiogram's InputFile expects a file path
+        tmp7 = None
+        tmp30 = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as f7:
+                f7.write(buf7.getvalue())
+                tmp7 = f7.name
+
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as f30:
+                f30.write(buf30.getvalue())
+                tmp30 = f30.name
+
+            await message.answer_photo(photo=InputFile(tmp7), caption="New users — last 7 days")
+            await message.answer_photo(photo=InputFile(tmp30), caption="New users — last 30 days")
+        finally:
+            for p in (tmp7, tmp30):
+                try:
+                    if p and os.path.exists(p):
+                        os.unlink(p)
+                except Exception:
+                    logging.exception("Failed to delete temp chart file %s", p)
     except Exception:
         tb = traceback.format_exc()
         logging.exception("Chart generation failed")
