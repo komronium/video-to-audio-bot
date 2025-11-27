@@ -152,10 +152,19 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
 
         audio_path = await VideoConverter().convert_video_to_audio(video_path, f'audios/{file_name}')
 
-        if type(audio_path) is dict:
+        if isinstance(audio_path, dict):
+            # Specific case: video has no audio track
+            if audio_path.get('code') == 'NO_AUDIO':
+                await processing_msg.edit_text(i18n.get_text('no-audio', lang))
+                return
+
+            # Generic error – notify user and admin
             await processing_msg.edit_text("❌ Error. Please try again later!")
-            await message.bot.send_message(settings.ADMIN_ID, f"<b>❌ Video converting ERROR</b>\n"
-                                                              f"<blockquote>{audio_path['message']}</blockquote>\n")
+            await message.bot.send_message(
+                settings.ADMIN_ID,
+                f"<b>❌ Video converting ERROR</b>\n"
+                f"<blockquote>{audio_path.get('message', 'Unknown error')}</blockquote>\n"
+            )
             return
 
         audio_file = FSInputFile(path=audio_path)
@@ -164,9 +173,6 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
         await message.reply_document(audio_file, caption=i18n.get_text('converted-by', lang).format(bot.username))
-
-        await message.answer(i18n.get_text('promo-links', lang))
-
         
 
         today = datetime.today().strftime('%Y-%m-%d')

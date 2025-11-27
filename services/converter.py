@@ -12,6 +12,20 @@ class VideoConverter:
 
     async def convert_video_to_audio(self, video_path: str, output_path: str) -> str:
         try:
+            # First, check if the video has an audio stream
+            probe = ffmpeg.probe(video_path)
+            audio_streams = [
+                stream for stream in probe.get('streams', [])
+                if stream.get('codec_type') == 'audio'
+            ]
+
+            if not audio_streams:
+                return {
+                    'error': 'No audio stream',
+                    'code': 'NO_AUDIO',
+                    'message': 'Input file does not contain an audio track'
+                }
+
             audio_path = f'{output_path}.mp3'
             process = (
                 ffmpeg
