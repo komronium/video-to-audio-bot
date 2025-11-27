@@ -16,7 +16,7 @@ from utils.i18n import i18n
 
 from config import settings
 
-MAX_FILE_SIZE = 150 * 1024 * 1024
+MAX_FILE_SIZE = 25 * 1024 * 1024
 DAILY_LIMIT = 5
 
 r = redis.Redis(host='localhost', port=6379, decode_responses=True)
@@ -60,10 +60,8 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     if video.file_size > MAX_FILE_SIZE:
         if not is_lifetime and user.diamonds <= 0:
             await message.bot.send_chat_action(message.chat.id, 'typing')
-            await message.reply(
-                i18n.get_text('too-large', lang),
-                reply_markup=get_buy_more_keyboard(lang)
-            )
+            size_mb = int(MAX_FILE_SIZE / (1024 * 1024))
+            await message.reply(i18n.get_text('too-large', lang).format(size_mb), reply_markup=get_buy_more_keyboard(lang))
             return
         elif not is_lifetime:
             used = await user_service.use_diamond(user.user_id)
@@ -77,6 +75,8 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
                 return
 
     user_id = message.from_user.id
+
+    
     today = datetime.today().strftime('%Y-%m-%d')
     key = f'user:{user_id}:{today}'
 
@@ -164,6 +164,10 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
         await UserService(db).add_conversation(message.from_user.id)
         await processing_msg.delete()
         await message.reply_document(audio_file, caption=i18n.get_text('converted-by', lang).format(bot.username))
+
+        await message.answer(i18n.get_text('promo-links', lang))
+
+        
 
         today = datetime.today().strftime('%Y-%m-%d')
         key = f'user:{user_id}:{today}'

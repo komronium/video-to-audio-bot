@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from config import settings
 from services.user_service import UserService
 from utils.i18n import i18n
+from sqlalchemy import func, select
+from database.models import User, Payment
 
 router = Router()
 
@@ -35,13 +37,15 @@ class Stats:
 
 
 def format_stats_message(stats: Stats, lang: str) -> str:
-    return i18n.get_text('stat-text', lang).format(
-        stats.total_users,
-        stats.total_active_users,
-        stats.active_users_percentage,
-        stats.total_conversations,
-        stats.avg_conversations,
-        stats.users_joined_today
+    # Minimal, emoji-free layout (original)
+    pct = max(0.0, min(100.0, stats.active_users_percentage))
+    return (
+        "<b>Statistics</b>\n\n"
+        f"🔹 Users: <code>{stats.total_users}</code>\n"
+        f"🔹 Active: <code>{stats.total_active_users}</code> (<code>{pct:.0f}%</code>)\n"
+        f"🔹 Conversations: <code>{stats.total_conversations}</code>\n"
+        f"🔹 Average per active: <code>{stats.avg_conversations}</code>\n"
+        f"🔹 New today: <code>{stats.users_joined_today}</code>"
     )
 
 
@@ -62,8 +66,7 @@ async def command_stats(message: types.Message, db: AsyncSession):
         raise
 
 
-@router.message(Command('langs'))
-async def command_stats(message: types.Message, db: AsyncSession):
+async def langs_internal(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     langs = await user_service.get_langs()
 
@@ -77,8 +80,7 @@ async def command_stats(message: types.Message, db: AsyncSession):
     await message.answer(text)
 
 
-@router.message(Command('deflangs'))
-async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
+async def deflangs_internal(message: types.Message, db: AsyncSession, bot: Bot):
     service = UserService(db)
     users = await service.get_all_users()
     langs = dict()
@@ -104,5 +106,68 @@ async def command_deflang(message: types.Message, db: AsyncSession, bot: Bot):
     text = ''
     for lang, count in langs.items():
         text += f"<code>{lang} | {count}</code>\n"
+
+    await message.answer(text)
+
+
+async def adminstats_internal(message: types.Message, db: AsyncSession):
+    if message.from_user.id != settings.ADMIN_ID:
+        return
+
+    # Aggregate core stats (reuse service for base metrics)
+    service = UserService(db)
+    base = await service.get_stats()
+
+    # Users joined last 7 days
+    from datetime import date, timedelta
+    today = date.today()
+    last_week = today - timedelta(days=6)
+    joined_last_week_stmt = select(func.count(User.user_id)).where(User.joined_at >= last_week)
+    joined_last_week = (await db.execute(joined_last_week_stmt)).scalar()
+
+    # Top languages
+    langs_stmt = select(User.lang, func.count()).where(User.lang.is_not(None)).group_by(User.lang).order_by(func.count().desc()).limit(5)
+    langs_rows = (await db.execute(langs_stmt)).all()
+    top_langs = ', '.join(f"{lang or '??'}: {count}" for lang, count in langs_rows) if langs_rows else '—'
+
+    # Payments aggregates
+    diamonds_sum_stmt = select(func.coalesce(func.sum(Payment.diamonds), 0))
+    diamonds_total = (await db.execute(diamonds_sum_stmt)).scalar() or 0
+
+    lifetime_cnt_stmt = select(func.count()).where(Payment.is_lifetime == True)
+    lifetime_total = (await db.execute(lifetime_cnt_stmt)).scalar() or 0
+
+    # Revenue in Stars estimation
+    stars_from_diamonds = diamonds_total * settings.DIAMONDS_PRICE
+    stars_from_lifetime = lifetime_total * settings.LIFETIME_PREMIUM_PRICE
+    stars_total = stars_from_diamonds + stars_from_lifetime
+
+    # Active ratio and avg
+    total_users = base.get('total_users') or 0
+    total_active = base.get('total_active_users') or 0
+    total_conversations = base.get('total_conversations') or 0
+    active_pct = round((total_active * 100 / total_users), 1) if total_users else 0.0
+    avg_conv = round((total_conversations / total_active), 2) if total_active else 0.0
+
+    text = (
+        "<b>Admin Statistics</b>\n\n"
+        f"🔹 Users: <code>{total_users}</code>\n"
+        f"🔹 Active: <code>{total_active}</code> (<code>{active_pct:.0f}%</code>)\n"
+        f"🔹 Conversations: <code>{total_conversations}</code>\n"
+        f"🔹 Average per active: <code>{avg_conv}</code>\n"
+        f"🔹 New users: today <code>{base.get('users_joined_today') or 0}</code> | last 7d <code>{joined_last_week}</code>\n"
+        f"🔹 Top languages: {top_langs or '—'}\n"
+        f"🔹 Sales — diamonds: <code>{diamonds_total}</code> | lifetime: <code>{lifetime_total}</code>\n"
+        f"🔹 Stars (est.): <code>{stars_total}</code>  (diamonds: <code>{stars_from_diamonds}</code>, lifetime: <code>{stars_from_lifetime}</code>)"
+    )
+
+    # Append Top 10 users by conversations
+    top_users = await service.get_top_users(limit=10)
+    if top_users:
+        text += "\n\n<b>Top 10 users</b>\n"
+        for idx, user in enumerate(top_users, start=1):
+            name = user.name or (f"@{user.username}" if user.username else str(user.user_id))
+            text += f"{idx}. {name} — <code>{user.conversation_count}</code>\n"
+
 
     await message.answer(text)

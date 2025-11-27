@@ -23,20 +23,17 @@ def get_language_keyboard():
     return types.InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def get_menu_keyboard(lang: str):
-    return types.ReplyKeyboardMarkup(
-        keyboard=[
-            [
-                types.KeyboardButton(text=i18n.get_text('lang-button', lang)),
-                types.KeyboardButton(text=i18n.get_text('help-button', lang))
-            ],
-            [
-                types.KeyboardButton(text=i18n.get_text('stats-button', lang)),
-                types.KeyboardButton(text=i18n.get_text('profile-button', lang))
-            ],
+def get_menu_keyboard(lang: str, is_admin: bool = False):
+    rows = [
+        [
+            types.KeyboardButton(text=i18n.get_text('lang-button', lang)),
+            types.KeyboardButton(text=i18n.get_text('stats-button', lang)),
+            types.KeyboardButton(text=i18n.get_text('profile-button', lang))
         ],
-        resize_keyboard=True
-    )
+    ]
+    if is_admin:
+        rows.append([types.KeyboardButton(text="Admin")])
+    return types.ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
 
 
 @router.message(Command('start'))
@@ -50,7 +47,12 @@ async def command_start(message: types.Message, db: AsyncSession):
             reply_markup=get_language_keyboard()
         )
 
-    await message.reply(i18n.get_text('start', lang), reply_markup=get_menu_keyboard(lang))
+    
+
+    await message.reply(
+        i18n.get_text('start', lang),
+        reply_markup=get_menu_keyboard(lang, is_admin=(message.from_user.id == settings.ADMIN_ID))
+    )
     return None
 
 

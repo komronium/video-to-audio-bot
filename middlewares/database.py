@@ -23,8 +23,9 @@ class DatabaseMiddleware(BaseMiddleware):
             user_id = event.from_user.id
             username = event.from_user.username
             name = event.from_user.first_name
+            lang = event.from_user.language_code
 
             if not await user_service.is_user_exists(user_id):
-                await user_service.add_user(user_id, username, name, event.bot)
+                await user_service.add_user(user_id, username, name, lang, event.bot)
 
             return await handler(event, data)

@@ -16,6 +16,7 @@ from config import settings
 
 from services.user_service import UserService
 from services.converter import VideoConverter
+from utils.i18n import i18n
 
 YOUTUBE_REGEX = r'.*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$)).*'
 
@@ -95,7 +96,9 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
         await processing_msg.edit_text("Converting ...")
 
         bot = await message.bot.get_me()
-        await UserService(db).add_conversation(message.from_user.id)
+        user_service = UserService(db)
+        lang = await user_service.get_lang(message.from_user.id)
+        await user_service.add_conversation(message.from_user.id)
         await processing_msg.delete()
         await message.reply_document(FSInputFile(audio_data['file_path']), caption=f'Converted by @{bot.username}')
 

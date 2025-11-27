@@ -29,7 +29,7 @@ async def buy_diamonds_callback(call: CallbackQuery):
         lang = await service.get_lang(call.from_user.id)
         await call.message.delete()
         await call.message.answer(
-            i18n.get_text('buy-diamonds', lang),
+            i18n.get_text('buy-diamonds', lang).format(settings.DIAMONDS_PRICE),
             reply_markup=get_prices_keyboard(lang)
         )
 
@@ -101,13 +101,32 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
             await message.answer(
                 i18n.get_text('congrats', lang).format(diamonds)
             )
-            await bot.send_message(settings.GROUP_ID, f'<b>{amount} DIAMONDS</b> added.')
+            user = message.from_user
+            mention = f'<a href="tg://user?id={user.id}">{user.full_name}</a>'
+            await bot.send_message(
+                settings.GROUP_ID,
+                (
+                    f"💎 <b>Diamonds Purchased</b>\n"
+                    f"👤 {mention}\n"
+                    f"✨ Diamonds: <b>{diamonds}</b>\n"
+                    f"⭐️ Stars spent: <b>{amount}</b>"
+                )
+            )
         else:
             await message.answer("❌ Payment received, but no diamonds were credited. Please contact support!")
 
     elif payload == "channel_support_lifetime":
         await user_service.set_lifetime(user_id)
-        await bot.send_message(settings.GROUP_ID, f'<b>{settings.LIFETIME_PREMIUM_PRICE} STARS</b> added.')
+        user = message.from_user
+        mention = f'<a href=\"tg://user?id={user.id}\">{user.full_name}</a>'
+        await bot.send_message(
+            settings.GROUP_ID,
+            (
+                f"👑 <b>Lifetime Premium Activated</b>\n"
+                f"👤 {mention}\n"
+                f"⭐️ Stars spent: <b>{settings.LIFETIME_PREMIUM_PRICE}</b>"
+            )
+        )
         await message.answer(i18n.get_text('congrats-lifetime', lang))
 
     else:

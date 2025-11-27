@@ -6,7 +6,7 @@
     "2-diamond": "2 Diamonds 💎",
     "4-diamond": "4 Diamonds 💎",
     "10-diamond": "10 Diamonds 💎",
-    "buy-diamonds": "<b>Buy Diamonds \uD83D\uDC8E via Telegram Stars</b>\nEach diamond gives you extra opportunities: unlimited conversations & large file conversions!\n\nYou pay with Telegram Stars. 1 Diamond = 5 Telegram Stars.",
+    "buy-diamonds": "<b>Buy Diamonds \uD83D\uDC8E via Telegram Stars</b>\nEach diamond gives you extra opportunities: unlimited conversations & large file conversions!\n\nYou pay with Telegram Stars. 1 Diamond = {} Telegram Stars.",
     "diamond-count": "{} Diamond \uD83D\uDC8E",
     "buy-title": "Buy {} Diamonds \uD83D\uDC8E",
     "buy-desc": "You are purchasing {} Diamonds.\nTotal: {} Telegram Stars.\n\nEach diamond unlocks extra opportunities: unlimited conversations and large file conversions!",
@@ -14,14 +14,14 @@
     "lifetime-desc": "Unlock unlimited uploads and conversions forever.",
     "buy-extra": "Buy Extra Diamonds \uD83D\uDC8E",
     "get-lifetime": "\uD83D\uDC8E Get Lifetime Premium",
-    "too-large": "💎 <b>File too large!</b>\nThis video is over 150 MB, which is above the free limit.\\nUse a diamond to convert large files, or buy more below.",
+    "too-large": "💎 <b>File too large!</b>\nThis video is over {} MB (free limit). Use a diamond to convert large files, or get premium.",
     "large-used": "<b>\uD83D\uDC8E 1 diamond used for large file upload.</b>",
     "daily-limit":  "<b>Daily limit reached!</b>\nYou’ve reached today’s free usage limit.\\nUse a diamond for more, or buy extra below.",
     "extra-used": "<b>\uD83D\uDC8E 1 diamond used for extra conversation.</b>",
     "queue": "⏳ Your request is in the queue. Please wait...\\nPosition: <code>{} / {}</code>",
     "downloading": "Downloading ...",
     "converting": "Converting ...",
-    "converted-by": "Converted by @{}",
+    "converted-by": "via @{}",
     "profile": "👤 <b>Your Profile:</b>\n\n🔹 User ID: <code>{}</code>\n🔹 Name: <b>{}</b>\n🔹 Username: @{}\n🔹 Conversations: <code>{}</code>\n🔹 Joined: <code>{}</code>\n\uD83D\uDD39 Diamonds: <code>{}</code>",
     "congrats": "<b>\uD83D\uDC8E Congratulations!</b>\\n{} diamonds have been added to your account.",
     "congrats-lifetime": "💎 Congratulations! You now have Lifetime Premium access.",
@@ -38,4 +38,6 @@
     "diamonds-button": "💎 Diamonds",
     "help-text": "🆘 <b>How to Use the Bot</b>\n\n1️⃣ <b>Send a video file</b> — Just upload your video here.\n2️⃣ <b>Wait for processing</b> — The bot will extract the audio automatically.\n3️⃣ <b>Download the audio</b> — You’ll receive the audio file ready to save or share.\n\n💎 <b>Need more?</b> Use diamonds for unlimited conversions and large files.\n\nIf you have questions or need help, just ask!",
     "stat-text": "📈 <b>Bot Statistics:</b>\n\n🔹 Total Users: <code>{}</code>\n🔹 Active Users: <code>{} ({}%)</code>\n🔹 Total Conversations: <code>{} ({})</code>\n🔹 New Users Today: <code>{}</code>"
+    ,
+    "promo-links": "🔗 <b>Useful Telegram bots and links</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>"
 }

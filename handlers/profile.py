@@ -30,5 +30,5 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         user.joined_at.strftime('%d-%m-%Y'),
         diamonds if diamonds < 99999 else '♾️',
     )
-
+    
     return await message.answer(text.strip())
