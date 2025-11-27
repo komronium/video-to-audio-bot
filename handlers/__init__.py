@@ -1,6 +1,6 @@
 from aiogram import Dispatcher
 
-from . import start, help, stats, top, profile, subscription, video, post, youtube, error, diamonds, admin
+from . import start, help, stats, top, profile, video, post, youtube, error, diamonds, admin
 
 
 def setup_handlers(dp: Dispatcher):
