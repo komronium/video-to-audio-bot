@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from collections import Counter
+import io
 
 from aiogram import types, Router, Bot, F
 from aiogram.filters import Command
@@ -12,6 +13,8 @@ from services.user_service import UserService
 from utils.i18n import i18n
 from sqlalchemy import func, select
 from database.models import User, Payment
+from services.stats_service import joins_per_days, create_join_chart_image
+from aiogram.types import InputFile
 
 router = Router()
 
@@ -108,6 +111,17 @@ async def deflangs_internal(message: types.Message, db: AsyncSession, bot: Bot):
         text += f"<code>{lang} | {count}</code>\n"
 
     await message.answer(text)
+    # Generate and send charts for admin: 7-day and 30-day new users
+    try:
+        dates7, vals7 = await joins_per_days(db, 7)
+        buf7 = create_join_chart_image(dates7, vals7, title="New users — last 7 days")
+        await message.answer_photo(photo=InputFile(buf7, filename="joins_7d.png"), caption="New users — last 7 days")
+
+        dates30, vals30 = await joins_per_days(db, 30)
+        buf30 = create_join_chart_image(dates30, vals30, title="New users — last 30 days")
+        await message.answer_photo(photo=InputFile(buf30, filename="joins_30d.png"), caption="New users — last 30 days")
+    except Exception as e:
+        logging.debug(f"Chart generation skipped or failed: {e}")
 
 
 async def adminstats_internal(message: types.Message, db: AsyncSession):
