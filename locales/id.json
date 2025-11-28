@@ -40,4 +40,6 @@
     "stat-text": "📈 <b>Statistik Bot:</b>\n\n🔹 Total Pengguna: <code>{}</code>\n🔹 Pengguna Aktif: <code>{} ({}%)</code>\n🔹 Total Percakapan: <code>{} ({})</code>\n🔹 Pengguna Baru Hari Ini: <code>{}</code>",
     "promo-links": "🔗 <b>Bot dan tautan Telegram yang bermanfaat</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>",
     "no-audio": "⚠️ Video ini tidak memiliki trek audio.\nSilakan kirim video yang memiliki suara."
+    ,
+    "youtube-disabled": "🔁 Konversi YouTube sementara dinonaktifkan karena menyebabkan antrean pemrosesan yang besar. Fitur ini akan segera dikembalikan."
 }

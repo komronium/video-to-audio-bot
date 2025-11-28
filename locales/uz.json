@@ -41,4 +41,6 @@
     "promo-links": "🔗 <b>Foydali Telegram botlar va linklar</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>",
     "error-server": "❌ Xatolik. Iltimos, birozdan so‘ng qayta urinib ko‘ring!",
     "no-audio": "⚠️ Bu videoda ovoz yo‘q.\nIltimos, ovozi bor video yuboring."
+    ,
+    "youtube-disabled": "🔁 YouTube konvertatsiyalari vaqtincha o'chirib qo'yildi — bu botda katta navbatlarni keltirib chiqaradi. Tez orada qayta qo'shamiz."
 }

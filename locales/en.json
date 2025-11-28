@@ -41,4 +41,6 @@
     ,
     "promo-links": "🔗 <b>Useful Telegram bots and links</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>",
     "no-audio": "⚠️ This video does not contain an audio track.\nPlease send a video with sound to extract audio."
+    ,
+    "youtube-disabled": "🔁 YouTube conversions are temporarily disabled because they cause heavy processing queues. We'll bring this feature back soon."
 }
