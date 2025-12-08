@@ -16,7 +16,7 @@ class ThrottlingMiddleware(BaseMiddleware):
             event,
             data
     ):
-        if getattr(event.message, 'media_group_id', None):
+        if getattr(event, 'media_group_id', None):
             return await handler(event, data)
 
         user_id = event.from_user.id

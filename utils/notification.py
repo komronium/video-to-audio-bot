@@ -4,21 +4,26 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config import settings
 
 MESSAGE_TEMPLATE = (
-    "<b>New user!</b>\n"
+    "<b>User:</b> #{id}\n"
     "<b>Name:</b> {name}\n"
     "<b>Username:</b> @{username}\n"
-    "<b>Language:</b> <code>{lang}</code>\n"
+    "<b>Language:</b> {lang}\n"
 )
 
 
 async def notify_group(bot: Bot, user, lang: str, db: AsyncSession):
     try:
         message = MESSAGE_TEMPLATE.format(
+            id=user.user_id,
             name=user.name,
             username=user.username or 'N/A',
             lang=lang,
         )
-        await bot.send_message(settings.GROUP_ID, message.strip())
+        await bot.send_message(
+            chat_id=settings.GROUP_ID,
+            message_thread_id=settings.USER_TOPIC_ID,
+            text=message.strip()
+        )
     except Exception as e:
         logging.error(f"Error while sending notification: {e}")
 

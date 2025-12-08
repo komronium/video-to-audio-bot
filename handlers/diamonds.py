@@ -109,12 +109,12 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
             )
             mention = f'<a href="tg://user?id={user_id}">{display_name}</a>'
             await bot.send_message(
-                settings.GROUP_ID,
-                (
+                chat_id=settings.GROUP_ID,
+                message_thread_id=settings.DIAMONDS_TOPIC_ID,
+                text=(
                     "💎 <b>DIAMOND DROP!</b>\n"
                     f"👤 {mention}\n"
                     f"✨ Purchased: <b>{diamonds}</b> diamonds\n"
-                    f"⭐️ Stars spent: <b>{amount}</b>\n"
                     f"💠 New balance: <b>{new_balance}</b>"
                 )
             )

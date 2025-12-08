@@ -1,11 +1,7 @@
 from aiogram import BaseMiddleware
 
-from config import settings
 from database.session import get_db
 from services.user_service import UserService
-
-LANGS = dict({})
-count = 0
 
 
 class DatabaseMiddleware(BaseMiddleware):
