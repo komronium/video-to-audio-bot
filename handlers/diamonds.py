@@ -15,10 +15,13 @@ router = Router()
 
 def get_prices_keyboard(lang: str):
     builder = InlineKeyboardBuilder()
-    builder.button(text=i18n.get_text('1-diamond', lang), callback_data="buy-1")
-    builder.button(text=i18n.get_text('2-diamond', lang), callback_data="buy-2")
-    builder.button(text=i18n.get_text('4-diamond', lang), callback_data="buy-4")
-    builder.button(text=i18n.get_text('10-diamond', lang), callback_data="buy-10")
+    # Tiered packs and their star prices
+    packs = [1, 5, 10, 25]
+    pack_prices = {1: 2, 5: 8, 10: 15, 25: 30}
+    for p in packs:
+        label = i18n.get_text('diamond-count', lang).format(p)
+        label = f"{label} — {pack_prices[p]} ⭐"
+        builder.button(text=label, callback_data=f"buy-{p}")
     builder.adjust(1)
     return builder.as_markup()
 
@@ -42,19 +45,23 @@ async def buy_diamonds_callback(call: CallbackQuery):
         service = UserService(db)
         lang = await service.get_lang(call.from_user.id)
         diamonds_count = int(call.data.split('-')[1])
+        # pricing map (stars per pack)
+        pack_prices = {1: 2, 5: 8, 10: 15, 25: 30}
+        price = pack_prices.get(diamonds_count, diamonds_count * settings.DIAMONDS_PRICE)
         prices = [
-            LabeledPrice(label=i18n.get_text('diamond-count', lang).format(diamonds_count),
-                         amount=diamonds_count * settings.DIAMONDS_PRICE),
+            LabeledPrice(label=i18n.get_text('diamond-count', lang).format(diamonds_count) + f" ({price} ⭐)",
+                         amount=price),
         ]
+        payload = f"channel_support:{diamonds_count}"
         await call.message.answer_invoice(
             title=i18n.get_text('buy-title', lang).format(diamonds_count),
             description=i18n.get_text('buy-desc', lang).format(
                 diamonds_count,
-                diamonds_count * settings.DIAMONDS_PRICE
+                price
             ),
             prices=prices,
             provider_token="",
-            payload="channel_support",
+            payload=payload,
             currency="XTR",
         )
         await call.answer()
@@ -95,8 +102,18 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
     payload = message.successful_payment.invoice_payload
     amount = message.successful_payment.total_amount
 
-    if payload == "channel_support":
-        diamonds = amount // settings.DIAMONDS_PRICE
+    if payload and payload.startswith("channel_support"):
+        # payload format: channel_support:<diamonds_count>
+        parts = payload.split(":")
+        diamonds = 0
+        try:
+            diamonds = int(parts[1]) if len(parts) > 1 else 0
+        except Exception:
+            diamonds = 0
+
+        # pricing map (stars per pack)
+        pack_prices = {1: 2, 5: 8, 10: 15, 25: 30}
+        spent = pack_prices.get(diamonds, diamonds * settings.DIAMONDS_PRICE)
 
         if diamonds > 0:
             await user_service.add_diamonds(user_id, diamonds)
@@ -115,8 +132,10 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
                     "💎 <b>DIAMOND DROP!</b>\n"
                     f"👤 {mention}\n"
                     f"✨ Purchased: <b>{diamonds}</b> diamonds\n"
+                    f"⭐ Stars spent: <b>{spent}</b>\n"
                     f"💠 New balance: <b>{new_balance}</b>"
-                )
+                ),
+                parse_mode='HTML'
             )
         else:
             await message.answer("❌ Payment received, but no diamonds were credited. Please contact support!")

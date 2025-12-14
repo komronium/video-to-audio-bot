@@ -142,6 +142,48 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     if queue_message:
         await queue_message.delete()
 
+    # If overall queue is too long, cancel the FIRST queued user's task (position 1)
+    try:
+        if queue_manager.queue_length() > 10:
+            # Peek first item in redis queue (format: user_id:file_id:timestamp)
+            first_item = r.lindex(queue_manager.queue_key, 0)
+            if first_item:
+                parts = first_item.split(":")
+                if len(parts) >= 3:
+                    target_user_id = int(parts[0])
+                    target_file_id = parts[1]
+                    target_ts = int(parts[2])
+
+                    # get target user's language if possible
+                    target_user = await user_service.get_user(target_user_id)
+                    target_lang = await user_service.get_lang(target_user_id)
+
+                    # notify the target user to try again later
+                    try:
+                        text = i18n.get_text('try-again', target_lang) or "Please try again later."
+                        await message.bot.send_message(target_user_id, text)
+                    except Exception:
+                        pass
+
+                    # notify group which user was canceled
+                    display_name = (target_user.name if target_user and target_user.name else message.from_user.full_name) or "User"
+                    mention = f'<a href="tg://user?id={target_user_id}">{display_name}</a>'
+                    try:
+                        await message.bot.send_message(
+                            settings.GROUP_ID,
+                            f"⚠️ <b>Queue limit exceeded</b>\n{mention} — task canceled because queue length > 10.",
+                            parse_mode='HTML'
+                        )
+                    except Exception:
+                        pass
+
+                    # remove that first queued task
+                    queue_manager.remove_from_queue(target_user_id, target_file_id, target_ts)
+                    return
+    except Exception:
+        # If anything goes wrong with notifying/removing, safely continue to processing
+        pass
+
     await process_video(message, db, video, lang)
 
 
