@@ -12,38 +12,40 @@ class VideoConverter:
 
     async def convert_video_to_audio(self, video_path: str, output_path: str) -> str:
         try:
-            # First, check if the video has an audio stream
             probe = ffmpeg.probe(video_path)
             audio_streams = [
-                stream for stream in probe.get('streams', [])
-                if stream.get('codec_type') == 'audio'
+                s for s in probe.get('streams', [])
+                if s.get('codec_type') == 'audio'
             ]
 
             if not audio_streams:
                 return {
                     'error': 'No audio stream',
                     'code': 'NO_AUDIO',
-                    'message': 'Input file does not contain an audio track'
                 }
 
-            audio_path = f'{output_path}.mp3'
-            process = (
+            audio_path = f'{output_path}.aac'
+
+            (
                 ffmpeg
                 .input(video_path)
-                .output(audio_path, format='mp3')
-                .run_async(pipe_stdout=True, pipe_stderr=True)
+                .output(
+                    audio_path,
+                    vn=None,            # video butunlay o‘chadi
+                    acodec='copy',      # 🔥 re-encode YO‘Q
+                    loglevel='error'
+                )
+                .overwrite_output()
+                .run()
             )
-            _, error = process.communicate()
 
-            if process.returncode != 0:
-                return {
-                    'error': 'Conversion failed',
-                    'message': error.decode('utf-8')
-                }
-            
             return audio_path
-        except Exception as e:
-            raise RuntimeError(f'Error during conversion: {e}')
+
+        except ffmpeg.Error as e:
+            return {
+                'error': 'Conversion failed',
+                'message': e.stderr.decode()
+            }
 
 
     async def get_youtube_video(self, video_id: str):
