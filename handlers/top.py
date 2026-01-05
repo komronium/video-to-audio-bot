@@ -1,18 +1,17 @@
-from aiogram import types, Router, F
-from aiogram.filters import Command
+from aiogram import F, Router, types
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
 from utils.i18n import i18n
 
-EMOJIES = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
+EMOJIES = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
 
 router = Router()
 
 
-@router.message(F.text.in_([
-    i18n.get_text('top-button', lang) for lang in i18n.LANGUAGES
-]))
+@router.message(
+    F.text.in_([i18n.get_text("top-button", lang) for lang in i18n.LANGUAGES])
+)
 async def command_top(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     top_users = await user_service.get_top_users()
@@ -35,4 +34,6 @@ async def rank_internal(message: types.Message, db: AsyncSession):
         await message.answer("⚠️ You are not registered.")
         return
     rank = await service.get_user_rank(user.user_id)
-    await message.answer(f"🏅 Your rank: <b>#{rank}</b> — conversations: <code>{user.conversation_count}</code>")
+    await message.answer(
+        f"🏅 Your rank: <b>#{rank}</b> — conversations: <code>{user.conversation_count}</code>"
+    )

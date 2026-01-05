@@ -1,4 +1,4 @@
-from aiogram import Router, F, Bot, types
+from aiogram import Bot, F, Router
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
 from aiogram.types.message import Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from database.session import get_db
-from handlers.video import get_buy_more_keyboard
 from services.user_service import UserService
 from utils.i18n import i18n
 
@@ -15,10 +14,10 @@ router = Router()
 
 def get_prices_keyboard(lang: str):
     builder = InlineKeyboardBuilder()
-    builder.button(text=i18n.get_text('1-diamond', lang), callback_data="buy-1")
-    builder.button(text=i18n.get_text('2-diamond', lang), callback_data="buy-2")
-    builder.button(text=i18n.get_text('4-diamond', lang), callback_data="buy-4")
-    builder.button(text=i18n.get_text('10-diamond', lang), callback_data="buy-10")
+    builder.button(text=i18n.get_text("1-diamond", lang), callback_data="buy-1")
+    builder.button(text=i18n.get_text("2-diamond", lang), callback_data="buy-2")
+    builder.button(text=i18n.get_text("4-diamond", lang), callback_data="buy-4")
+    builder.button(text=i18n.get_text("10-diamond", lang), callback_data="buy-10")
     builder.adjust(1)
     return builder.as_markup()
 
@@ -30,27 +29,28 @@ async def buy_diamonds_callback(call: CallbackQuery):
         lang = await service.get_lang(call.from_user.id)
         await call.message.delete()
         await call.message.answer(
-            i18n.get_text('buy-diamonds', lang).format(settings.DIAMONDS_PRICE),
-            reply_markup=get_prices_keyboard(lang)
+            i18n.get_text("buy-diamonds", lang).format(settings.DIAMONDS_PRICE),
+            reply_markup=get_prices_keyboard(lang),
         )
 
 
 # --- Callback handler for buying diamonds via Telegram Stars ---
 @router.callback_query(F.data.startswith("buy-"))
-async def buy_diamonds_callback(call: CallbackQuery):
+async def buy_any_diamonds_callback(call: CallbackQuery):
     async with get_db() as db:
         service = UserService(db)
         lang = await service.get_lang(call.from_user.id)
-        diamonds_count = int(call.data.split('-')[1])
+        diamonds_count = int(call.data.split("-")[1])
         prices = [
-            LabeledPrice(label=i18n.get_text('diamond-count', lang).format(diamonds_count),
-                         amount=diamonds_count * settings.DIAMONDS_PRICE),
+            LabeledPrice(
+                label=i18n.get_text("diamond-count", lang).format(diamonds_count),
+                amount=diamonds_count * settings.DIAMONDS_PRICE,
+            ),
         ]
         await call.message.answer_invoice(
-            title=i18n.get_text('buy-title', lang).format(diamonds_count),
-            description=i18n.get_text('buy-desc', lang).format(
-                diamonds_count,
-                diamonds_count * settings.DIAMONDS_PRICE
+            title=i18n.get_text("buy-title", lang).format(diamonds_count),
+            description=i18n.get_text("buy-desc", lang).format(
+                diamonds_count, diamonds_count * settings.DIAMONDS_PRICE
             ),
             prices=prices,
             provider_token="",
@@ -59,6 +59,7 @@ async def buy_diamonds_callback(call: CallbackQuery):
         )
         await call.answer()
 
+
 # --- Callback handler for buying Lifetime Premium ---
 @router.callback_query(F.data == "lifetime")
 async def buy_lifetime_callback(call: CallbackQuery):
@@ -66,12 +67,15 @@ async def buy_lifetime_callback(call: CallbackQuery):
         service = UserService(db)
         lang = await service.get_lang(call.from_user.id)
         prices = [
-            LabeledPrice(label=i18n.get_text('lifetime-title', lang), amount=settings.LIFETIME_PREMIUM_PRICE),
+            LabeledPrice(
+                label=i18n.get_text("lifetime-title", lang),
+                amount=settings.LIFETIME_PREMIUM_PRICE,
+            ),
         ]
         await call.message.delete()
         await call.message.answer_invoice(
-            title=i18n.get_text('lifetime-title', lang),
-            description=i18n.get_text('lifetime-desc', lang),
+            title=i18n.get_text("lifetime-title", lang),
+            description=i18n.get_text("lifetime-desc", lang),
             prices=prices,
             provider_token="",
             payload="channel_support_lifetime",
@@ -99,9 +103,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
 
         if diamonds > 0:
             await user_service.add_diamonds(user_id, diamonds)
-            await message.answer(
-                i18n.get_text('congrats', lang).format(diamonds)
-            )
+            await message.answer(i18n.get_text("congrats", lang).format(diamonds))
             user = message.from_user
             mention = f'<a href="tg://user?id={user.id}">{user.full_name}</a>'
             await bot.send_message(
@@ -111,24 +113,28 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
                     f"👤 {mention}\n"
                     f"✨ Diamonds: <b>{diamonds}</b>\n"
                     f"⭐️ Stars spent: <b>{amount}</b>"
-                )
+                ),
             )
         else:
-            await message.answer("❌ Payment received, but no diamonds were credited. Please contact support!")
+            await message.answer(
+                "❌ Payment received, but no diamonds were credited. Please contact support!"
+            )
 
     elif payload == "channel_support_lifetime":
         await user_service.set_lifetime(user_id)
         user = message.from_user
-        mention = f'<a href=\"tg://user?id={user.id}\">{user.full_name}</a>'
+        mention = f'<a href="tg://user?id={user.id}">{user.full_name}</a>'
         await bot.send_message(
             settings.GROUP_ID,
             (
                 f"👑 <b>Lifetime Premium Activated</b>\n"
                 f"👤 {mention}\n"
                 f"⭐️ Stars spent: <b>{settings.LIFETIME_PREMIUM_PRICE}</b>"
-            )
+            ),
         )
-        await message.answer(i18n.get_text('congrats-lifetime', lang))
+        await message.answer(i18n.get_text("congrats-lifetime", lang))
 
     else:
-        await message.answer("<b>Unknown payment type.</b>\nPlease contact support: @TGBots_ContactBot")
+        await message.answer(
+            "<b>Unknown payment type.</b>\nPlease contact support: @TGBots_ContactBot"
+        )
