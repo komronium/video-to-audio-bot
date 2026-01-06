@@ -1,6 +1,8 @@
 import logging
+
 from aiogram import Bot
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from config import settings
 
 MESSAGE_TEMPLATE = (
@@ -15,10 +17,12 @@ async def notify_group(bot: Bot, user, lang: str, db: AsyncSession):
     try:
         message = MESSAGE_TEMPLATE.format(
             name=user.name,
-            username=user.username or 'N/A',
+            username=user.username or "N/A",
             lang=lang,
         )
-        await bot.send_message(settings.GROUP_ID, message.strip())
+        await bot.send_message(
+            chat_id=settings.GROUP_ID, text=message.strip(), message_thread_id=15
+        )
     except Exception as e:
         logging.error(f"Error while sending notification: {e}")
 

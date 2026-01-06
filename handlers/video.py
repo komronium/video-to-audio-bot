@@ -26,8 +26,10 @@ router = Router()
 
 def get_buy_more_keyboard(lang: str):
     builder = InlineKeyboardBuilder()
-    builder.button(text=i18n.get_text("buy-extra", lang), callback_data="buy_diamonds")
-    builder.button(text=i18n.get_text("get-lifetime", lang), callback_data="lifetime")
+    builder.button(text=i18n.get_text("buy-extra", lang), callback_data="diamond:list")
+    builder.button(
+        text=i18n.get_text("get-lifetime", lang), callback_data="diamond:lifetime"
+    )
     builder.adjust(1)
     return builder.as_markup()
 

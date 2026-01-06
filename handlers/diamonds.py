@@ -1,57 +1,46 @@
 from aiogram import Bot, F, Router
-from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery
+from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery, chat
 from aiogram.types.message import Message
-from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
 from database.session import get_db
+from keyboards.prices import get_prices_keyboard
 from services.user_service import UserService
 from utils.i18n import i18n
 
 router = Router()
 
 
-def get_prices_keyboard(lang: str):
-    builder = InlineKeyboardBuilder()
-    builder.button(text=i18n.get_text("1-diamond", lang), callback_data="buy-1")
-    builder.button(text=i18n.get_text("2-diamond", lang), callback_data="buy-2")
-    builder.button(text=i18n.get_text("4-diamond", lang), callback_data="buy-4")
-    builder.button(text=i18n.get_text("10-diamond", lang), callback_data="buy-10")
-    builder.adjust(1)
-    return builder.as_markup()
-
-
-@router.callback_query(F.data == "buy_diamonds")
+@router.callback_query(F.data == "diamond:list")
 async def buy_diamonds_callback(call: CallbackQuery):
     async with get_db() as db:
         service = UserService(db)
         lang = await service.get_lang(call.from_user.id)
-        await call.message.delete()
-        await call.message.answer(
-            i18n.get_text("buy-diamonds", lang).format(settings.DIAMONDS_PRICE),
+        await call.message.edit_text(
+            i18n.get_text("buy-diamonds", lang),
             reply_markup=get_prices_keyboard(lang),
         )
 
 
 # --- Callback handler for buying diamonds via Telegram Stars ---
-@router.callback_query(F.data.startswith("buy-"))
+@router.callback_query(F.data.startswith("diamond:buy:"))
 async def buy_any_diamonds_callback(call: CallbackQuery):
     async with get_db() as db:
         service = UserService(db)
         lang = await service.get_lang(call.from_user.id)
-        diamonds_count = int(call.data.split("-")[1])
+        diamonds_count = int(call.data.split(":")[2])
+        amount = settings.DIAMONDS_PRICES[diamonds_count]
+
         prices = [
             LabeledPrice(
                 label=i18n.get_text("diamond-count", lang).format(diamonds_count),
-                amount=diamonds_count * settings.DIAMONDS_PRICE,
+                amount=amount,
             ),
         ]
         await call.message.answer_invoice(
             title=i18n.get_text("buy-title", lang).format(diamonds_count),
-            description=i18n.get_text("buy-desc", lang).format(
-                diamonds_count, diamonds_count * settings.DIAMONDS_PRICE
-            ),
+            description=i18n.get_text("buy-desc", lang).format(diamonds_count, amount),
             prices=prices,
             provider_token="",
             payload="channel_support",
@@ -61,7 +50,7 @@ async def buy_any_diamonds_callback(call: CallbackQuery):
 
 
 # --- Callback handler for buying Lifetime Premium ---
-@router.callback_query(F.data == "lifetime")
+@router.callback_query(F.data == "diamond:lifetime")
 async def buy_lifetime_callback(call: CallbackQuery):
     async with get_db() as db:
         service = UserService(db)
@@ -99,7 +88,9 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
     amount = message.successful_payment.total_amount
 
     if payload == "channel_support":
-        diamonds = amount * settings.DIAMONDS_PRICE
+        diamonds = list(settings.DIAMONDS_PRICES.keys())[
+            list(settings.DIAMONDS_PRICES.values()).index(amount)
+        ]
 
         if diamonds > 0:
             await user_service.add_diamonds(user_id, diamonds)
@@ -107,13 +98,14 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
             user = message.from_user
             mention = f'<a href="tg://user?id={user.id}">{user.full_name}</a>'
             await bot.send_message(
-                settings.GROUP_ID,
-                (
+                chat_id=settings.GROUP_ID,
+                text=(
                     f"💎 <b>Diamonds Purchased</b>\n"
                     f"👤 {mention}\n"
                     f"✨ Diamonds: <b>{diamonds}</b>\n"
                     f"⭐️ Stars spent: <b>{amount}</b>"
                 ),
+                message_thread_id=17,
             )
         else:
             await message.answer(
