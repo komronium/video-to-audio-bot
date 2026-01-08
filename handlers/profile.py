@@ -21,12 +21,13 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         return await message.answer(NOT_REGISTERED_TEXT)
 
     diamonds = user.diamonds
+    conversion_count = await user_service.get_conversion_count(user.user_id)
 
     text = i18n.get_text("profile", lang).format(
         user.user_id,
         user.name,
         user.username or "N/A",
-        user.conversation_count,
+        conversion_count,
         user.joined_at.strftime("%d-%m-%Y"),
         diamonds if not user.is_premium else "♾️",
     )

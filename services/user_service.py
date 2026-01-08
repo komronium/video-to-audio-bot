@@ -1,16 +1,16 @@
 from datetime import date
+
 from aiogram import Bot
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import func, select
 
 from config import settings
-from database.models import User
+from database.models import Conversion, User
 from utils.notification import notify_group, notify_milestone
 
 
 class UserService:
-
     def __init__(self, db: AsyncSession):
         self.db = db
 
@@ -27,7 +27,9 @@ class UserService:
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def add_user(self, user_id: int, username: str, name: str, lang: str, bot: Bot):
+    async def add_user(
+        self, user_id: int, username: str, name: str, lang: str, bot: Bot
+    ):
         try:
             user = User(user_id=user_id, username=username, name=name)
             self.db.add(user)
@@ -47,11 +49,17 @@ class UserService:
         result = await self.db.execute(stmt)
         return result.scalars().first() is not None
 
-    async def add_conversation(self, user_id: int):
-       user = await self.get_user(user_id)
-       if user:
-           user.conversation_count += 1
-           await self.db.commit()
+    async def add_conversation(self, user_id: int, is_premium: bool = False):
+        conversion = Conversion(user_id=user_id)
+        self.db.add(conversion)
+        await self.db.commit()
+
+    async def get_conversion_count(self, user_id: int):
+        stmt = select(func.count(Conversion.conversion_id)).where(
+            Conversion.user_id == user_id
+        )
+        result = await self.db.execute(stmt)
+        return result.scalar()
 
     async def total_users(self, exclude_admin=False):
         stmt = select(func.count(User.user_id))
@@ -67,7 +75,9 @@ class UserService:
         return result.scalar()
 
     async def total_conversations(self):
-        stmt = select(func.sum(User.conversation_count))
+        stmt = select(func.count(Conversion.conversion_id)).where(
+            Conversion.success == True
+        )
         result = await self.db.execute(stmt)
         return result.scalar() or 0
 
@@ -86,11 +96,7 @@ class UserService:
         }
 
     async def get_top_users(self, limit=10):
-        stmt = (
-            select(User)
-            .order_by(User.conversation_count.desc())
-            .limit(limit)
-        )
+        stmt = select(User).order_by(User.conversation_count.desc()).limit(limit)
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
@@ -100,7 +106,9 @@ class UserService:
         if not user:
             return None
 
-        higher_stmt = select(func.count(User.user_id)).where(User.conversation_count > user.conversation_count)
+        higher_stmt = select(func.count(User.user_id)).where(
+            User.conversation_count > user.conversation_count
+        )
         result = await self.db.execute(higher_stmt)
         higher = result.scalar() or 0
         return higher + 1
@@ -161,7 +169,7 @@ class UserService:
     async def get_top_language(self):
         """Return most popular language."""
         stmt = (
-            select(User.lang, func.count(User.user_id).label('count'))
+            select(User.lang, func.count(User.user_id).label("count"))
             .where(User.lang.is_not(None))
             .group_by(User.lang)
             .order_by(func.count(User.user_id).desc())
