@@ -56,7 +56,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     user_service = UserService(db)
     user = await user_service.get_user(message.from_user.id)
     lang = await user_service.get_lang(message.from_user.id)
-    is_lifetime = await user_service.is_lifetime(user.id)
+    is_lifetime = user.is_premium
 
     video = message.video if not document else document
     if video.file_size > MAX_FILE_SIZE:
