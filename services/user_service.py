@@ -61,7 +61,7 @@ class UserService:
     async def get_conversion_count(self, user_id: int):
         stmt = select(func.count(Conversion.id)).where(Conversion.user_id == user_id)
         result = await self.db.execute(stmt)
-        return result.scalar()
+        return result.scalar_one()
 
     async def total_users(self, exclude_admin=False):
         stmt = select(func.count(User.user_id))
