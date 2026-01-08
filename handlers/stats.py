@@ -1,17 +1,16 @@
 import asyncio
 import logging
 from collections import Counter
-
-from aiogram import types, Router, Bot, F
-from aiogram.filters import Command
-from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import dataclass
 
+from aiogram import Bot, F, Router, types
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from config import settings
+from database.models import Payment, User
 from services.user_service import UserService
 from utils.i18n import i18n
-from sqlalchemy import func, select
-from database.models import User, Payment
 
 router = Router()
 
@@ -33,7 +32,7 @@ class Stats:
     def avg_conversations(self) -> float:
         if not self.total_active_users:
             return 0.0
-        return round(self.total_conversations / self.total_active_users, 1)
+        return round(self.total_conversations / self.total_active_users, 2)
 
 
 def format_stats_message(stats: Stats, lang: str) -> str:
@@ -49,9 +48,9 @@ def format_stats_message(stats: Stats, lang: str) -> str:
     )
 
 
-@router.message(F.text.in_([
-    i18n.get_text('stats-button', lang) for lang in i18n.LANGUAGES
-]))
+@router.message(
+    F.text.in_([i18n.get_text("stats-button", lang) for lang in i18n.LANGUAGES])
+)
 async def command_stats(message: types.Message, db: AsyncSession):
     try:
         user_service = UserService(db)
@@ -62,7 +61,7 @@ async def command_stats(message: types.Message, db: AsyncSession):
         text = format_stats_message(stats, lang)
         await message.answer(text)
     except Exception:
-        await message.answer('❌ Error getting statistics')
+        await message.answer("❌ Error getting statistics")
         raise
 
 
@@ -70,7 +69,7 @@ async def langs_internal(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
     langs = await user_service.get_langs()
 
-    text = ''
+    text = ""
     for lang in langs:
         if lang:
             text += f"<code>{langs[lang]}</code>\t\t{i18n.get_text('lang', lang)}\n"
@@ -102,8 +101,7 @@ async def deflangs_internal(message: types.Message, db: AsyncSession, bot: Bot):
     langs = Counter(langs)
     langs = dict(langs.most_common(10))
 
-
-    text = ''
+    text = ""
     for lang, count in langs.items():
         text += f"<code>{lang} | {count}</code>\n"
 
@@ -120,15 +118,28 @@ async def adminstats_internal(message: types.Message, db: AsyncSession):
 
     # Users joined last 7 days
     from datetime import date, timedelta
+
     today = date.today()
     last_week = today - timedelta(days=6)
-    joined_last_week_stmt = select(func.count(User.user_id)).where(User.joined_at >= last_week)
+    joined_last_week_stmt = select(func.count(User.user_id)).where(
+        User.joined_at >= last_week
+    )
     joined_last_week = (await db.execute(joined_last_week_stmt)).scalar()
 
     # Top languages
-    langs_stmt = select(User.lang, func.count()).where(User.lang.is_not(None)).group_by(User.lang).order_by(func.count().desc()).limit(5)
+    langs_stmt = (
+        select(User.lang, func.count())
+        .where(User.lang.is_not(None))
+        .group_by(User.lang)
+        .order_by(func.count().desc())
+        .limit(5)
+    )
     langs_rows = (await db.execute(langs_stmt)).all()
-    top_langs = ', '.join(f"{lang or '??'}: {count}" for lang, count in langs_rows) if langs_rows else '—'
+    top_langs = (
+        ", ".join(f"{lang or '??'}: {count}" for lang, count in langs_rows)
+        if langs_rows
+        else "—"
+    )
 
     # Payments aggregates
     diamonds_sum_stmt = select(func.coalesce(func.sum(Payment.diamonds), 0))
@@ -143,9 +154,9 @@ async def adminstats_internal(message: types.Message, db: AsyncSession):
     stars_total = stars_from_diamonds + stars_from_lifetime
 
     # Active ratio and avg
-    total_users = base.get('total_users') or 0
-    total_active = base.get('total_active_users') or 0
-    total_conversations = base.get('total_conversations') or 0
+    total_users = base.get("total_users") or 0
+    total_active = base.get("total_active_users") or 0
+    total_conversations = base.get("total_conversations") or 0
     active_pct = round((total_active * 100 / total_users), 1) if total_users else 0.0
     avg_conv = round((total_conversations / total_active), 2) if total_active else 0.0
 
@@ -166,8 +177,9 @@ async def adminstats_internal(message: types.Message, db: AsyncSession):
     if top_users:
         text += "\n\n<b>Top 10 users</b>\n"
         for idx, user in enumerate(top_users, start=1):
-            name = user.name or (f"@{user.username}" if user.username else str(user.user_id))
+            name = user.name or (
+                f"@{user.username}" if user.username else str(user.user_id)
+            )
             text += f"{idx}. {name} — <code>{user.conversation_count}</code>\n"
-
 
     await message.answer(text)
