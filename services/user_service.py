@@ -75,9 +75,7 @@ class UserService:
         return result.scalar()
 
     async def total_conversations(self):
-        stmt = select(func.count(Conversion.conversion_id)).where(
-            Conversion.success == True
-        )
+        stmt = select(func.count(Conversion.id)).where(Conversion.success == True)
         result = await self.db.execute(stmt)
         return result.scalar() or 0
 
