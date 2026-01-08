@@ -55,9 +55,7 @@ class UserService:
         await self.db.commit()
 
     async def get_conversion_count(self, user_id: int):
-        stmt = select(func.count(Conversion.conversion_id)).where(
-            Conversion.user_id == user_id
-        )
+        stmt = select(func.count(Conversion.id)).where(Conversion.user_id == user_id)
         result = await self.db.execute(stmt)
         return result.scalar()
 
