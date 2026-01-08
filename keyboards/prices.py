@@ -10,7 +10,7 @@ def get_prices_keyboard(lang):
     builder = InlineKeyboardBuilder()
     for price in PRICES:
         builder.button(
-            text=f"{price} " + i18n.get_text("diamonds-button") + f" →  {PRICES[price]} ⭐️", lang,
+            text=f"{price} " + i18n.get_text("diamonds-button", lang) + f" →  {PRICES[price]} ⭐️",
             callback_data=f"diamond:buy:{price}",
         )
     builder.button(text=i18n.get_text("⬅️ Back", lang), callback_data="diamond:back")
