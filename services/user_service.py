@@ -49,8 +49,12 @@ class UserService:
         result = await self.db.execute(stmt)
         return result.scalars().first() is not None
 
-    async def add_conversation(self, user_id: int, is_premium: bool = False):
+    async def add_conversation(self, user_id: int):
+        user = await self.get_user(user_id)
         conversion = Conversion(user_id=user_id)
+        if user.is_premium:
+            conversion.is_premium = True
+
         self.db.add(conversion)
         await self.db.commit()
 

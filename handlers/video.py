@@ -176,9 +176,7 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
         audio_file = FSInputFile(path=audio_path)
 
         bot = await message.bot.get_me()
-        await UserService(db).add_conversation(
-            message.from_user.id, is_premium=is_lifetime
-        )
+        await UserService(db).add_conversation(user_id=message.from_user.id)
         await processing_msg.delete()
         await message.reply_document(
             audio_file, caption=i18n.get_text("converted-by", lang).format(bot.username)
