@@ -22,6 +22,7 @@ class User(Base):
     is_premium = Column(Boolean, default=False)
     lang = Column(String(2), nullable=True)
 
+    conversions = relationship("Conversion", back_populates="user")
     payments = relationship("Payment", back_populates="user")
 
 
