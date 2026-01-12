@@ -72,7 +72,10 @@ class UserService:
         return result.scalar()
 
     async def total_active_users(self):
-        stmt = select(func.count(User.user_id)).where(User.conversation_count > 0)
+        stmt = (
+            select(func.count(distinct(User.user_id)))
+            .join(Conversion, User.user_id == Conversion.user_id)
+        )
         result = await self.db.execute(stmt)
         return result.scalar()
 
