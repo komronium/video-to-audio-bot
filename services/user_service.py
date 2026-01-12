@@ -1,7 +1,7 @@
 from datetime import date
 
 from aiogram import Bot
-from sqlalchemy import func, select
+from sqlalchemy import func, select, distinct
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
