@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import re
 from datetime import datetime
@@ -18,6 +19,10 @@ from utils.i18n import i18n
 
 MAX_FILE_SIZE = 25 * 1024 * 1024
 DAILY_LIMIT = 5
+MAX_QUEUE_SIZE = 50
+MAX_CONCURRENT = 5
+
+conversion_semaphore = asyncio.Semaphore(MAX_CONCURRENT)
 
 r = redis.Redis(host="localhost", port=6379, decode_responses=True)
 
@@ -105,6 +110,16 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
                 return
 
     timestamp = int(message.date.timestamp())
+
+    current_queue_size = queue_manager.queue_length()
+    if current_queue_size >= MAX_QUEUE_SIZE:
+        await message.reply(
+            i18n.get_text("server-busy", lang)
+            if i18n.get_text("server-busy", lang) != "server-busy"
+            else "⚠️ Server is busy right now. Please try again in a few minutes."
+        )
+        return
+
     queue_position = queue_manager.add_to_queue(user_id, video.file_id, timestamp)
     query_length = queue_manager.queue_length()
     queue_message = None
@@ -137,9 +152,30 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
             query_length = queue_manager.queue_length()
 
     if queue_message:
-        await queue_message.delete()
+        try:
+            await queue_message.delete()
+        except TelegramAPIError:
+            pass
 
-    await process_video(message, db, video, lang)
+    try:
+        async with conversion_semaphore:
+            await process_video(message, db, video, lang)
+    except Exception as e:
+        logging.exception(f"Error processing video for user {user_id}")
+        try:
+            await message.reply("⚠️ An error occurred. Please try again later.")
+        except TelegramAPIError:
+            pass
+        try:
+            await message.bot.send_message(
+                settings.ADMIN_ID,
+                f"<b>❌ Video processing error</b>\n"
+                f"<b>User:</b> <code>{user_id}</code>\n"
+                f"<b>Error:</b> <code>{e}</code>\n"
+                f"<b>Queue size:</b> {queue_manager.queue_length()}",
+            )
+        except TelegramAPIError:
+            pass
 
 
 @router.message(F.document.mime_type.startswith("video"))

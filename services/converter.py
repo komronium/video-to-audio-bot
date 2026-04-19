@@ -1,4 +1,4 @@
-import subprocess
+import asyncio
 from pathlib import Path
 
 import requests
@@ -29,11 +29,14 @@ class VideoConverter:
                 audio_path,
             ]
 
-            process = subprocess.Popen(
-                cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            process = await asyncio.create_subprocess_exec(
+                *cmd, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE
             )
 
-            process.wait()
+            _, stderr = await process.communicate()
+
+            if process.returncode != 0:
+                raise RuntimeError(f"ffmpeg failed: {stderr.decode()}")
 
             return audio_path
         except Exception as e:

@@ -30,9 +30,12 @@ class QueueManager:
     def get_next_task(self) -> tuple:
         task = self.redis_client.lpop(self.queue_key)
         if task:
-            user_id, file_id = task.split(":")
-            return int(user_id), file_id
-        return None, None
+            parts = task.split(":")
+            user_id = int(parts[0])
+            file_id = parts[1]
+            timestamp = int(parts[2]) if len(parts) > 2 else 0
+            return user_id, file_id, timestamp
+        return None, None, None
 
     def queue_length(self) -> int:
         return self.redis_client.llen(self.queue_key)
