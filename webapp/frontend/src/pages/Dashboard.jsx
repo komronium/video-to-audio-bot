@@ -6,6 +6,8 @@ import {
   Crown,
   Gem,
   UserPlus,
+  Trophy,
+  DollarSign,
 } from "lucide-react";
 import {
   LineChart,
@@ -20,16 +22,22 @@ import {
 import StatCard from "../components/StatCard";
 import { api } from "../lib/api";
 
+const medals = ["🥇", "🥈", "🥉"];
+
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [chart, setChart] = useState([]);
+  const [topUsers, setTopUsers] = useState([]);
+  const [revenue, setRevenue] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.dashboard(), api.chart(30)])
-      .then(([s, c]) => {
+    Promise.all([api.dashboard(), api.chart(30), api.topUsers(10), api.revenue()])
+      .then(([s, c, t, r]) => {
         setStats(s);
         setChart(c);
+        setTopUsers(t);
+        setRevenue(r);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -139,25 +147,98 @@ export default function Dashboard() {
         </ResponsiveContainer>
       </div>
 
-      {/* Languages */}
-      {stats.languages?.length > 0 && (
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <h2 className="text-sm font-semibold text-gray-700 mb-3">
-            Languages
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {stats.languages.map(({ lang, count }) => (
-              <span
-                key={lang}
-                className="px-3 py-1.5 bg-gray-100 rounded-full text-xs font-medium text-gray-600"
-              >
-                {lang.toUpperCase()}{" "}
-                <span className="text-gray-400">{fmt(count)}</span>
-              </span>
-            ))}
+      {/* Bottom row: Top Users + Languages + Revenue */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Top Users */}
+        {topUsers.length > 0 && (
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy size={16} className="text-amber-500" />
+              <h2 className="text-sm font-semibold text-gray-700">Top Users</h2>
+            </div>
+            <div className="space-y-1.5">
+              {topUsers.map((u, i) => (
+                <div
+                  key={u.user_id}
+                  className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-50"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-6 text-center text-sm">
+                      {i < 3 ? medals[i] : <span className="text-gray-400 text-xs">{i + 1}</span>}
+                    </span>
+                    <span className="text-sm text-gray-800 truncate">
+                      {u.name || u.username || u.user_id}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium text-gray-500 shrink-0">
+                    {fmt(u.conversation_count)}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Languages */}
+        {stats.languages?.length > 0 && (
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">
+              Languages
+            </h2>
+            <div className="space-y-2">
+              {stats.languages.map(({ lang, count }) => {
+                const pct = stats.total_users
+                  ? Math.round((count / stats.total_users) * 100)
+                  : 0;
+                return (
+                  <div key={lang} className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-gray-600 w-6 uppercase">
+                      {lang}
+                    </span>
+                    <div className="flex-1 bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-400 w-16 text-right">
+                      {fmt(count)} ({pct}%)
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Revenue */}
+        {revenue && (
+          <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-3">
+              <DollarSign size={16} className="text-green-500" />
+              <h2 className="text-sm font-semibold text-gray-700">Revenue</h2>
+            </div>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-500">Total Payments</span>
+                <span className="font-semibold text-gray-900">{fmt(revenue.total_payments)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-500">Diamonds Sold</span>
+                <span className="font-semibold text-cyan-600">{fmt(revenue.diamonds_sold)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-500">Lifetime Premium</span>
+                <span className="font-semibold text-amber-600">{fmt(revenue.lifetime_sold)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-gray-500">Unique Buyers</span>
+                <span className="font-semibold text-gray-900">{fmt(revenue.unique_buyers)}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -3,6 +3,7 @@ import Layout from "./components/Layout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
+import Broadcast from "./pages/Broadcast";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -24,6 +25,7 @@ export default function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="users" element={<Users />} />
+        <Route path="broadcast" element={<Broadcast />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

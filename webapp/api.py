@@ -1,7 +1,12 @@
 """Admin Dashboard API for Video-to-Audio Bot."""
 
 import os
+import io
+import csv
+import uuid
+import asyncio
 import jwt
+import httpx
 from datetime import datetime, timedelta, date
 from pathlib import Path
 
@@ -11,10 +16,11 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from fastapi import FastAPI, Depends, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from typing import Optional
 from sqlalchemy import (
     Column, Integer, String, Boolean, Date, ForeignKey,
     func, select, distinct,
@@ -30,6 +36,7 @@ DB_PATH = Path(__file__).resolve().parent.parent / "database.db"
 DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 SECRET_KEY = os.getenv("ADMIN_SECRET", "change-me-in-production")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "admin")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = 24
 
@@ -107,6 +114,11 @@ class DiamondRequest(BaseModel):
 
 class PremiumRequest(BaseModel):
     is_premium: bool
+
+
+class BroadcastRequest(BaseModel):
+    text: str
+    parse_mode: Optional[str] = "HTML"
 
 
 # ─── App ──────────────────────────────────────────────────
@@ -363,6 +375,180 @@ async def toggle_premium(
     user.is_premium = body.is_premium
     await db.commit()
     return {"success": True, "is_premium": user.is_premium}
+
+
+# ─── Top Users ───────────────────────────────────────────
+
+@app.get("/api/top-users")
+async def top_users(
+    limit: int = Query(10, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
+    _=Depends(verify_token),
+):
+    rows = (
+        await db.execute(
+            select(User)
+            .order_by(User.conversation_count.desc())
+            .limit(limit)
+        )
+    ).scalars().all()
+    return [_user_dict(u) for u in rows]
+
+
+# ─── Export ──────────────────────────────────────────────
+
+@app.get("/api/users/export")
+async def export_users(
+    token: str = Query(""),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("role") != "admin":
+            raise HTTPException(403, "Not admin")
+    except Exception:
+        raise HTTPException(401, "Invalid token")
+    rows = (
+        await db.execute(select(User).order_by(User.joined_at.desc()))
+    ).scalars().all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(
+        ["user_id", "name", "username", "conversions", "diamonds", "premium", "lang", "joined_at"]
+    )
+    for u in rows:
+        writer.writerow([
+            u.user_id, u.name, u.username,
+            u.conversation_count or 0, u.diamonds or 0,
+            u.is_premium, u.lang,
+            u.joined_at.isoformat() if u.joined_at else "",
+        ])
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=users.csv"},
+    )
+
+
+# ─── Broadcast ───────────────────────────────────────────
+
+_broadcasts: dict = {}
+
+
+async def _do_broadcast(bid: str, user_ids: list[int], text: str, parse_mode: str):
+    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    async with httpx.AsyncClient(timeout=10) as client:
+        for uid in user_ids:
+            try:
+                resp = await client.post(url, json={
+                    "chat_id": uid,
+                    "text": text,
+                    "parse_mode": parse_mode,
+                })
+                if resp.status_code == 200:
+                    _broadcasts[bid]["sent"] += 1
+                else:
+                    _broadcasts[bid]["failed"] += 1
+            except Exception:
+                _broadcasts[bid]["failed"] += 1
+
+            done = _broadcasts[bid]["sent"] + _broadcasts[bid]["failed"]
+            if done % 25 == 0:
+                await asyncio.sleep(1)
+
+    _broadcasts[bid]["status"] = "done"
+    _broadcasts[bid]["finished_at"] = datetime.utcnow().isoformat()
+
+
+@app.post("/api/broadcast")
+async def start_broadcast(
+    body: BroadcastRequest,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(verify_token),
+):
+    if not BOT_TOKEN:
+        raise HTTPException(500, "BOT_TOKEN not configured")
+
+    user_ids = (
+        await db.execute(select(User.user_id))
+    ).scalars().all()
+
+    bid = uuid.uuid4().hex[:8]
+    _broadcasts[bid] = {
+        "status": "running",
+        "total": len(user_ids),
+        "sent": 0,
+        "failed": 0,
+        "text": body.text[:100],
+        "started_at": datetime.utcnow().isoformat(),
+        "finished_at": None,
+    }
+    asyncio.create_task(_do_broadcast(bid, user_ids, body.text, body.parse_mode))
+    return {"broadcast_id": bid}
+
+
+@app.get("/api/broadcast/{bid}")
+async def broadcast_status(
+    bid: str,
+    _=Depends(verify_token),
+):
+    if bid not in _broadcasts:
+        raise HTTPException(404, "Broadcast not found")
+    return _broadcasts[bid]
+
+
+@app.get("/api/broadcasts")
+async def list_broadcasts(_=Depends(verify_token)):
+    return [
+        {"id": k, **v} for k, v in sorted(
+            _broadcasts.items(),
+            key=lambda x: x[1].get("started_at", ""),
+            reverse=True,
+        )
+    ]
+
+
+# ─── Revenue ────────────────────────────────────────────
+
+@app.get("/api/revenue")
+async def revenue(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(verify_token),
+):
+    total_payments = (
+        await db.execute(select(func.count(Payment.id)))
+    ).scalar() or 0
+    diamonds_sold = (
+        await db.execute(select(func.coalesce(func.sum(Payment.diamonds), 0)))
+    ).scalar() or 0
+    lifetime_sold = (
+        await db.execute(select(func.count()).where(Payment.is_lifetime == True))
+    ).scalar() or 0
+    unique_buyers = (
+        await db.execute(select(func.count(distinct(Payment.user_id))))
+    ).scalar() or 0
+
+    daily = (
+        await db.execute(
+            select(Payment.created_at, func.count(), func.coalesce(func.sum(Payment.diamonds), 0))
+            .group_by(Payment.created_at)
+            .order_by(Payment.created_at.desc())
+            .limit(30)
+        )
+    ).all()
+
+    return {
+        "total_payments": total_payments,
+        "diamonds_sold": diamonds_sold,
+        "lifetime_sold": lifetime_sold,
+        "unique_buyers": unique_buyers,
+        "daily": [
+            {"date": d.isoformat() if d else "", "count": c, "diamonds": dia}
+            for d, c, dia in daily
+        ],
+    }
 
 
 # ─── Static Files (Production) ────────────────────────────

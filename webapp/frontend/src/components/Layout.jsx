@@ -1,9 +1,10 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, LogOut, Bot } from "lucide-react";
+import { LayoutDashboard, Users, Radio, LogOut, Bot } from "lucide-react";
 
 const links = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/users", icon: Users, label: "Users" },
+  { to: "/broadcast", icon: Radio, label: "Broadcast" },
 ];
 
 export default function Layout() {

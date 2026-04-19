@@ -33,6 +33,8 @@ export const api = {
 
   dashboard: () => request("/dashboard"),
   chart: (days = 30) => request(`/dashboard/chart?days=${days}`),
+  topUsers: (limit = 10) => request(`/top-users?limit=${limit}`),
+  revenue: () => request("/revenue"),
 
   users: (page = 1, search = "", sort = "conversions", perPage = 20) =>
     request(
@@ -49,4 +51,16 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ is_premium: isPremium }),
     }),
+  exportUsers: () => {
+    const token = localStorage.getItem("token");
+    window.open(`${API}/users/export?token=${token}`, "_blank");
+  },
+
+  broadcast: (text, parseMode = "HTML") =>
+    request("/broadcast", {
+      method: "POST",
+      body: JSON.stringify({ text, parse_mode: parseMode }),
+    }),
+  broadcastStatus: (bid) => request(`/broadcast/${bid}`),
+  broadcasts: () => request("/broadcasts"),
 };
