@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     CHANNEL_ID: int
     GROUP_ID: int
     ADMIN_ID: int
+    SERVER_IP: str = "89.169.47.171"
 
     LIFETIME_PREMIUM_PRICE: int = 200
     DIAMONDS_PRICES: dict[int, int] = {

@@ -17,12 +17,15 @@ router = Router()
 
 BTN_STATS_EXTENDED = "📊 Stats+"
 BTN_GIVE_DIAMONDS = "💎 Give"
+BTN_DASHBOARD = "🖥 Dashboard"
 BTN_RESTART = "🔁 Restart"
 BTN_UPDATE = "⬇️ Update"
 BTN_LANGS = "🌍 Langs"
 BTN_DEF_LANGS = "📈 DefLangs"
 BTN_BACK = "⬅️ Back"
 BTN_ADMIN = "Admin"
+
+WEBAPP_URL = f"http://{settings.SERVER_IP}:8001"
 
 
 def is_admin(user_id: int) -> bool:
@@ -43,6 +46,9 @@ def get_admin_keyboard(lang: str) -> ReplyKeyboardMarkup:
         [
             KeyboardButton(text=BTN_STATS_EXTENDED),
             KeyboardButton(text=BTN_GIVE_DIAMONDS),
+        ],
+        [
+            KeyboardButton(text=BTN_DASHBOARD),
         ],
         [
             KeyboardButton(text=BTN_RESTART),
@@ -83,6 +89,18 @@ async def admin_extended_stats(message: types.Message, db: AsyncSession):
     # Call internal admin stats logic directly
     from .stats import adminstats_internal
     await adminstats_internal(message, db)
+
+
+@router.message(F.text == BTN_DASHBOARD)
+async def admin_dashboard(message: types.Message):
+    if not is_admin(message.from_user.id):
+        return
+    await message.answer(
+        "🖥 <b>Admin Dashboard</b>",
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="🌐 Open Dashboard", url=WEBAPP_URL)]
+        ]),
+    )
 
 
 @router.message(F.text == BTN_RESTART)
