@@ -22,7 +22,7 @@
   "downloading": "Mengunduh ...",
   "converting": "Mengonversi ...",
   "converted-by": "via @{}",
-  "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n🆔 <code>{user_id}</code>\n🎧 Konversi: <code>{conversions}</code>\n🏅 Peringkat: <b>#{rank}</b> dari {total}\n� Berlian: <code>{diamonds}</code>\n� Bergabung: <code>{joined}</code>",
+  "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Konversi:</b> <code>{conversions}</code>\n▸ <b>Peringkat:</b> #{rank} / {total}\n▸ <b>Berlian:</b> <code>{diamonds}</code>\n▸ <b>Bergabung:</b> <code>{joined}</code>",
   "congrats": "<b>💎 Selamat!</b>\n{} berlian telah ditambahkan ke akun Anda.",
   "congrats-lifetime": "\uD83D\uDC8E Selamat! Kini Anda memiliki akses Premium Seumur Hidup.",
   "subscribe": "Untuk melanjutkan, silakan berlangganan ke channel kami terlebih dahulu.",
@@ -37,7 +37,7 @@
   "top-button": "🏆 Pengguna Teratas",
   "diamonds-button": "💎 Berlian",
   "help-text": "🆘 <b>Cara Menggunakan Bot</b>\n\n1️⃣ <b>Kirim file video</b> — Cukup unggah video Anda di sini.\n2️⃣ <b>Tunggu proses selesai</b> — Bot akan mengekstrak audio secara otomatis.\n3️⃣ <b>Unduh audio</b> — Anda akan menerima file audio yang siap disimpan atau dibagikan.\n\n💎 <b>Butuh lebih?</b> Gunakan berlian untuk konversi tanpa batas dan file besar.\n\nJika Anda memiliki pertanyaan atau butuh bantuan, silakan tanya!",
-  "stat-text": "� <b>Statistik Bot</b>\n\n� Pengguna: <code>{total}</code>\n� Aktif: <code>{active}</code> ({pct}%)\n🎧 Konversi: <code>{conversions}</code>\n🆕 Baru hari ini: <code>{today}</code>",
+  "stat-text": "📊 <b>Statistik Bot</b>\n\n▸ <b>Pengguna:</b> <code>{total}</code>\n▸ <b>Aktif:</b> <code>{active}</code> ({pct}%)\n▸ <b>Konversi:</b> <code>{conversions}</code>\n▸ <b>Baru hari ini:</b> <code>{today}</code>",
   "promo-links": "🔗 <b>Bot dan tautan Telegram yang bermanfaat</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>",
   "admin-gift": "🎁 <b>Hadiah!</b>\n\n💎 Admin menambahkan <b>{count}</b> berlian ke akun Anda."
 }

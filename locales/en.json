@@ -22,7 +22,7 @@
     "downloading": "⬇️ Downloading video...",
     "converting": "🎧 Converting to audio...",
     "converted-by": "via @{}",
-    "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n🆔 <code>{user_id}</code>\n🎧 Conversions: <code>{conversions}</code>\n🏅 Rank: <b>#{rank}</b> of {total}\n� Diamonds: <code>{diamonds}</code>\n� Joined: <code>{joined}</code>",
+    "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Conversions:</b> <code>{conversions}</code>\n▸ <b>Rank:</b> #{rank} / {total}\n▸ <b>Diamonds:</b> <code>{diamonds}</code>\n▸ <b>Joined:</b> <code>{joined}</code>",
     "congrats": "🎉 <b>Success!</b>\n\n{} diamonds have been added to your account.",
     "congrats-lifetime": "🎉 <b>Lifetime Premium Activated!</b>\n\nYou now have unlimited access forever.",
     "subscribe": "\uD83D\uDD14 Please subscribe to our channel to continue using the bot.",
@@ -37,7 +37,7 @@
     "top-button": "🏆 Top Users",
     "diamonds-button": "💎 Diamonds",
     "help-text": "🆘 <b>How It Works</b>\n\n1️⃣ Send a video file\n2️⃣ Wait while we extract the audio\n3️⃣ Download and enjoy\n\n💎 Need more power? Use diamonds for unlimited access and large files.\n\nStill need help? Just ask!",
-    "stat-text": "📊 <b>Bot Statistics</b>\n\n👥 Users: <code>{total}</code>\n🔥 Active: <code>{active}</code> ({pct}%)\n🎧 Conversions: <code>{conversions}</code>\n🆕 New today: <code>{today}</code>",
+    "stat-text": "📊 <b>Bot Statistics</b>\n\n▸ <b>Users:</b> <code>{total}</code>\n▸ <b>Active:</b> <code>{active}</code> ({pct}%)\n▸ <b>Conversions:</b> <code>{conversions}</code>\n▸ <b>New today:</b> <code>{today}</code>",
     "promo-links": "🔗 <b>Useful Telegram bots and links</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>",
     "admin-gift": "🎁 <b>Gift received!</b>\n\n💎 <b>{count}</b> diamonds have been added to your account by the admin."
 }

@@ -55,6 +55,7 @@ class UserService:
         if user.is_premium:
             conversion.is_premium = True
 
+        user.conversation_count = (user.conversation_count or 0) + 1
         self.db.add(conversion)
         await self.db.commit()
 
