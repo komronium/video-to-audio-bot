@@ -22,7 +22,7 @@
   "downloading": "جارٍ التحميل ...",
   "converting": "جارٍ التحويل ...",
   "converted-by": "عن طريق @{}",
-  "profile": "👤 <b>ملفك الشخصي:</b>\n\n🔹 معرف المستخدم: <code>{}</code>\n🔹 الاسم: <b>{}</b>\n🔹 اسم المستخدم: @{}\n🔹 المحادثات: <code>{}</code>\n🔹 تاريخ الانضمام: <code>{}</code>\n🔹 الألماس: <code>{}</code>",
+  "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n🆔 <code>{user_id}</code>\n🎧 التحويلات: <code>{conversions}</code>\n🏅 الترتيب: <b>#{rank}</b> من {total}\n� الألماس: <code>{diamonds}</code>\n� الانضمام: <code>{joined}</code>",
   "congrats": "<b>💎 تهانينا!</b>\nتمت إضافة {} ألماس إلى حسابك.",
   "congrats-lifetime": "💎 تهانينا! لديك الآن وصول مميز مدى الحياة.",
   "subscribe": "للمتابعة، يرجى الاشتراك في قناتنا أولاً.",
@@ -37,6 +37,7 @@
   "top-button": "🏆 أفضل المستخدمين",
   "diamonds-button": "💎 الألماس",
   "help-text": "🆘 <b>كيفية استخدام البوت</b>\n\n1️⃣ <b>أرسل ملف فيديو</b> — فقط قم بتحميل الفيديو هنا.\n2️⃣ <b>انتظر المعالجة</b> — سيقوم البوت باستخراج الصوت تلقائيًا.\n3️⃣ <b>حمّل الصوت</b> — ستحصل على ملف الصوت جاهزًا للحفظ أو المشاركة.\n\n💎 <b>تحتاج المزيد؟</b> استخدم الجواهر للتحويلات غير المحدودة والملفات الكبيرة.\n\nإذا كان لديك أي أسئلة أو تحتاج للمساعدة، فقط اسأل!",
-  "stat-text": "📈 <b>إحصائيات البوت:</b>\n\n🔹 إجمالي المستخدمين: <code>{}</code>\n🔹 المستخدمون النشطون: <code>{} ({}%)</code>\n🔹 إجمالي المحادثات: <code>{} ({})</code>\n🔹 المستخدمون الجدد اليوم: <code>{}</code>",
-  "promo-links": "🔗 <b>بوتات وروابط تيليجرام مفيدة</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>"
+  "stat-text": "� <b>إحصائيات البوت</b>\n\n� المستخدمون: <code>{total}</code>\n� النشطون: <code>{active}</code> ({pct}%)\n🎧 التحويلات: <code>{conversions}</code>\n🆕 الجدد اليوم: <code>{today}</code>",
+  "promo-links": "🔗 <b>بوتات وروابط تيليجرام مفيدة</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>",
+  "admin-gift": "🎁 <b>هدية!</b>\n\n💎 أضاف المسؤول <b>{count}</b> ألماسة إلى حسابك."
 }

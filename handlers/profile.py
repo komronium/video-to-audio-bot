@@ -6,7 +6,9 @@ from utils.i18n import i18n
 
 router = Router()
 
-NOT_REGISTERED_TEXT = "⚠️ You are not registered in the system."
+
+def _fmt(n: int) -> str:
+    return f"{n:,}"
 
 
 @router.message(
@@ -18,18 +20,29 @@ async def profile_handler(message: types.Message, db: AsyncSession):
     lang = await user_service.get_lang(message.from_user.id)
 
     if not user:
-        return await message.answer(NOT_REGISTERED_TEXT)
+        return await message.answer("⚠️ Not registered.")
 
-    diamonds = user.diamonds
-    conversion_count = await user_service.get_conversion_count(user.user_id)
+    conversions = await user_service.get_conversion_count(user.user_id)
+    rank = await user_service.get_user_rank(user.user_id)
+    total_users = await user_service.total_users()
+
+    if user.is_premium:
+        status = "👑 Premium"
+        diamonds_text = "♾️"
+    else:
+        status = "Free"
+        diamonds_text = str(user.diamonds or 0)
 
     text = i18n.get_text("profile", lang).format(
-        user.user_id,
-        user.name,
-        user.username or "N/A",
-        conversion_count,
-        user.joined_at.strftime("%d-%m-%Y"),
-        diamonds if not user.is_premium else "♾️",
+        name=user.name or "—",
+        username=user.username or "N/A",
+        user_id=user.user_id,
+        conversions=_fmt(conversions),
+        rank=rank or "—",
+        total=_fmt(total_users),
+        diamonds=diamonds_text,
+        joined=user.joined_at.strftime("%d.%m.%Y"),
+        status=status,
     )
 
     return await message.answer(text.strip())

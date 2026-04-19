@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from collections import Counter
-from dataclasses import dataclass
+from datetime import date, timedelta
 
 from aiogram import Bot, F, Router, types
 from sqlalchemy import func, select
@@ -14,38 +14,11 @@ from utils.i18n import i18n
 
 router = Router()
 
-
-@dataclass
-class Stats:
-    total_users: int
-    total_active_users: int
-    total_conversations: int
-    users_joined_today: int
-
-    @property
-    def active_users_percentage(self) -> float:
-        if not self.total_users:
-            return 0.0
-        return round(self.total_active_users * 100 / self.total_users)
-
-    @property
-    def avg_conversations(self) -> float:
-        if not self.total_active_users:
-            return 0.0
-        return round(self.total_conversations / self.total_active_users, 2)
+MEDALS = {1: "🥇", 2: "🥈", 3: "🥉"}
 
 
-def format_stats_message(stats: Stats, lang: str) -> str:
-    # Minimal, emoji-free layout (original)
-    pct = max(0.0, min(100.0, stats.active_users_percentage))
-    return (
-        "<b>Statistics</b>\n\n"
-        f"🔹 Users: <code>{stats.total_users}</code>\n"
-        f"🔹 Active: <code>{stats.total_active_users}</code> (<code>{pct:.0f}%</code>)\n"
-        f"🔹 Conversations: <code>{stats.total_conversations}</code>\n"
-        f"🔹 Average per active: <code>{stats.avg_conversations}</code>\n"
-        f"🔹 New today: <code>{stats.users_joined_today}</code>"
-    )
+def _fmt(n: int) -> str:
+    return f"{n:,}"
 
 
 @router.message(
@@ -53,12 +26,23 @@ def format_stats_message(stats: Stats, lang: str) -> str:
 )
 async def command_stats(message: types.Message, db: AsyncSession):
     try:
-        user_service = UserService(db)
-        lang = await user_service.get_lang(message.from_user.id)
-        raw_stats = await user_service.get_stats()
-        stats = Stats(**raw_stats)
+        service = UserService(db)
+        lang = await service.get_lang(message.from_user.id)
+        raw = await service.get_stats()
 
-        text = format_stats_message(stats, lang)
+        total = raw["total_users"] or 0
+        active = raw["total_active_users"] or 0
+        convs = raw["total_conversations"] or 0
+        today = raw["users_joined_today"] or 0
+        pct = round(active * 100 / total) if total else 0
+
+        text = i18n.get_text("stat-text", lang).format(
+            total=_fmt(total),
+            active=_fmt(active),
+            pct=pct,
+            conversions=_fmt(convs),
+            today=today,
+        )
         await message.answer(text)
     except Exception:
         await message.answer("❌ Error getting statistics")
@@ -66,8 +50,8 @@ async def command_stats(message: types.Message, db: AsyncSession):
 
 
 async def langs_internal(message: types.Message, db: AsyncSession):
-    user_service = UserService(db)
-    langs = await user_service.get_langs()
+    service = UserService(db)
+    langs = await service.get_langs()
 
     text = ""
     for lang in langs:
@@ -112,21 +96,21 @@ async def adminstats_internal(message: types.Message, db: AsyncSession):
     if message.from_user.id != settings.ADMIN_ID:
         return
 
-    # Aggregate core stats (reuse service for base metrics)
     service = UserService(db)
     base = await service.get_stats()
 
-    # Users joined last 7 days
-    from datetime import date, timedelta
+    total_users = base.get("total_users") or 0
+    total_active = base.get("total_active_users") or 0
+    total_convs = base.get("total_conversations") or 0
+    today_joined = base.get("users_joined_today") or 0
+    active_pct = round(total_active * 100 / total_users) if total_users else 0
+    avg_conv = round(total_convs / total_active, 1) if total_active else 0
 
     today = date.today()
-    last_week = today - timedelta(days=6)
-    joined_last_week_stmt = select(func.count(User.user_id)).where(
-        User.joined_at >= last_week
-    )
-    joined_last_week = (await db.execute(joined_last_week_stmt)).scalar()
+    week_ago = today - timedelta(days=6)
+    week_stmt = select(func.count(User.user_id)).where(User.joined_at >= week_ago)
+    week_joined = (await db.execute(week_stmt)).scalar() or 0
 
-    # Top languages
     langs_stmt = (
         select(User.lang, func.count())
         .where(User.lang.is_not(None))
@@ -135,51 +119,50 @@ async def adminstats_internal(message: types.Message, db: AsyncSession):
         .limit(5)
     )
     langs_rows = (await db.execute(langs_stmt)).all()
-    top_langs = (
-        ", ".join(f"{lang or '??'}: {count}" for lang, count in langs_rows)
-        if langs_rows
-        else "—"
-    )
+    top_langs = " · ".join(
+        f"{lang or '??'}: {_fmt(c)}" for lang, c in langs_rows
+    ) if langs_rows else "—"
 
-    # Payments aggregates
-    diamonds_sum_stmt = select(func.coalesce(func.sum(Payment.diamonds), 0))
-    diamonds_total = (await db.execute(diamonds_sum_stmt)).scalar() or 0
+    diamonds_stmt = select(func.coalesce(func.sum(Payment.diamonds), 0))
+    diamonds_total = (await db.execute(diamonds_stmt)).scalar() or 0
 
-    lifetime_cnt_stmt = select(func.count()).where(Payment.is_lifetime == True)
-    lifetime_total = (await db.execute(lifetime_cnt_stmt)).scalar() or 0
+    lifetime_stmt = select(func.count()).where(Payment.is_lifetime == True)
+    lifetime_total = (await db.execute(lifetime_stmt)).scalar() or 0
 
-    # Revenue in Stars estimation
-    stars_from_diamonds = diamonds_total * settings.DIAMONDS_PRICE
-    stars_from_lifetime = lifetime_total * settings.LIFETIME_PREMIUM_PRICE
-    stars_total = stars_from_diamonds + stars_from_lifetime
-
-    # Active ratio and avg
-    total_users = base.get("total_users") or 0
-    total_active = base.get("total_active_users") or 0
-    total_conversations = base.get("total_conversations") or 0
-    active_pct = round((total_active * 100 / total_users), 1) if total_users else 0.0
-    avg_conv = round((total_conversations / total_active), 2) if total_active else 0.0
+    _prices = settings.DIAMONDS_PRICES
+    _avg_price = sum(_prices.values()) / sum(_prices.keys()) if _prices else 0
+    stars_diamonds = int(diamonds_total * _avg_price)
+    stars_lifetime = lifetime_total * settings.LIFETIME_PREMIUM_PRICE
+    stars_total = stars_diamonds + stars_lifetime
 
     text = (
-        "<b>Admin Statistics</b>\n\n"
-        f"🔹 Users: <code>{total_users}</code>\n"
-        f"🔹 Active: <code>{total_active}</code> (<code>{active_pct:.0f}%</code>)\n"
-        f"🔹 Conversations: <code>{total_conversations}</code>\n"
-        f"🔹 Average per active: <code>{avg_conv}</code>\n"
-        f"🔹 New users: today <code>{base.get('users_joined_today') or 0}</code> | last 7d <code>{joined_last_week}</code>\n"
-        f"🔹 Top languages: {top_langs or '—'}\n"
-        f"🔹 Sales — diamonds: <code>{diamonds_total}</code> | lifetime: <code>{lifetime_total}</code>\n"
-        f"🔹 Stars (est.): <code>{stars_total}</code>  (diamonds: <code>{stars_from_diamonds}</code>, lifetime: <code>{stars_from_lifetime}</code>)"
+        "📊 <b>Admin Dashboard</b>\n"
+        "━━━━━━━━━━━━━━━\n\n"
+
+        "👥 <b>Users</b>\n"
+        f"├ Total: <code>{_fmt(total_users)}</code>\n"
+        f"├ Active: <code>{_fmt(total_active)}</code> ({active_pct}%)\n"
+        f"├ Avg per user: <code>{avg_conv}</code>\n"
+        f"├ Today: <code>+{today_joined}</code> · 7d: <code>+{week_joined}</code>\n"
+        f"└ Langs: {top_langs}\n\n"
+
+        "🎧 <b>Conversions</b>\n"
+        f"└ Total: <code>{_fmt(total_convs)}</code>\n\n"
+
+        "💰 <b>Revenue</b>\n"
+        f"├ 💎 Diamonds sold: <code>{_fmt(diamonds_total)}</code>\n"
+        f"├ 👑 Lifetime: <code>{lifetime_total}</code>\n"
+        f"└ ⭐ Stars (est.): <code>{_fmt(stars_total)}</code>"
     )
 
-    # Append Top 10 users by conversations
     top_users = await service.get_top_users(limit=10)
     if top_users:
-        text += "\n\n<b>Top 10 users</b>\n"
+        text += "\n\n🏆 <b>Top 10</b>\n"
         for idx, user in enumerate(top_users, start=1):
+            medal = MEDALS.get(idx, f"<code>{idx}.</code>")
             name = user.name or (
                 f"@{user.username}" if user.username else str(user.user_id)
             )
-            text += f"{idx}. {name} — <code>{user.conversation_count}</code>\n"
+            text += f"{medal} {name} — <code>{user.conversation_count}</code>\n"
 
     await message.answer(text)

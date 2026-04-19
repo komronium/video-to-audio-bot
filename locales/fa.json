@@ -22,7 +22,7 @@
     "downloading": "در حال دانلود ...",
     "converting": "در حال تبدیل ...",
     "converted-by": "از طریق @{}",
-    "profile": "👤 <b>پروفایل شما:</b>\n\n🔹 شناسه کاربری: <code>{}</code>\n🔹 نام: <b>{}</b>\n🔹 نام کاربری: @{}\n🔹 گفتگوها: <code>{}</code>\n🔹 تاریخ عضویت: <code>{}</code>\n🔹 الماس‌ها: <code>{}</code>",
+    "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n🆔 <code>{user_id}</code>\n🎧 تبدیل‌ها: <code>{conversions}</code>\n🏅 رتبه: <b>#{rank}</b> از {total}\n� الماس: <code>{diamonds}</code>\n� عضویت: <code>{joined}</code>",
     "congrats": "<b>💎 تبریک!</b>\n{} الماس به حساب شما اضافه شد.",
     "congrats-lifetime": "💎 تبریک! شما اکنون دسترسی ویژه مادام‌العمر دارید.",
     "subscribe": "برای ادامه، لطفاً ابتدا در کانال ما عضو شوید.",
@@ -37,6 +37,7 @@
     "top-button": "🏆 أفضل المستخدمين",
     "diamonds-button": "💎 الألماس",
     "help-text": "🆘 <b>نحوه استفاده از ربات</b>\n\n1️⃣ <b>یک فایل ویدئویی ارسال کنید</b> — فقط ویدیوی خود را اینجا آپلود کنید.\n2️⃣ <b>منتظر پردازش بمانید</b> — ربات به طور خودکار صدا را استخراج می‌کند.\n3️⃣ <b>صدا را دانلود کنید</b> — فایل صوتی آماده برای ذخیره یا اشتراک را دریافت خواهید کرد.\n\n💎 <b>بیشتر نیاز دارید؟</b> از الماس‌ها برای تبدیل نامحدود و فایل‌های بزرگ استفاده کنید.\n\nاگر سوالی دارید یا به کمک نیاز دارید، فقط بپرسید!",
-    "stat-text": "📈 <b>آمار ربات:</b>\n\n🔹 کاربران کل: <code>{}</code>\n🔹 کاربران فعال: <code>{} ({}%)</code>\n🔹 گفتگوهای کل: <code>{} ({})</code>\n🔹 کاربران جدید امروز: <code>{}</code>",
-    "promo-links": "🔗 <b>ربات‌ها و لینک‌های مفید تلگرام</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>"
+    "stat-text": "� <b>آمار ربات</b>\n\n� کاربران: <code>{total}</code>\n� فعال: <code>{active}</code> ({pct}%)\n🎧 تبدیل‌ها: <code>{conversions}</code>\n🆕 جدید امروز: <code>{today}</code>",
+    "promo-links": "🔗 <b>ربات‌ها و لینک‌های مفید تلگرام</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>",
+    "admin-gift": "🎁 <b>هدیه!</b>\n\n💎 مدیر <b>{count}</b> الماس به حساب شما اضافه کرد."
 }

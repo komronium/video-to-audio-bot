@@ -26,9 +26,16 @@ def get_language_keyboard():
 def get_menu_keyboard(lang: str, is_admin: bool = False):
     rows = [
         [
-            types.KeyboardButton(text=i18n.get_text('lang-button', lang)),
             types.KeyboardButton(text=i18n.get_text('stats-button', lang)),
-            types.KeyboardButton(text=i18n.get_text('profile-button', lang))
+            types.KeyboardButton(text=i18n.get_text('profile-button', lang)),
+        ],
+        [
+            types.KeyboardButton(text=i18n.get_text('diamonds-button', lang)),
+            types.KeyboardButton(text=i18n.get_text('top-button', lang)),
+        ],
+        [
+            types.KeyboardButton(text=i18n.get_text('lang-button', lang)),
+            types.KeyboardButton(text=i18n.get_text('help-button', lang)),
         ],
     ]
     if is_admin:

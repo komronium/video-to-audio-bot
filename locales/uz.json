@@ -22,7 +22,7 @@
     "downloading": "⬇️ Video yuklanmoqda...",
     "converting": "🎧 Audio ajratilmoqda...",
     "converted-by": "@{} orqali",
-    "profile": "👤 <b>Sizning profilingiz</b>\n\n🆔 ID: <code>{}</code>\n👤 Ism: <b>{}</b>\n🔗 Username: @{}\n💬 Konvertatsiyalar: <code>{}</code>\n📅 Ro‘yxatdan o‘tgan sana: <code>{}</code>\n💎 Olmoslar: <code>{}</code>",
+    "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n🆔 <code>{user_id}</code>\n🎧 Konvertatsiyalar: <code>{conversions}</code>\n🏅 O'rin: <b>#{rank}</b> / {total}\n💎 Olmoslar: <code>{diamonds}</code>\n� Qo'shilgan: <code>{joined}</code>",
     "congrats": "🎉 <b>Muvaffaqiyatli!</b>\n\n{} ta olmos hisobingizga qo‘shildi.",
     "congrats-lifetime": "🎉 <b>Doimiy Premium faollashtirildi!</b>\n\nEndi sizda cheksiz imkoniyatlar mavjud.",
     "subscribe": "Davom etish uchun, avval kanalimizga obuna bo'ling.",
@@ -37,7 +37,8 @@
     "top-button": "🏆 Eng yaxshi foydalanuvchilar",
     "diamonds-button": "💎 Olmoslar",
     "help-text": "🆘 <b>Botdan foydalanish</b>\n\n1️⃣ <b>Video fayl yuboring</b> — Videongizni shu yerga yuklang.\n2️⃣ <b>Qayta ishlashni kuting</b> — Bot avtomatik tarzda audioni ajratib oladi.\n3️⃣ <b>Audioni yuklab oling</b> — Tayyor audio faylni saqlab olishingiz yoki ulashishingiz mumkin.\n\n💎 <b>Ko‘proq ma'lumot kerakmi?</b> Cheksiz konvertatsiya va katta fayllar uchun olmoslardan foydalaning.\n\nSavollaringiz bo‘lsa yoki yordam kerak bo‘lsa, bemalol so‘rashingiz mumkin!",
-    "stat-text": "📈 <b>BOT STATISTIKASI:</b>\n\n🔹 Jami foydalanuvchilar: <code>{}</code>\n🔹 Faol foydalanuvchilar: <code>{} ({}%)</code>\n🔹 Jami konversiyalar: <code>{} ({})</code>\n🔹 Bugun qo‘shilgan foydalanuvchilar: <code>{}</code>",
+    "stat-text": "� <b>Bot statistikasi</b>\n\n� Foydalanuvchilar: <code>{total}</code>\n� Faol: <code>{active}</code> ({pct}%)\n🎧 Konvertatsiyalar: <code>{conversions}</code>\n🆕 Bugun qo'shilgan: <code>{today}</code>",
     "promo-links": "🔗 <b>Foydali Telegram botlar va linklar</b>\n📌 <a href=\"https://t.me/TGBotsUsefulLinks\"><b>t.me/TGBotsUsefulLinks</b></a>",
-    "error-server": "❌ Xatolik. Iltimos, birozdan so‘ng qayta urinib ko‘ring!"
+    "error-server": "❌ Xatolik. Iltimos, birozdan so'ng qayta urinib ko'ring!",
+    "admin-gift": "🎁 <b>Sovg'a!</b>\n\n💎 Admin tomonidan hisobingizga <b>{count}</b> ta olmos qo'shildi."
 }

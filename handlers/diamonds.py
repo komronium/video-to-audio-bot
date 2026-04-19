@@ -12,6 +12,19 @@ from utils.i18n import i18n
 router = Router()
 
 
+@router.message(
+    F.text.in_([i18n.get_text("diamonds-button", lang) for lang in i18n.LANGUAGES])
+)
+async def diamonds_menu(message: Message):
+    async with get_db() as db:
+        service = UserService(db)
+        lang = await service.get_lang(message.from_user.id)
+        await message.answer(
+            i18n.get_text("buy-diamonds", lang),
+            reply_markup=get_prices_keyboard(lang),
+        )
+
+
 @router.callback_query(F.data == "diamond:list")
 async def buy_diamonds_callback(call: CallbackQuery):
     async with get_db() as db:
