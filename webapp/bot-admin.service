@@ -1,0 +1,14 @@
+[Unit]
+Description=Bot Admin Dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/video-to-audio-bot/webapp
+ExecStart=/usr/local/bin/uvicorn api:app --host 127.0.0.1 --port 8001
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
