@@ -39,6 +39,10 @@ class QueueManager:
 
     def queue_length(self) -> int:
         return self.redis_client.llen(self.queue_key)
+
+    def user_in_queue(self, user_id: int) -> bool:
+        queue = self.redis_client.lrange(self.queue_key, 0, -1)
+        return any(item.startswith(f"{user_id}:") for item in queue)
     
     def clear_queue(self):
         self.redis_client.delete(self.queue_key)
