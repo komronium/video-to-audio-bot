@@ -93,8 +93,16 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
     if count and int(count) >= DAILY_LIMIT:
         if not is_lifetime and user.diamonds <= 0:
+            ttl = r.ttl(key)
+            if ttl and ttl > 0:
+                hours = ttl // 3600
+                minutes = (ttl % 3600) // 60
+                time_str = f"{hours}h {minutes}m" if hours else f"{minutes}m"
+                limit_text = i18n.get_text("daily-limit", lang) + f"\n\n⏳ <b>{time_str}</b>"
+            else:
+                limit_text = i18n.get_text("daily-limit", lang)
             await message.answer(
-                i18n.get_text("daily-limit", lang),
+                limit_text,
                 reply_markup=get_buy_more_keyboard(lang),
             )
             return
