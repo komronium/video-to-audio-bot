@@ -221,11 +221,8 @@ export default function Dashboard() {
                   nameKey="lang"
                   cx="50%"
                   cy="50%"
-                  outerRadius={70}
-                  label={({ lang, percent }) =>
-                    `${(lang || "??").toUpperCase()} ${(percent * 100).toFixed(0)}%`
-                  }
-                  labelLine={false}
+                  innerRadius={40}
+                  outerRadius={65}
                 >
                   {stats.languages.map((_, i) => (
                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
@@ -234,6 +231,11 @@ export default function Dashboard() {
                 <Tooltip
                   formatter={(v, n) => [v, (n || "??").toUpperCase()]}
                   contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
+                />
+                <Legend
+                  formatter={(v) => (v || "??").toUpperCase()}
+                  iconSize={8}
+                  wrapperStyle={{ fontSize: 11 }}
                 />
               </PieChart>
             </ResponsiveContainer>

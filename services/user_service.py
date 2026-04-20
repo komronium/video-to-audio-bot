@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from database.models import Conversion, User
+from database.models import Conversion, Payment, User
 from utils.notification import notify_group, notify_milestone
 
 
@@ -136,12 +136,17 @@ class UserService:
         user = await self.get_user(user_id)
         if user:
             user.diamonds = (user.diamonds or 0) + count
+            payment = Payment(user_id=user.id, diamonds=count, is_lifetime=False)
+            self.db.add(payment)
             await self.db.commit()
 
     async def set_lifetime(self, user_id: int):
         user = await self.get_user(user_id)
         if user:
             user.diamonds = 99999
+            user.is_premium = True
+            payment = Payment(user_id=user.id, diamonds=0, is_lifetime=True)
+            self.db.add(payment)
             await self.db.commit()
 
     async def is_lifetime(self, user_id: int) -> bool:
