@@ -60,7 +60,13 @@ def generate_name(message: Message, video) -> str:
 async def video_handler(message: Message, db: AsyncSession, document: Document = None):
     user_service = UserService(db)
     user = await user_service.get_user(message.from_user.id)
-    lang = await user_service.get_lang(message.from_user.id)
+    if not user:
+        tg_user = message.from_user
+        user = await user_service.add_user(
+            tg_user.id, tg_user.username, tg_user.full_name,
+            tg_user.language_code or "en", message.bot
+        )
+    lang = user.lang or "en"
     is_lifetime = user.is_premium
 
     video = message.video if not document else document
@@ -218,7 +224,7 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
     try:
         processing_msg = await message.reply(i18n.get_text("downloading", lang))
 
-        file = await message.bot.get_file(video.file_id, request_timeout=300)
+        file = await message.bot.get_file(video.file_id)
         video_path = file.file_path
 
         file_name = generate_name(message, video)

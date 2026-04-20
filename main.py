@@ -25,7 +25,7 @@ async def on_shutdown(bot: Bot):
 async def main():
     basicConfig(level=INFO)
     local_server = TelegramAPIServer.from_base('http://localhost:8081')
-    session = AiohttpSession(api=local_server)
+    session = AiohttpSession(api=local_server, timeout=300)
 
     bot = Bot(
         token=settings.BOT_TOKEN,
