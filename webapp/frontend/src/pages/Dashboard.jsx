@@ -151,7 +151,7 @@ export default function Dashboard() {
           icon={Star}
           label="Stars Earned"
           value={fmt(stats.stars_earned)}
-          sub={`${stats.lifetime_sold} lifetime · ${stats.diamonds_sold} 💎`}
+          sub={`≈ $${(stats.stars_earned * 0.013).toFixed(2)} · ${stats.lifetime_sold} lifetime · ${stats.diamonds_sold} 💎`}
           accent="amber"
         />
         <KpiCard
@@ -335,7 +335,7 @@ export default function Dashboard() {
             {revenue && (
               <div className="text-right">
                 <p className="text-lg font-bold text-yellow-500 leading-none">{fmt(revenue.stars_earned)}</p>
-                <p className="text-xs text-gray-400 mt-0.5">⭐ total</p>
+                <p className="text-xs text-gray-400 mt-0.5">⭐ · ≈ ${(revenue.stars_earned * 0.013).toFixed(2)}</p>
               </div>
             )}
           </div>
