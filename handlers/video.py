@@ -200,6 +200,8 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
             )
         except TelegramAPIError:
             pass
+    finally:
+        queue_manager.remove_from_queue(user_id, video.file_id, timestamp)
 
 
 @router.message(F.document.mime_type.startswith("video"))
@@ -209,15 +211,17 @@ async def document_handler(message: Message, db: AsyncSession):
 
 async def process_video(message: Message, db: AsyncSession, video, lang: str):
     user_id = message.from_user.id
-    processing_msg = await message.reply(i18n.get_text("downloading", lang))
-
-    file = await message.bot.get_file(video.file_id, request_timeout=300)
-    video_path = file.file_path
+    processing_msg = None
+    video_path = None
     audio_path = None
 
     try:
-        file_name = generate_name(message, video)
+        processing_msg = await message.reply(i18n.get_text("downloading", lang))
 
+        file = await message.bot.get_file(video.file_id, request_timeout=300)
+        video_path = file.file_path
+
+        file_name = generate_name(message, video)
         await processing_msg.edit_text(i18n.get_text("converting", lang))
 
         audio_path = await VideoConverter().convert_video_to_audio(
@@ -234,13 +238,20 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
             return
 
         audio_file = FSInputFile(path=audio_path)
-
         bot = await message.bot.get_me()
         await UserService(db).add_conversation(user_id=message.from_user.id)
         await processing_msg.delete()
-        await message.reply_document(
-            audio_file, caption=i18n.get_text("converted-by", lang).format(bot.username)
-        )
+        processing_msg = None
+
+        try:
+            await message.reply_document(
+                audio_file, caption=i18n.get_text("converted-by", lang).format(bot.username)
+            )
+        except TelegramRetryAfter as e:
+            await asyncio.sleep(e.retry_after)
+            await message.reply_document(
+                audio_file, caption=i18n.get_text("converted-by", lang).format(bot.username)
+            )
 
         today = datetime.today().strftime("%Y-%m-%d")
         key = f"user:{user_id}:{today}"
@@ -249,10 +260,16 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
             r.expire(key, 86400)
         else:
             r.incr(key)
-    finally:
-        timestamp = int(message.date.timestamp())
-        queue_manager.remove_from_queue(user_id, video.file_id, timestamp)
 
-        os.remove(video_path)
+    except Exception:
+        if processing_msg:
+            try:
+                await processing_msg.edit_text("⚠️ Error. Please try again.")
+            except TelegramAPIError:
+                pass
+        raise
+    finally:
+        if video_path and os.path.exists(video_path):
+            os.remove(video_path)
         if audio_path and os.path.exists(audio_path):
             os.remove(audio_path)
