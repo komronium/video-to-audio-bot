@@ -10,6 +10,7 @@ class VideoConverter:
     def __init__(self):
         self.output_dir = Path("videos")
         self.output_dir.mkdir(exist_ok=True)
+        Path("audios").mkdir(exist_ok=True)
 
     async def convert_video_to_audio(self, video_path: str, output_path: str) -> str:
         try:
