@@ -627,7 +627,7 @@ async def list_conversions(
     db: AsyncSession = Depends(get_db),
     _=Depends(verify_token),
 ):
-    stmt = select(Conversion, User).join(User, User.id == Conversion.user_id)
+    stmt = select(Conversion, User).join(User, User.user_id == Conversion.user_id)
     count_stmt = select(func.count(Conversion.id))
     if filter == "premium":
         stmt = stmt.where(Conversion.is_premium == True)
