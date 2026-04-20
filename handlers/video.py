@@ -12,7 +12,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from services.converter import VideoConverter
+from services.converter import VideoConverter, NoAudioError
 from services.redis_queue import queue_manager
 from services.user_service import UserService
 from utils.i18n import i18n
@@ -200,9 +200,13 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
         file_name = generate_name(message, video)
         await processing_msg.edit_text(i18n.get_text("converting", lang))
 
-        audio_path = await VideoConverter().convert_video_to_audio(
-            video_path, f"audios/{file_name}"
-        )
+        try:
+            audio_path = await VideoConverter().convert_video_to_audio(
+                video_path, f"audios/{file_name}"
+            )
+        except NoAudioError:
+            await processing_msg.edit_text("🔇 This video has no audio track.")
+            return
 
         if type(audio_path) is dict:
             await processing_msg.edit_text("❌ Error. Please try again later!")

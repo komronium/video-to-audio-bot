@@ -6,6 +6,10 @@ import requests
 from config import settings
 
 
+class NoAudioError(Exception):
+    pass
+
+
 class VideoConverter:
     def __init__(self):
         self.output_dir = Path("videos")
@@ -25,8 +29,6 @@ class VideoConverter:
                 "-i",
                 video_path,
                 "-vn",
-                "-map",
-                "a:0",
                 audio_path,
             ]
 
@@ -35,11 +37,16 @@ class VideoConverter:
             )
 
             _, stderr = await process.communicate()
+            err_text = stderr.decode()
 
             if process.returncode != 0:
-                raise RuntimeError(f"ffmpeg failed: {stderr.decode()}")
+                if "matches no streams" in err_text or "does not contain any stream" in err_text or "Output file does not contain" in err_text:
+                    raise NoAudioError("Video has no audio stream")
+                raise RuntimeError(f"ffmpeg failed: {err_text}")
 
             return audio_path
+        except NoAudioError:
+            raise
         except Exception as e:
             raise RuntimeError(f"Error during conversion: {e}")
 
