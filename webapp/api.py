@@ -178,6 +178,7 @@ async def dashboard(
 ):
     today = date.today()
     week_ago = today - timedelta(days=7)
+    two_weeks_ago = today - timedelta(days=14)
 
     total_users = (
         await db.execute(select(func.count(User.user_id)))
@@ -198,11 +199,28 @@ async def dashboard(
             select(func.count(User.user_id)).where(User.joined_at >= week_ago)
         )
     ).scalar() or 0
+    new_prev_week = (
+        await db.execute(
+            select(func.count(User.user_id)).where(
+                User.joined_at >= two_weeks_ago, User.joined_at < week_ago
+            )
+        )
+    ).scalar() or 0
     premium_users = (
         await db.execute(
             select(func.count(User.user_id)).where(User.is_premium == True)
         )
     ).scalar() or 0
+    today_conversions = (
+        await db.execute(
+            select(func.count(Conversion.id)).where(Conversion.created_at == today)
+        )
+    ).scalar() or 0
+
+    # Growth rate: this week vs prev week
+    growth_rate = round(
+        ((new_week - new_prev_week) / new_prev_week * 100) if new_prev_week else 0, 1
+    )
 
     # Revenue
     payments_rows = (await db.execute(select(Payment.diamonds, Payment.is_lifetime))).all()
@@ -226,6 +244,9 @@ async def dashboard(
         "total_conversions": total_conversions,
         "new_today": new_today,
         "new_week": new_week,
+        "new_prev_week": new_prev_week,
+        "growth_rate": growth_rate,
+        "today_conversions": today_conversions,
         "premium_users": premium_users,
         "diamonds_sold": diamonds_sold,
         "stars_earned": stars_earned,
