@@ -159,6 +159,16 @@ async def login(body: LoginRequest):
     return {"token": token}
 
 
+# ─── Helpers ─────────────────────────────────────────────
+
+DIAMOND_PRICE = {1: 2, 3: 5, 5: 8, 10: 15, 20: 28, 50: 70}
+
+def payment_stars(diamonds: int, is_lifetime: bool) -> int:
+    if is_lifetime:
+        return 200
+    return DIAMOND_PRICE.get(diamonds, diamonds * 2)
+
+
 # ─── Dashboard ────────────────────────────────────────────
 
 @app.get("/api/dashboard")
@@ -195,16 +205,10 @@ async def dashboard(
     ).scalar() or 0
 
     # Revenue
-    diamonds_sold = (
-        await db.execute(
-            select(func.coalesce(func.sum(Payment.diamonds), 0))
-        )
-    ).scalar() or 0
-    lifetime_sold = (
-        await db.execute(
-            select(func.count()).where(Payment.is_lifetime == True)
-        )
-    ).scalar() or 0
+    payments_rows = (await db.execute(select(Payment.diamonds, Payment.is_lifetime))).all()
+    diamonds_sold = sum(p.diamonds for p in payments_rows if not p.is_lifetime)
+    stars_earned = sum(payment_stars(p.diamonds, p.is_lifetime) for p in payments_rows)
+    lifetime_sold = sum(1 for p in payments_rows if p.is_lifetime)
 
     # Language distribution
     langs = (
@@ -224,6 +228,7 @@ async def dashboard(
         "new_week": new_week,
         "premium_users": premium_users,
         "diamonds_sold": diamonds_sold,
+        "stars_earned": stars_earned,
         "lifetime_sold": lifetime_sold,
         "languages": [
             {"lang": lang or "??", "count": count} for lang, count in langs
@@ -233,7 +238,7 @@ async def dashboard(
 
 @app.get("/api/dashboard/chart")
 async def dashboard_chart(
-    days: int = Query(30, ge=7, le=90),
+    days: int = Query(7, ge=7, le=365),
     db: AsyncSession = Depends(get_db),
     _=Depends(verify_token),
 ):
@@ -520,12 +525,10 @@ async def revenue(
     total_payments = (
         await db.execute(select(func.count(Payment.id)))
     ).scalar() or 0
-    diamonds_sold = (
-        await db.execute(select(func.coalesce(func.sum(Payment.diamonds), 0)))
-    ).scalar() or 0
-    lifetime_sold = (
-        await db.execute(select(func.count()).where(Payment.is_lifetime == True))
-    ).scalar() or 0
+    payments_rows = (await db.execute(select(Payment.diamonds, Payment.is_lifetime))).all()
+    diamonds_sold = sum(p.diamonds for p in payments_rows if not p.is_lifetime)
+    stars_earned = sum(payment_stars(p.diamonds, p.is_lifetime) for p in payments_rows)
+    lifetime_sold = sum(1 for p in payments_rows if p.is_lifetime)
     unique_buyers = (
         await db.execute(select(func.count(distinct(Payment.user_id))))
     ).scalar() or 0
@@ -542,6 +545,7 @@ async def revenue(
     return {
         "total_payments": total_payments,
         "diamonds_sold": diamonds_sold,
+        "stars_earned": stars_earned,
         "lifetime_sold": lifetime_sold,
         "unique_buyers": unique_buyers,
         "daily": [

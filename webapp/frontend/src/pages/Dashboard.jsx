@@ -8,6 +8,7 @@ import {
   UserPlus,
   Trophy,
   DollarSign,
+  Star,
 } from "lucide-react";
 import {
   LineChart,
@@ -18,21 +19,28 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  PieChart,
+  Pie,
+  Cell,
 } from "recharts";
 import StatCard from "../components/StatCard";
 import { api } from "../lib/api";
 
 const medals = ["🥇", "🥈", "🥉"];
+const periods = [{ label: "7D", days: 7 }, { label: "30D", days: 30 }, { label: "1Y", days: 365 }];
+const PIE_COLORS = ["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b", "#ef4444", "#6366f1", "#14b8a6"];
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const [chart, setChart] = useState([]);
+  const [chartDays, setChartDays] = useState(7);
+  const [chartLoading, setChartLoading] = useState(false);
   const [topUsers, setTopUsers] = useState([]);
   const [revenue, setRevenue] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.dashboard(), api.chart(30), api.topUsers(10), api.revenue()])
+    Promise.all([api.dashboard(), api.chart(7), api.topUsers(10), api.revenue()])
       .then(([s, c, t, r]) => {
         setStats(s);
         setChart(c);
@@ -41,6 +49,13 @@ export default function Dashboard() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const switchPeriod = (days) => {
+    if (days === chartDays) return;
+    setChartDays(days);
+    setChartLoading(true);
+    api.chart(days).then(setChart).finally(() => setChartLoading(false));
+  };
 
   if (loading) {
     return (
@@ -103,9 +118,24 @@ export default function Dashboard() {
 
       {/* Chart */}
       <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-        <h2 className="text-sm font-semibold text-gray-700 mb-4">
-          Last 30 Days
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-gray-700">
+            {chartDays === 7 ? "Last 7 Days" : chartDays === 30 ? "Last 30 Days" : "Last Year"}
+          </h2>
+          <div className="flex bg-gray-100 rounded-lg p-0.5">
+            {periods.map((p) => (
+              <button
+                key={p.days}
+                onClick={() => switchPeriod(p.days)}
+                className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+                  chartDays === p.days ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={chart}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -179,35 +209,34 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Languages */}
+        {/* Languages pie chart */}
         {stats.languages?.length > 0 && (
           <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-700 mb-3">
-              Languages
-            </h2>
-            <div className="space-y-2">
-              {stats.languages.map(({ lang, count }) => {
-                const pct = stats.total_users
-                  ? Math.round((count / stats.total_users) * 100)
-                  : 0;
-                return (
-                  <div key={lang} className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-gray-600 w-6 uppercase">
-                      {lang}
-                    </span>
-                    <div className="flex-1 bg-gray-100 rounded-full h-2">
-                      <div
-                        className="bg-blue-500 h-2 rounded-full"
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="text-xs text-gray-400 w-16 text-right">
-                      {fmt(count)} ({pct}%)
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+            <h2 className="text-sm font-semibold text-gray-700 mb-3">Languages</h2>
+            <ResponsiveContainer width="100%" height={180}>
+              <PieChart>
+                <Pie
+                  data={stats.languages}
+                  dataKey="count"
+                  nameKey="lang"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={70}
+                  label={({ lang, percent }) =>
+                    `${(lang || "??").toUpperCase()} ${(percent * 100).toFixed(0)}%`
+                  }
+                  labelLine={false}
+                >
+                  {stats.languages.map((_, i) => (
+                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(v, n) => [v, (n || "??").toUpperCase()]}
+                  contentStyle={{ borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 12 }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         )}
 
@@ -215,7 +244,7 @@ export default function Dashboard() {
         {revenue && (
           <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-center gap-2 mb-3">
-              <DollarSign size={16} className="text-green-500" />
+              <Star size={16} className="text-yellow-500" />
               <h2 className="text-sm font-semibold text-gray-700">Revenue</h2>
             </div>
             <div className="space-y-3">
@@ -224,11 +253,15 @@ export default function Dashboard() {
                 <span className="font-semibold text-gray-900">{fmt(revenue.total_payments)}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                <span className="text-sm text-gray-500">Diamonds Sold</span>
+                <span className="text-sm text-gray-500">⭐ Stars Earned</span>
+                <span className="font-semibold text-yellow-500">{fmt(revenue.stars_earned)}</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-500">💎 Diamonds Sold</span>
                 <span className="font-semibold text-cyan-600">{fmt(revenue.diamonds_sold)}</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                <span className="text-sm text-gray-500">Lifetime Premium</span>
+                <span className="text-sm text-gray-500">👑 Lifetime</span>
                 <span className="font-semibold text-amber-600">{fmt(revenue.lifetime_sold)}</span>
               </div>
               <div className="flex justify-between items-center py-2">
