@@ -3,6 +3,7 @@
 import os
 import io
 import csv
+import json
 import uuid
 import asyncio
 import jwt
@@ -574,6 +575,168 @@ async def revenue(
             for d, c, dia in daily
         ],
     }
+
+
+# ─── Payments ────────────────────────────────────────────
+
+@app.get("/api/payments")
+async def list_payments(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    type: str = Query("all"),
+    db: AsyncSession = Depends(get_db),
+    _=Depends(verify_token),
+):
+    stmt = select(Payment, User).join(User, User.id == Payment.user_id)
+    count_stmt = select(func.count(Payment.id))
+    if type == "diamond":
+        stmt = stmt.where(Payment.is_lifetime == False)
+        count_stmt = count_stmt.where(Payment.is_lifetime == False)
+    elif type == "lifetime":
+        stmt = stmt.where(Payment.is_lifetime == True)
+        count_stmt = count_stmt.where(Payment.is_lifetime == True)
+    stmt = stmt.order_by(Payment.created_at.desc(), Payment.id.desc())
+    total = (await db.execute(count_stmt)).scalar() or 0
+    rows = (await db.execute(stmt.offset((page - 1) * per_page).limit(per_page))).all()
+    return {
+        "payments": [
+            {
+                "id": p.id,
+                "user_id": u.user_id,
+                "user_name": u.name,
+                "username": u.username,
+                "diamonds": p.diamonds,
+                "stars": payment_stars(p.diamonds, p.is_lifetime),
+                "is_lifetime": p.is_lifetime,
+                "created_at": p.created_at.isoformat() if p.created_at else None,
+            }
+            for p, u in rows
+        ],
+        "total": total,
+        "pages": max(1, (total + per_page - 1) // per_page),
+    }
+
+
+# ─── Conversions ──────────────────────────────────────────
+
+@app.get("/api/conversions")
+async def list_conversions(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=100),
+    filter: str = Query("all"),
+    db: AsyncSession = Depends(get_db),
+    _=Depends(verify_token),
+):
+    stmt = select(Conversion, User).join(User, User.id == Conversion.user_id)
+    count_stmt = select(func.count(Conversion.id))
+    if filter == "premium":
+        stmt = stmt.where(Conversion.is_premium == True)
+        count_stmt = count_stmt.where(Conversion.is_premium == True)
+    elif filter == "free":
+        stmt = stmt.where(Conversion.is_premium == False)
+        count_stmt = count_stmt.where(Conversion.is_premium == False)
+    stmt = stmt.order_by(Conversion.created_at.desc(), Conversion.id.desc())
+    total = (await db.execute(count_stmt)).scalar() or 0
+    rows = (await db.execute(stmt.offset((page - 1) * per_page).limit(per_page))).all()
+    return {
+        "conversions": [
+            {
+                "id": c.id,
+                "user_id": u.user_id,
+                "user_name": u.name,
+                "username": u.username,
+                "is_premium": c.is_premium,
+                "success": c.success,
+                "created_at": c.created_at.isoformat() if c.created_at else None,
+            }
+            for c, u in rows
+        ],
+        "total": total,
+        "pages": max(1, (total + per_page - 1) // per_page),
+    }
+
+
+# ─── Analytics ────────────────────────────────────────────
+
+@app.get("/api/analytics")
+async def analytics(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(verify_token),
+):
+    today = date.today()
+    start_30 = today - timedelta(days=29)
+    this_month_start = today.replace(day=1)
+    last_month_start = (this_month_start - timedelta(days=1)).replace(day=1)
+
+    total_users = (await db.execute(select(func.count(User.user_id)))).scalar() or 0
+    active_users = (await db.execute(select(func.count(distinct(Conversion.user_id))))).scalar() or 0
+    paying_users = (await db.execute(select(func.count(distinct(Payment.user_id))))).scalar() or 0
+    lifetime_users = (await db.execute(select(func.count(User.user_id)).where(User.is_premium == True))).scalar() or 0
+    premium_conv = (await db.execute(select(func.count(Conversion.id)).where(Conversion.is_premium == True))).scalar() or 0
+    total_conv = (await db.execute(select(func.count(Conversion.id)))).scalar() or 0
+
+    daily_conv = dict((await db.execute(
+        select(Conversion.created_at, func.count()).where(Conversion.created_at >= start_30).group_by(Conversion.created_at)
+    )).all())
+    daily_users = dict((await db.execute(
+        select(User.joined_at, func.count()).where(User.joined_at >= start_30).group_by(User.joined_at)
+    )).all())
+    daily = [{"date": (start_30 + timedelta(days=i)).isoformat(), "conversions": daily_conv.get(start_30 + timedelta(days=i), 0), "users": daily_users.get(start_30 + timedelta(days=i), 0)} for i in range(30)]
+
+    this_month_users = (await db.execute(select(func.count(User.user_id)).where(User.joined_at >= this_month_start))).scalar() or 0
+    last_month_users = (await db.execute(select(func.count(User.user_id)).where(User.joined_at >= last_month_start, User.joined_at < this_month_start))).scalar() or 0
+    this_month_conv = (await db.execute(select(func.count(Conversion.id)).where(Conversion.created_at >= this_month_start))).scalar() or 0
+    last_month_conv = (await db.execute(select(func.count(Conversion.id)).where(Conversion.created_at >= last_month_start, Conversion.created_at < this_month_start))).scalar() or 0
+
+    return {
+        "funnel": [
+            {"label": "Total Users", "value": total_users, "color": "#3b82f6", "pct": 100},
+            {"label": "Active Users", "value": active_users, "color": "#8b5cf6", "pct": round(active_users / max(total_users, 1) * 100, 1)},
+            {"label": "Paying Users", "value": paying_users, "color": "#f59e0b", "pct": round(paying_users / max(total_users, 1) * 100, 1)},
+            {"label": "Lifetime Members", "value": lifetime_users, "color": "#10b981", "pct": round(lifetime_users / max(total_users, 1) * 100, 1)},
+        ],
+        "daily": daily,
+        "premium_ratio": round(premium_conv / max(total_conv, 1) * 100, 1),
+        "month": {
+            "this": {"users": this_month_users, "conversions": this_month_conv},
+            "last": {"users": last_month_users, "conversions": last_month_conv},
+        },
+    }
+
+
+# ─── Settings ─────────────────────────────────────────────
+
+SETTINGS_FILE = Path(__file__).resolve().parent.parent / "bot_settings.json"
+DEFAULT_SETTINGS = {
+    "daily_limit": 5,
+    "max_file_size_mb": 25,
+    "max_queue_size": 50,
+    "max_concurrent": 5,
+    "lifetime_stars": 200,
+    "diamond_prices": {"1": 2, "3": 5, "5": 8, "10": 15, "20": 28, "50": 70},
+}
+
+def read_settings() -> dict:
+    if SETTINGS_FILE.exists():
+        try:
+            return {**DEFAULT_SETTINGS, **json.loads(SETTINGS_FILE.read_text())}
+        except Exception:
+            pass
+    return DEFAULT_SETTINGS.copy()
+
+def write_settings(data: dict):
+    SETTINGS_FILE.write_text(json.dumps(data, indent=2))
+
+@app.get("/api/settings")
+async def get_settings(_=Depends(verify_token)):
+    return read_settings()
+
+@app.post("/api/settings")
+async def update_settings(body: dict, _=Depends(verify_token)):
+    current = read_settings()
+    current.update({k: v for k, v in body.items() if k in DEFAULT_SETTINGS})
+    write_settings(current)
+    return {"success": True, "settings": current}
 
 
 # ─── Static Files (Production) ────────────────────────────

@@ -4,6 +4,10 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Broadcast from "./pages/Broadcast";
+import Payments from "./pages/Payments";
+import Conversions from "./pages/Conversions";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("token");
@@ -26,6 +30,10 @@ export default function App() {
         <Route index element={<Dashboard />} />
         <Route path="users" element={<Users />} />
         <Route path="broadcast" element={<Broadcast />} />
+        <Route path="payments" element={<Payments />} />
+        <Route path="conversions" element={<Conversions />} />
+        <Route path="analytics" element={<Analytics />} />
+        <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

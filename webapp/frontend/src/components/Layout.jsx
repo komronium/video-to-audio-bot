@@ -1,10 +1,14 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Radio, LogOut, Headphones } from "lucide-react";
+import { LayoutDashboard, Users, Radio, LogOut, Headphones, CreditCard, BarChart2, Settings, Film } from "lucide-react";
 
 const links = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
+  { to: "/analytics", icon: BarChart2, label: "Analytics" },
   { to: "/users", icon: Users, label: "Users" },
+  { to: "/conversions", icon: Film, label: "Conversions" },
+  { to: "/payments", icon: CreditCard, label: "Payments" },
   { to: "/broadcast", icon: Radio, label: "Broadcast" },
+  { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
 export default function Layout() {

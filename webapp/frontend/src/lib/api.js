@@ -63,4 +63,19 @@ export const api = {
     }),
   broadcastStatus: (bid) => request(`/broadcast/${bid}`),
   broadcasts: () => request("/broadcasts"),
+
+  payments: (page = 1, type = "all") =>
+    request(`/payments?page=${page}&type=${type}`),
+
+  conversions: (page = 1, filter = "all") =>
+    request(`/conversions?page=${page}&filter=${filter}`),
+
+  analytics: () => request("/analytics"),
+
+  settings: () => request("/settings"),
+  saveSettings: (data) =>
+    request("/settings", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
