@@ -195,7 +195,7 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
     user_id = message.from_user.id
     processing_msg = await message.reply(i18n.get_text("downloading", lang))
 
-    file = await message.bot.get_file(video.file_id)
+    file = await message.bot.get_file(video.file_id, request_timeout=300)
     video_path = file.file_path
     audio_path = None
 
