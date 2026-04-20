@@ -44,7 +44,11 @@ async def youtube_video_handler(message: Message, db: AsyncSession):
 
     processing_msg = await message.reply("Downloading ...")
 
-    audio_data = await VideoConverter().get_youtube_video(video_id)
+    try:
+        audio_data = await VideoConverter().get_youtube_video(video_id)
+    except Exception as e:
+        await processing_msg.edit_text("❌ Failed to fetch video. Please try again later.")
+        return
 
     if audio_data["duration"] > 30 * 60:
         await message.reply("Video is too long. Max is 30 minutes")
