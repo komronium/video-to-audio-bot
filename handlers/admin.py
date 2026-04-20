@@ -257,7 +257,7 @@ async def admin_give_diamonds_count(message: types.Message, state: FSMContext, b
 
     async with get_db() as db:
         service = UserService(db)
-        await service.add_diamonds(user_id, count)
+        await service.add_diamonds(user_id, count, record_payment=False)
         lang = await service.get_lang(user_id)
 
     # Notify the user in their language

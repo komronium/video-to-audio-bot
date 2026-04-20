@@ -132,12 +132,13 @@ class UserService:
             return True
         return False
 
-    async def add_diamonds(self, user_id: int, count: int):
+    async def add_diamonds(self, user_id: int, count: int, record_payment: bool = True):
         user = await self.get_user(user_id)
         if user:
             user.diamonds = (user.diamonds or 0) + count
-            payment = Payment(user_id=user.id, diamonds=count, is_lifetime=False)
-            self.db.add(payment)
+            if record_payment:
+                payment = Payment(user_id=user.id, diamonds=count, is_lifetime=False)
+                self.db.add(payment)
             await self.db.commit()
 
     async def set_lifetime(self, user_id: int):
