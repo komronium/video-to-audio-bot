@@ -139,54 +139,24 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         return
 
     queue_position = queue_manager.add_to_queue(user_id, video.file_id, timestamp)
-    query_length = queue_manager.queue_length()
+    queue_length = queue_manager.queue_length()
     queue_message = None
 
     if queue_position > 1:
-        queue_message = await message.reply(
-            i18n.get_text("queue", lang).format(queue_position, query_length)
-        )
-        queue_position = queue_manager.get_queue_position(
-            user_id, video.file_id, timestamp
-        )
-        query_length = queue_manager.queue_length()
-        await asyncio.sleep(2)
-
-    wait_start = asyncio.get_event_loop().time()
-    MAX_WAIT = 300
-
-    while queue_position > 1:
-        if asyncio.get_event_loop().time() - wait_start > MAX_WAIT:
-            queue_manager.remove_from_queue(user_id, video.file_id, timestamp)
-            if queue_message:
-                try:
-                    await queue_message.edit_text("⚠️ Queue timeout. Please try again.")
-                except TelegramAPIError:
-                    pass
-            return
         try:
-            await asyncio.sleep(5)
-            queue_position = queue_manager.get_queue_position(
-                user_id, video.file_id, timestamp
+            queue_message = await message.reply(
+                i18n.get_text("queue", lang).format(queue_position, queue_length)
             )
-            query_length = queue_manager.queue_length()
-            if queue_message:
-                await queue_message.edit_text(
-                    i18n.get_text("queue", lang).format(queue_position, query_length)
-                )
-        except TelegramRetryAfter as e:
-            await asyncio.sleep(e.retry_after)
-        except TelegramAPIError:
-            pass
-
-    if queue_message:
-        try:
-            await queue_message.delete()
         except TelegramAPIError:
             pass
 
     try:
         async with conversion_semaphore:
+            if queue_message:
+                try:
+                    await queue_message.delete()
+                except TelegramAPIError:
+                    pass
             await process_video(message, db, video, lang)
     except TelegramRetryAfter as e:
         logging.warning(f"FloodControl for user {user_id}, retry after {e.retry_after}s")
