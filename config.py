@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     GROUP_ID: int
     ADMIN_ID: int
     SERVER_IP: str = "89.169.47.171"
+    API_HOST: str = "youtube-mp36.p.rapidapi.com"
+    API_KEY: str = ""
 
     LIFETIME_PREMIUM_PRICE: int = 200
     DIAMONDS_PRICES: dict[int, int] = {
