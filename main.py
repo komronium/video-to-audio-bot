@@ -1,4 +1,6 @@
 import asyncio
+import os
+import sys
 from logging import basicConfig, INFO
 
 from aiogram import Bot, Dispatcher
@@ -22,8 +24,23 @@ async def on_shutdown(bot: Bot):
     await bot.session.close()
 
 
+PID_FILE = "/tmp/video-to-audio-bot.pid"
+
+
+def check_pid_lock():
+    if os.path.exists(PID_FILE):
+        with open(PID_FILE) as f:
+            old_pid = int(f.read().strip())
+        if os.path.exists(f"/proc/{old_pid}"):
+            print(f"Bot already running (PID {old_pid}). Killing old instance...")
+            os.kill(old_pid, 9)
+    with open(PID_FILE, "w") as f:
+        f.write(str(os.getpid()))
+
+
 async def main():
     basicConfig(level=INFO)
+    check_pid_lock()
     local_server = TelegramAPIServer.from_base('http://localhost:8081')
     session = AiohttpSession(api=local_server, timeout=300)
 
