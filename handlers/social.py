@@ -2,7 +2,7 @@ import asyncio
 import hashlib
 import logging
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import redis
@@ -84,11 +84,11 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
                 f"💎 <b>{SOCIAL_DIAMOND_COST} diamonds used</b> — {platform.capitalize()} download activated."
             )
         else:
-            ttl = r.ttl(key)
-            time_str = ""
-            if ttl and ttl > 0:
-                h, m = ttl // 3600, (ttl % 3600) // 60
-                time_str = f"\n⏳ <b>{'%dh %dm' % (h, m) if h else '%dm' % m}</b> remaining"
+            now = datetime.now()
+            midnight = (now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1))
+            seconds_until_midnight = int((midnight - now).total_seconds())
+            h, m = seconds_until_midnight // 3600, (seconds_until_midnight % 3600) // 60
+            time_str = f"\n⏳ <b>{'%dh %dm' % (h, m) if h else '%dm' % m}</b> remaining"
             await message.answer(
                 i18n.get_text("social-limit", lang).format(
                     diamonds=user.diamonds or 0,
