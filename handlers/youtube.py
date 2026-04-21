@@ -20,7 +20,7 @@ YOUTUBE_REGEX = r".*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$
 DAILY_LIMIT = 5
 YT_SLOT_COST = 2        # YouTube uses 2 daily slots
 YT_DIAMOND_COST = 2     # YouTube costs 2 diamonds
-MAX_DURATION = 30 * 60  # seconds
+MAX_DURATION = 20 * 60  # seconds
 
 r = redis.Redis(host="localhost", port=6379, decode_responses=True)
 router = Router()
@@ -145,8 +145,6 @@ async def youtube_handler(message: Message, db: AsyncSession):
             r.expire(key, 86400)
         else:
             r.incrby(key, YT_SLOT_COST)
-
-        await message.answer(i18n.get_text("promo-links", lang))
 
     except Exception as e:
         logging.exception(f"YouTube error for user {user_id}")
