@@ -6,7 +6,6 @@ from datetime import datetime
 from pathlib import Path
 
 import redis
-import yt_dlp
 from aiogram import F, Router
 from aiogram.exceptions import TelegramAPIError
 from aiogram.types import FSInputFile, Message
@@ -41,6 +40,7 @@ def _get_buy_keyboard(lang: str):
 
 def _yt_info(video_id: str) -> dict:
     """Fetch metadata only (no download) — blocking, run in executor."""
+    import yt_dlp
     with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True}) as ydl:
         return ydl.extract_info(
             f"https://www.youtube.com/watch?v={video_id}",
@@ -50,6 +50,7 @@ def _yt_info(video_id: str) -> dict:
 
 def _yt_download(video_id: str) -> str:
     """Download and convert to mp3 — blocking, run in executor."""
+    import yt_dlp
     Path("audios").mkdir(exist_ok=True)
     output = f"audios/yt_{video_id}"
     opts = {
