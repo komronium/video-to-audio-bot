@@ -18,7 +18,7 @@ from utils.i18n import i18n
 
 YOUTUBE_REGEX = r".*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$)).*"
 DAILY_LIMIT = 5
-YT_SLOT_COST = 2        # YouTube uses 2 daily slots
+YT_SLOT_COST = 3        # YouTube uses 3 daily slots
 YT_DIAMOND_COST = 2     # YouTube costs 2 diamonds
 MAX_DURATION = 20 * 60  # seconds
 

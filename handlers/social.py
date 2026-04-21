@@ -20,7 +20,7 @@ INSTAGRAM_REGEX = r"https?://(www\.)?instagram\.com/(reel|p|tv)/[\w-]+"
 TIKTOK_REGEX = r"https?://((www\.|vm\.|vt\.)?tiktok\.com|tiktok\.com)/[\w/@.?=&%-]+"
 
 DAILY_LIMIT = 5
-SOCIAL_SLOT_COST = 2
+SOCIAL_SLOT_COST = 3
 SOCIAL_DIAMOND_COST = 2
 MAX_DURATION = 20 * 60  # 30 minutes
 
