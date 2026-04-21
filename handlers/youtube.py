@@ -12,6 +12,7 @@ from aiogram.types import FSInputFile, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from config import settings
 from services.user_service import UserService
 from utils.i18n import i18n
 
@@ -147,11 +148,20 @@ async def youtube_handler(message: Message, db: AsyncSession):
 
         await message.answer(i18n.get_text("promo-links", lang))
 
-    except Exception:
+    except Exception as e:
         logging.exception(f"YouTube error for user {user_id}")
         try:
             await processing_msg.edit_text("⚠️ Failed to download. Please try again later.")
         except TelegramAPIError:
+            pass
+        try:
+            await message.bot.send_message(
+                settings.ADMIN_ID,
+                f"<b>❌ YouTube error</b>\n"
+                f"<b>User:</b> <code>{user_id}</code>\n"
+                f"<b>Error:</b> <code>{type(e).__name__}: {e}</code>",
+            )
+        except Exception:
             pass
     finally:
         if file_path and os.path.exists(file_path):
