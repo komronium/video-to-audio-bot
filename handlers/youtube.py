@@ -148,18 +148,27 @@ async def youtube_handler(message: Message, db: AsyncSession):
 
     except Exception as e:
         logging.exception(f"YouTube error for user {user_id}")
+        err_str = str(e).lower()
+        if "blocked" in err_str or "ip address" in err_str:
+            user_msg = "Your IP is blocked by YouTube. Try again later or use VPN."
+        elif "not available" in err_str or "unavailable" in err_str:
+            user_msg = "This YouTube video is not available."
+        elif "copyright" in err_str or "blocked in your country" in err_str:
+            user_msg = "Content blocked by copyright in your region."
+        else:
+            user_msg = "Please try again later."
         try:
-            await processing_msg.edit_text("⚠️ Failed to download. Please try again later.")
+            await processing_msg.edit_text(user_msg)
         except TelegramAPIError:
             pass
         try:
             await message.bot.send_message(
                 settings.ADMIN_ID,
-                f"<b>❌ YouTube error</b>\n"
+                f"<b>Video To Audio Bot | MP3: </b> YouTube error\n"
                 f"<b>User:</b> <code>{user_id}</code>\n"
                 f"<b>Error:</b> <code>{type(e).__name__}: {e}</code>",
             )
-        except Exception:
+        except (Exception,):
             pass
     finally:
         if file_path and os.path.exists(file_path):

@@ -96,9 +96,10 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     key = f"user:{user_id}:{today}"
 
     count = r.get(key)
+    current = int(count or 0)
 
-    if count and int(count) >= DAILY_LIMIT:
-        if not is_lifetime and user.diamonds <= 0:
+    if not is_lifetime and current + 1 > DAILY_LIMIT:
+        if user.diamonds <= 0:
             ttl = r.ttl(key)
             if ttl and ttl > 0:
                 hours = ttl // 3600

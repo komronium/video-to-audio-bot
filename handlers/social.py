@@ -136,14 +136,23 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
 
     except Exception as e:
         logging.exception(f"{platform} error for user {user_id}")
+        err_str = str(e).lower()
+        if "blocked" in err_str or "ip address" in err_str:
+            user_msg = f"Your IP is blocked by {platform.capitalize()}. Try again later or use VPN."
+        elif "not available" in err_str or "unavailable" in err_str:
+            user_msg = f"This {platform.capitalize()} content is not available."
+        elif "copyright" in err_str or "blocked in your country" in err_str:
+            user_msg = f"Content blocked by copyright in your region."
+        else:
+            user_msg = "Please try again later."
         try:
-            await processing_msg.edit_text("⚠️ Failed to download. Please try again later.")
+            await processing_msg.edit_text(user_msg)
         except TelegramAPIError:
             pass
         try:
             await message.bot.send_message(
                 settings.ADMIN_ID,
-                f"<b>❌ {platform.capitalize()} error</b>\n"
+                f"<b>Video To Audio Bot | MP3: </b> {platform} error\n"
                 f"<b>User:</b> <code>{user_id}</code>\n"
                 f"<b>Error:</b> <code>{type(e).__name__}: {e}</code>",
             )
