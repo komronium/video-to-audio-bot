@@ -1,7 +1,7 @@
 import asyncio
 from datetime import date
 
-from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String, text
 from sqlalchemy.orm import declarative_base, relationship
 
 from .session import engine
@@ -33,6 +33,7 @@ class Conversion(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     success = Column(Boolean, default=True)
     is_premium = Column(Boolean, default=False)
+    type = Column(String(20), default="video", nullable=True)
     created_at = Column(Date, default=date.today)
 
     user = relationship("User", back_populates="conversions")
@@ -52,6 +53,10 @@ class Payment(Base):
 async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        try:
+            await conn.execute(text("ALTER TABLE conversions ADD COLUMN type VARCHAR DEFAULT 'video'"))
+        except Exception:
+            pass
 
 
 asyncio.run(create_tables())

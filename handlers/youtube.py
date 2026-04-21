@@ -127,7 +127,7 @@ async def youtube_handler(message: Message, db: AsyncSession):
         file_path = await loop.run_in_executor(None, _yt_download, video_id)
 
         bot_me = await message.bot.get_me()
-        await user_service.add_conversation(user_id)
+        await user_service.add_conversation(user_id, conv_type="youtube")
 
         try:
             await processing_msg.delete()

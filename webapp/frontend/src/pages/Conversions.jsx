@@ -4,6 +4,8 @@ import { api } from "../lib/api";
 
 const TABS = [
   { key: "all", label: "All" },
+  { key: "video", label: "🎬 Video" },
+  { key: "youtube", label: "▶️ YouTube" },
   { key: "premium", label: "👑 Premium" },
   { key: "free", label: "🆓 Free" },
 ];
@@ -52,11 +54,10 @@ export default function Conversions() {
             <button
               key={t.key}
               onClick={() => switchTab(t.key)}
-              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 -mb-px ${
-                tab === t.key
-                  ? "border-purple-600 text-purple-700"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 -mb-px ${tab === t.key
+                ? "border-purple-600 text-purple-700"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
             >
               {t.label}
             </button>
@@ -73,7 +74,8 @@ export default function Conversions() {
               <tr className="border-b border-gray-50 text-left">
                 <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">#</th>
                 <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">User</th>
-                <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Type</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Source</th>
+                <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Plan</th>
                 <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
                 <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
               </tr>
@@ -89,6 +91,17 @@ export default function Conversions() {
                       <p className="font-medium text-gray-800">{c.user_name || `#${c.user_id}`}</p>
                       {c.username && <p className="text-xs text-gray-400">@{c.username}</p>}
                     </div>
+                  </td>
+                  <td className="px-5 py-3">
+                    {c.type === "youtube" ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">
+                        ▶️ YouTube
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                        🎬 Video
+                      </span>
+                    )}
                   </td>
                   <td className="px-5 py-3">
                     {c.is_premium ? (

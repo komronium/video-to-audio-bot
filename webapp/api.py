@@ -69,6 +69,7 @@ class Conversion(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     success = Column(Boolean, default=True)
     is_premium = Column(Boolean, default=False)
+    type = Column(String, default="video", nullable=True)
     created_at = Column(Date, default=date.today)
 
 
@@ -635,6 +636,12 @@ async def list_conversions(
     elif filter == "free":
         stmt = stmt.where(Conversion.is_premium == False)
         count_stmt = count_stmt.where(Conversion.is_premium == False)
+    elif filter == "youtube":
+        stmt = stmt.where(Conversion.type == "youtube")
+        count_stmt = count_stmt.where(Conversion.type == "youtube")
+    elif filter == "video":
+        stmt = stmt.where((Conversion.type == "video") | (Conversion.type == None))
+        count_stmt = count_stmt.where((Conversion.type == "video") | (Conversion.type == None))
     stmt = stmt.order_by(Conversion.created_at.desc(), Conversion.id.desc())
     total = (await db.execute(count_stmt)).scalar() or 0
     rows = (await db.execute(stmt.offset((page - 1) * per_page).limit(per_page))).all()
@@ -647,6 +654,7 @@ async def list_conversions(
                 "username": u.username,
                 "is_premium": c.is_premium,
                 "success": c.success,
+                "type": c.type or "video",
                 "created_at": c.created_at.isoformat() if c.created_at else None,
             }
             for c, u in rows

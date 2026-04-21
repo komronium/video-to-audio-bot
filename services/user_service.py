@@ -49,9 +49,9 @@ class UserService:
         result = await self.db.execute(stmt)
         return result.scalars().first() is not None
 
-    async def add_conversation(self, user_id: int):
+    async def add_conversation(self, user_id: int, conv_type: str = "video"):
         user = await self.get_user(user_id)
-        conversion = Conversion(user_id=user_id)
+        conversion = Conversion(user_id=user_id, type=conv_type)
         if user.is_premium:
             conversion.is_premium = True
 
