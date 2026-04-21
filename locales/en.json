@@ -17,6 +17,7 @@
     "too-large": "💎 ⚠️ <b>File too large</b>\n\nThis video exceeds the free limit ({} MB).\nUse 💎 1 diamond or upgrade to Premium.",
     "large-used": "💎 <b>1 diamond used</b>\nLarge file upload unlocked.",
     "daily-limit": "⛔ <b>Daily limit reached</b>\n\nYou’ve used all free conversions for today.\nUse a diamond or buy more below.",
+    "social-limit": "⛔ <b>Daily limit reached</b>\n\nThis type of download costs <b>2 diamonds</b>.\n💎 Your balance: <b>{diamonds}</b> diamonds. {time}",
     "extra-used": "💎 <b>1 diamond used</b>\nExtra conversion activated.",
     "queue": "⏳ Processing in queue...\nYour position: <code>{} / {}</code>",
     "downloading": "⬇️ Downloading video...",

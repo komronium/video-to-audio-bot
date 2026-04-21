@@ -90,8 +90,10 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
                 h, m = ttl // 3600, (ttl % 3600) // 60
                 time_str = f"\n⏳ <b>{'%dh %dm' % (h, m) if h else '%dm' % m}</b> remaining"
             await message.answer(
-                f"⛔ <b>Daily limit reached</b>\n\n"
-                f"{platform.capitalize()} downloads cost <b>{SOCIAL_SLOT_COST}</b> conversions each.{time_str}",
+                i18n.get_text("social-limit", lang).format(
+                    diamonds=user.diamonds or 0,
+                    time=time_str,
+                ),
                 reply_markup=_get_buy_keyboard(lang),
             )
             return

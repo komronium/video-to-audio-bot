@@ -17,6 +17,7 @@
     "too-large": "⚠️ <b>Fayl juda katta</b>\n\nVideo hajmi bepul limitdan oshib ketdi ({} MB).\n💎 1 olmos ishlating yoki Premiumga o‘ting.",
     "large-used": "💎 <b>1 olmos ishlatildi</b>\nKatta fayl yuklash ochildi.",
     "daily-limit": "⛔ <b>Kundalik limit tugadi</b>\n\nBugungi bepul foydalanish limiti yakunlandi.\nDavom etish uchun olmos ishlating yoki sotib oling.",
+"social-limit": "⛔ <b>Kundalik limit tugadi</b>\n\nBu turdagi yuklashlar <b>2 olmos</b> talab qiladi.\n💎 Sizda: <b>{diamonds}</b> ta olmos bor.{time}",
     "extra-used": "💎 <b>1 olmos ishlatildi</b>\nQo‘shimcha audioga o‘girish faollashtirildi.",
     "queue": "⏳ So‘rovingiz navbatda...\nNavbatdagi o‘rningiz: <code>{} / {}</code>",
     "downloading": "⬇️ Video yuklanmoqda...",

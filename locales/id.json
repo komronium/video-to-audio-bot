@@ -17,6 +17,7 @@
   "too-large": "💎 <b>Berkas terlalu besar!</b>\nVideo ini lebih dari {} MB (batas gratis). Gunakan berlian untuk konversi file besar, atau dapatkan premium.",
   "large-used": "<b>\uD83D\uDC8E 1 berlian digunakan untuk unggahan berkas besar.</b>",
   "daily-limit": "<b>Batas harian tercapai!</b>\nAnda telah menggunakan percakapan gratis harian Anda.\n\nAnda dapat menggunakan berlian untuk membuka percakapan ekstra, beli di bawah.",
+  "social-limit": "⛔ <b>Batas harian tercapai!</b>\n\nJenis unduhan ini membutuhkan <b>2 berlian</b>.\n💎 Saldo Anda: <b>{diamonds}</b> berlian.{time}",
   "extra-used": "<b>\uD83D\uDC8E 1 berlian digunakan untuk percakapan ekstra.</b>",
   "queue": "⏳ Permintaan Anda dalam antrean. Mohon tunggu ...\nPosisi: <code>{} / {}</code>",
   "downloading": "Mengunduh ...",
