@@ -22,7 +22,7 @@ TIKTOK_REGEX = r"https?://((www\.|vm\.|vt\.)?tiktok\.com|tiktok\.com)/[\w/@.?=&%
 DAILY_LIMIT = 5
 SOCIAL_SLOT_COST = 2
 SOCIAL_DIAMOND_COST = 2
-MAX_DURATION = 30 * 60  # 30 minutes
+MAX_DURATION = 20 * 60  # 30 minutes
 
 r = redis.Redis(host="localhost", port=6379, decode_responses=True)
 router = Router()
@@ -133,8 +133,6 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
             r.expire(key, 86400)
         else:
             r.incrby(key, SOCIAL_SLOT_COST)
-
-        await message.answer(i18n.get_text("promo-links", lang))
 
     except Exception as e:
         logging.exception(f"{platform} error for user {user_id}")
