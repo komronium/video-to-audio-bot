@@ -6,6 +6,8 @@ const TABS = [
   { key: "all", label: "All" },
   { key: "video", label: "🎬 Video" },
   { key: "youtube", label: "▶️ YouTube" },
+  { key: "instagram", label: "📸 Instagram" },
+  { key: "tiktok", label: "🎵 TikTok" },
   { key: "premium", label: "👑 Premium" },
   { key: "free", label: "🆓 Free" },
 ];
@@ -94,13 +96,13 @@ export default function Conversions() {
                   </td>
                   <td className="px-5 py-3">
                     {c.type === "youtube" ? (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">
-                        ▶️ YouTube
-                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-600 bg-red-50 px-2 py-1 rounded-full">▶️ YouTube</span>
+                    ) : c.type === "instagram" ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-pink-600 bg-pink-50 px-2 py-1 rounded-full">📸 Instagram</span>
+                    ) : c.type === "tiktok" ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-gray-800 bg-gray-100 px-2 py-1 rounded-full">🎵 TikTok</span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                        🎬 Video
-                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">🎬 Video</span>
                     )}
                   </td>
                   <td className="px-5 py-3">

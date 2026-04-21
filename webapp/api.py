@@ -642,6 +642,12 @@ async def list_conversions(
     elif filter == "video":
         stmt = stmt.where((Conversion.type == "video") | (Conversion.type == None))
         count_stmt = count_stmt.where((Conversion.type == "video") | (Conversion.type == None))
+    elif filter == "instagram":
+        stmt = stmt.where(Conversion.type == "instagram")
+        count_stmt = count_stmt.where(Conversion.type == "instagram")
+    elif filter == "tiktok":
+        stmt = stmt.where(Conversion.type == "tiktok")
+        count_stmt = count_stmt.where(Conversion.type == "tiktok")
     stmt = stmt.order_by(Conversion.created_at.desc(), Conversion.id.desc())
     total = (await db.execute(count_stmt)).scalar() or 0
     rows = (await db.execute(stmt.offset((page - 1) * per_page).limit(per_page))).all()
