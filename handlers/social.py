@@ -16,6 +16,7 @@ from config import settings
 from services.user_service import UserService
 from utils.i18n import i18n
 
+YOUTUBE_REGEX = r".*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$)).*"
 INSTAGRAM_REGEX = r"https?://(www\.)?instagram\.com/(reel|p|tv)/[\w-]+"
 TIKTOK_REGEX = r"https?://((www\.|vm\.|vt\.)?tiktok\.com|tiktok\.com)/[\w/@.?=&%-]+"
 
@@ -163,6 +164,11 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
     finally:
         if file_path and os.path.exists(file_path):
             os.remove(file_path)
+
+
+@router.message(F.text.regexp(YOUTUBE_REGEX))
+async def youtube_handler(message: Message, db: AsyncSession):
+    await _handle_social(message, db, message.text.strip(), "youtube")
 
 
 @router.message(F.text.regexp(INSTAGRAM_REGEX))
