@@ -103,7 +103,10 @@ async def buy_diamonds_callback(call: CallbackQuery, bot: Bot):
         i18n.get_text('start', lang),
         reply_markup=get_menu_keyboard(lang, is_admin=(call.from_user.id == settings.ADMIN_ID))
     )
-    return await call.message.delete()
+    try:
+        await call.message.delete()
+    except (Exception,):
+        pass
 
 
 @router.message(F.text.in_([

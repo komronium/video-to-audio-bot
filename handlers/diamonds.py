@@ -74,7 +74,10 @@ async def buy_lifetime_callback(call: CallbackQuery):
                 amount=settings.LIFETIME_PREMIUM_PRICE,
             ),
         ]
-        await call.message.delete()
+        try:
+            await call.message.delete()
+        except (Exception,):
+            pass
         await call.message.answer_invoice(
             title=i18n.get_text("lifetime-title", lang),
             description=i18n.get_text("lifetime-desc", lang),

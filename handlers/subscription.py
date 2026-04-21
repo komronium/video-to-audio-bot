@@ -24,5 +24,8 @@ async def check_subscription(callback: types.CallbackQuery):
         )
         return
 
-    await callback.message.delete()
+    try:
+        await callback.message.delete()
+    except (Exception,):
+        pass
     await callback.message.answer(i18n.get_text('thank-sub', lang))
