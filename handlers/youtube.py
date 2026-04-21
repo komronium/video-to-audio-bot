@@ -2,19 +2,17 @@ import asyncio
 import logging
 import os
 import re
-import urllib.parse
 from datetime import datetime
 from pathlib import Path
 
 import redis
-import requests
+import yt_dlp
 from aiogram import F, Router
 from aiogram.exceptions import TelegramAPIError
 from aiogram.types import FSInputFile, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.converter import VideoConverter
 from services.user_service import UserService
 from utils.i18n import i18n
 
@@ -41,20 +39,29 @@ def _get_buy_keyboard(lang: str):
     return builder.as_markup()
 
 
-def _download_file(link: str) -> str:
-    """Blocking HTTP download — run in thread executor."""
-    response = requests.get(link, timeout=60)
-    response.raise_for_status()
-    disposition = response.headers.get("Content-Disposition", "")
-    if "filename=" in disposition:
-        filename = urllib.parse.unquote(disposition.split("filename=")[1].strip('"'))
-    else:
-        filename = f"yt_{datetime.now().timestamp()}.mp3"
+def _yt_info(video_id: str) -> dict:
+    """Fetch metadata only (no download) — blocking, run in executor."""
+    with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True}) as ydl:
+        return ydl.extract_info(
+            f"https://www.youtube.com/watch?v={video_id}",
+            download=False,
+        )
+
+
+def _yt_download(video_id: str) -> str:
+    """Download and convert to mp3 — blocking, run in executor."""
     Path("audios").mkdir(exist_ok=True)
-    file_path = str(Path("audios") / filename)
-    with open(file_path, "wb") as f:
-        f.write(response.content)
-    return file_path
+    output = f"audios/yt_{video_id}"
+    opts = {
+        "format": "bestaudio/best",
+        "outtmpl": f"{output}.%(ext)s",
+        "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
+        "quiet": True,
+        "no_warnings": True,
+    }
+    with yt_dlp.YoutubeDL(opts) as ydl:
+        ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
+    return f"{output}.mp3"
 
 
 @router.message(F.text.regexp(YOUTUBE_REGEX))
@@ -102,25 +109,20 @@ async def youtube_handler(message: Message, db: AsyncSession):
             )
             return
 
-    # ── Download ─────────────────────────────────────────
+    # ── Fetch metadata (duration check before download) ──
     processing_msg = await message.reply("⬇️ Downloading from YouTube...")
     file_path = None
 
     try:
-        audio_data = await VideoConverter().get_youtube_video(video_id)
+        loop = asyncio.get_event_loop()
 
-        if audio_data.get("duration", 0) > MAX_DURATION:
+        info = await loop.run_in_executor(None, _yt_info, video_id)
+        if info.get("duration", 0) > MAX_DURATION:
             await processing_msg.edit_text("⏱️ Video too long. Maximum is <b>30 minutes</b>.")
             return
 
-        link = audio_data.get("link")
-        if not link:
-            await processing_msg.edit_text("❌ Could not get audio link. Try again later.")
-            return
-
         await processing_msg.edit_text("🎧 Processing audio...")
-        loop = asyncio.get_event_loop()
-        file_path = await loop.run_in_executor(None, _download_file, link)
+        file_path = await loop.run_in_executor(None, _yt_download, video_id)
 
         bot_me = await message.bot.get_me()
         await user_service.add_conversation(user_id)
