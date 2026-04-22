@@ -51,6 +51,7 @@
     "referral-share": "📤 Ulashish",
     "referral-info": "🎁 <b>Sizning referral havolangiz</b>\n\n<code>{link}</code>\n\nHavolani ulashing va oling:\n• Har bir konvertatsiya qilgan do'stingiz uchun <b>2 💎 olmos</b>\n• Do'stingizga birinchi konvertatsiyadan so'ng <b>1 💎 olmos</b>\n\n🏆 <b>Marrali bonuslar:</b>\n• 50 konvertatsiya → 5 💎\n• 100 konvertatsiya → 10 💎\n• 200 konvertatsiya → 20 💎\n• 500 konvertatsiya → 50 💎",
     "referral-bonus": "🎁 <b>Referral bonusi!</b>\n\n💎 Sizga +1 olmos\n💎 Taklif qilgan userga +2 olmos",
+    "referral-inviter-bonus": "🎉 <b>Referral mukofoti berildi!</b>\n\nTaklif qilgan do‘stingiz birinchi konvertatsiyani qildi.\n💎 Balansingizga +2 olmos qo‘shildi.",
     "milestone-bonus": "🏆 <b>Marraga yetildi!</b>\n\n💎 +{} olmos bonus!",
     "social-diamonds-used": "💎 <b>{count} olmos ishlatildi</b> — {platform} yuklab olish faollashtirildi.",
     "social-downloading": "{emoji} {platform} dan yuklanmoqda...",

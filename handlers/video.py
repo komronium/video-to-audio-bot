@@ -263,7 +263,16 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
         # Referral reward check
         should_reward, inviter_id = await user_service.check_referral_reward(user_id)
         if should_reward:
-            await user_service.grant_referral_reward(user_id)
+            granted, inviter_user_id = await user_service.grant_referral_reward(user_id)
+            if granted and inviter_user_id:
+                inviter_lang = await user_service.get_lang(inviter_user_id)
+                try:
+                    await message.bot.send_message(
+                        inviter_user_id,
+                        i18n.get_text("referral-inviter-bonus", inviter_lang),
+                    )
+                except TelegramAPIError:
+                    pass
             await message.answer(i18n.get_text("referral-bonus", lang))
 
         # Milestone reward check

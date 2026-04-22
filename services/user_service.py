@@ -234,19 +234,21 @@ class UserService:
     async def grant_referral_reward(self, user_id: int):
         user = await self.get_user(user_id)
         if not user or user.referral_rewarded:
-            return False
+            return False, None
         inviter_id = user.referral_code_id
         if not inviter_id:
-            return False
+            return False, None
         inviter = await self.db.get(User, inviter_id)
-        if inviter:
-            await self.add_diamonds(inviter.user_id, 2, record_payment=False)
-        await self.add_diamonds(user_id, 1, record_payment=False)
+        if not inviter:
+            return False, None
+
+        inviter.diamonds = (inviter.diamonds or 0) + 2
+        user.diamonds = (user.diamonds or 0) + 1
         user.referral_rewarded = True
         referral = Referral(inviter_id=inviter_id, invited_id=user.id)
         self.db.add(referral)
         await self.db.commit()
-        return True
+        return True, inviter.user_id
 
     async def check_milestone_rewards(self, user_id: int) -> int:
         user = await self.get_user(user_id)

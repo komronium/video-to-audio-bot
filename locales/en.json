@@ -51,6 +51,7 @@
     "referral-share": "📤 Share",
     "referral-info": "🎁 <b>Your Referral Link</b>\n\n<code>{link}</code>\n\nShare this link and get:\n• <b>2 💎 diamonds</b> for each friend who converts\n• Your friend gets <b>1 💎 diamond</b> after first conversion\n\n🏆 <b>Milestone Rewards:</b>\n• 50 conversions → 5 💎\n• 100 conversions → 10 💎\n• 200 conversions → 20 💎\n• 500 conversions → 50 💎",
     "referral-bonus": "🎁 <b>Referral bonus!</b>\n\n💎 +1 diamond for you\n💎 +2 diamonds for your inviter",
+    "referral-inviter-bonus": "🎉 <b>Referral reward received!</b>\n\nYour invited friend made the first conversion.\n💎 +2 diamonds added to your balance.",
     "milestone-bonus": "🏆 <b>Milestone reached!</b>\n\n💎 +{} diamonds bonus!",
     "social-diamonds-used": "💎 <b>{count} diamonds used</b> — {platform} download activated.",
     "social-downloading": "{emoji} Downloading from {platform}...",
