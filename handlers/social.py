@@ -48,7 +48,12 @@ async def _get_buy_keyboard(
 
 def _social_info(url: str) -> dict:
     import yt_dlp
-    with yt_dlp.YoutubeDL({"quiet": True, "no_warnings": True}) as ydl:
+    opts = {
+        "quiet": True,
+        "no_warnings": True,
+        "cookiefile": "cookies.txt",
+    }
+    with yt_dlp.YoutubeDL(opts) as ydl:
         return ydl.extract_info(url, download=False)
 
 
@@ -62,6 +67,7 @@ def _social_download(url: str, name: str) -> str:
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
         "quiet": True,
         "no_warnings": True,
+        "cookiefile": "cookies.txt",
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
         ydl.download([url])
