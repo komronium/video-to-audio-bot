@@ -4,6 +4,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 from pathlib import Path
+from urllib.parse import quote_plus
 
 import redis
 from aiogram import F, Router
@@ -29,10 +30,18 @@ r = redis.Redis(host="localhost", port=6379, decode_responses=True)
 router = Router()
 
 
-def _get_buy_keyboard(lang: str):
+async def _get_buy_keyboard(
+    lang: str, user_service: UserService, user_id: int, bot
+):
     builder = InlineKeyboardBuilder()
     builder.button(text=i18n.get_text("buy-extra", lang), callback_data="diamond:list")
     builder.button(text=i18n.get_text("get-lifetime", lang), callback_data="diamond:lifetime")
+    code = await user_service.generate_referral_code(user_id)
+    bot_username = (await bot.get_me()).username
+    referral_link = f"https://t.me/{bot_username}?start={code}"
+    share_text = i18n.get_text("referral-share-text", lang)
+    share_url = f"https://t.me/share/url?url={quote_plus(referral_link)}&text={quote_plus(share_text)}"
+    builder.button(text=i18n.get_text("invite-friend", lang), url=share_url)
     builder.adjust(1)
     return builder.as_markup()
 
@@ -97,8 +106,12 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
                 i18n.get_text("social-limit", lang).format(
                     diamonds=user.diamonds or 0,
                     time=time_str,
+                )
+                + "\n\n"
+                + i18n.get_text("limit-invite-tip", lang),
+                reply_markup=await _get_buy_keyboard(
+                    lang, user_service, user.user_id, message.bot
                 ),
-                reply_markup=_get_buy_keyboard(lang),
             )
             return
 

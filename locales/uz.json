@@ -70,4 +70,7 @@
     "username-na": "Mavjud emas",
     "stats-error": "❌ Statistikani olishda xatolik.",
     "referral-invalid": "⚠️ Referral kod noto‘g‘ri yoki allaqachon qo‘llangan."
+    ,"invite-friend": "👥 Do‘stni taklif qiling"
+    ,"referral-share-text": "Mening havolam orqali botga qo‘shiling va birinchi konvertatsiyadan keyin bonus olmos oling!"
+    ,"limit-invite-tip": "3) 👥 Do‘stingizni taklif qiling va referral olmos oling."
 }

@@ -3,6 +3,7 @@ import logging
 import os
 import re
 from datetime import datetime
+from urllib.parse import quote_plus
 
 import redis
 from aiogram import F, Router
@@ -29,12 +30,18 @@ r = redis.Redis(host="localhost", port=6379, decode_responses=True)
 router = Router()
 
 
-def get_buy_more_keyboard(lang: str):
+async def get_buy_more_keyboard(lang: str, user_service: UserService, user_id: int, bot):
     builder = InlineKeyboardBuilder()
     builder.button(text=i18n.get_text("buy-extra", lang), callback_data="diamond:list")
     builder.button(
         text=i18n.get_text("get-lifetime", lang), callback_data="diamond:lifetime"
     )
+    code = await user_service.generate_referral_code(user_id)
+    bot_username = (await bot.get_me()).username
+    referral_link = f"https://t.me/{bot_username}?start={code}"
+    share_text = i18n.get_text("referral-share-text", lang)
+    share_url = f"https://t.me/share/url?url={quote_plus(referral_link)}&text={quote_plus(share_text)}"
+    builder.button(text=i18n.get_text("invite-friend", lang), url=share_url)
     builder.adjust(1)
     return builder.as_markup()
 
@@ -75,8 +82,12 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
             await message.bot.send_chat_action(message.chat.id, "typing")
             size_mb = int(MAX_FILE_SIZE / (1024 * 1024))
             await message.reply(
-                i18n.get_text("too-large", lang).format(size_mb),
-                reply_markup=get_buy_more_keyboard(lang),
+                i18n.get_text("too-large", lang).format(size_mb)
+                + "\n\n"
+                + i18n.get_text("limit-invite-tip", lang),
+                reply_markup=await get_buy_more_keyboard(
+                    lang, user_service, user.user_id, message.bot
+                ),
             )
             return
         elif not is_lifetime:
@@ -86,7 +97,9 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
             else:
                 await message.reply(
                     i18n.get_text("no-diamonds", lang),
-                    reply_markup=get_buy_more_keyboard(lang),
+                    reply_markup=await get_buy_more_keyboard(
+                        lang, user_service, user.user_id, message.bot
+                    ),
                 )
                 return
 
@@ -109,8 +122,10 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
             else:
                 limit_text = i18n.get_text("daily-limit", lang)
             await message.answer(
-                limit_text,
-                reply_markup=get_buy_more_keyboard(lang),
+                limit_text + "\n\n" + i18n.get_text("limit-invite-tip", lang),
+                reply_markup=await get_buy_more_keyboard(
+                    lang, user_service, user.user_id, message.bot
+                ),
             )
             return
         elif not is_lifetime:
@@ -120,7 +135,9 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
             else:
                 await message.reply(
                     i18n.get_text("no-diamonds", lang),
-                    reply_markup=get_buy_more_keyboard(lang),
+                    reply_markup=await get_buy_more_keyboard(
+                        lang, user_service, user.user_id, message.bot
+                    ),
                 )
                 return
 

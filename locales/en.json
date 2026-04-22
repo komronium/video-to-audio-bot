@@ -70,4 +70,7 @@
     "username-na": "N/A",
     "stats-error": "❌ Error getting statistics.",
     "referral-invalid": "⚠️ Invalid referral code or already applied."
+    ,"invite-friend": "👥 Invite a Friend"
+    ,"referral-share-text": "Join this bot with my link and get bonus diamonds after your first conversion!"
+    ,"limit-invite-tip": "3) 👥 Invite a friend and earn referral diamonds."
 }
