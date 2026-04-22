@@ -158,7 +158,10 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
             caption=i18n.get_text("converted-by", lang).format(bot_me.username),
         )
         # Also send as voice message
-        await message.reply_voice(FSInputFile(file_path))
+        await message.reply_voice(
+            FSInputFile(file_path),
+            caption=i18n.get_text("converted-by", lang).format(bot_me.username),
+        )
 
         if not r.exists(key):
             r.set(key, SOCIAL_SLOT_COST)

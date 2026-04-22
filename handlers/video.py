@@ -254,7 +254,10 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
             await message.reply_document(
                 audio_file, caption=i18n.get_text("converted-by", lang).format(bot.username)
             )
-            voice_file = FSInputFile(path=audio_path)
+            voice_file = FSInputFile(
+                path=audio_path,
+                caption=i18n.get_text("converted-by", lang).format(bot.username)
+            )
             await message.reply_voice(voice_file)
 
         today = datetime.today().strftime("%Y-%m-%d")
