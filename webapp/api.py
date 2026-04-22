@@ -82,6 +82,14 @@ class Payment(Base):
     created_at = Column(Date, default=date.today)
 
 
+class Referral(Base):
+    __tablename__ = "referrals"
+    id = Column(Integer, primary_key=True)
+    inviter_id = Column(Integer, ForeignKey("users.id"))
+    invited_id = Column(Integer, ForeignKey("users.id"))
+    created_at = Column(Date, default=date.today)
+
+
 # ─── Dependencies ─────────────────────────────────────────
 
 async def get_db():
@@ -218,6 +226,11 @@ async def dashboard(
             select(func.count(Conversion.id)).where(Conversion.created_at == today)
         )
     ).scalar() or 0
+    today_active_converters = (
+        await db.execute(
+            select(func.count(distinct(Conversion.user_id))).where(Conversion.created_at == today)
+        )
+    ).scalar() or 0
 
     # Growth rate: this week vs prev week
     growth_rate = round(
@@ -249,6 +262,7 @@ async def dashboard(
         "new_prev_week": new_prev_week,
         "growth_rate": growth_rate,
         "today_conversions": today_conversions,
+        "today_active_converters": today_active_converters,
         "premium_users": premium_users,
         "diamonds_sold": diamonds_sold,
         "stars_earned": stars_earned,
@@ -285,6 +299,15 @@ async def dashboard_chart(
             )
         ).all()
     )
+    active_conv_users_data = dict(
+        (
+            await db.execute(
+                select(Conversion.created_at, func.count(distinct(Conversion.user_id)))
+                .where(Conversion.created_at >= start_date)
+                .group_by(Conversion.created_at)
+            )
+        ).all()
+    )
 
     chart = []
     for i in range(days + 1):
@@ -294,6 +317,7 @@ async def dashboard_chart(
                 "date": d.isoformat(),
                 "users": users_data.get(d, 0),
                 "conversions": conv_data.get(d, 0),
+                "active_converters": active_conv_users_data.get(d, 0),
             }
         )
     return chart
@@ -670,6 +694,43 @@ async def list_conversions(
     }
 
 
+# ─── Referrals ────────────────────────────────────────────
+
+@app.get("/api/referrals")
+async def referrals(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    _=Depends(verify_token),
+):
+    stmt = (
+        select(Referral, User, User.label("inviter_user"))
+        .join(User, User.id == Referral.invited_id)
+        .join(User, User.id == Referral.inviter_id)
+    )
+    count_stmt = select(func.count(Referral.id))
+    stmt = stmt.order_by(Referral.created_at.desc(), Referral.id.desc())
+    total = (await db.execute(count_stmt)).scalar() or 0
+    rows = (await db.execute(stmt.offset((page - 1) * per_page).limit(per_page))).all()
+    return {
+        "referrals": [
+            {
+                "id": r.id,
+                "inviter_id": inviter.user_id,
+                "inviter_name": inviter.name,
+                "inviter_username": inviter.username,
+                "invited_id": u.user_id,
+                "invited_name": u.name,
+                "invited_username": u.username,
+                "created_at": r.created_at.isoformat() if r.created_at else None,
+            }
+            for r, u, inviter in rows
+        ],
+        "total": total,
+        "pages": max(1, (total + per_page - 1) // per_page),
+    }
+
+
 # ─── Analytics ────────────────────────────────────────────
 
 @app.get("/api/analytics")
@@ -692,10 +753,20 @@ async def analytics(
     daily_conv = dict((await db.execute(
         select(Conversion.created_at, func.count()).where(Conversion.created_at >= start_30).group_by(Conversion.created_at)
     )).all())
+    daily_active_conv_users = dict((await db.execute(
+        select(Conversion.created_at, func.count(distinct(Conversion.user_id)))
+        .where(Conversion.created_at >= start_30)
+        .group_by(Conversion.created_at)
+    )).all())
     daily_users = dict((await db.execute(
         select(User.joined_at, func.count()).where(User.joined_at >= start_30).group_by(User.joined_at)
     )).all())
-    daily = [{"date": (start_30 + timedelta(days=i)).isoformat(), "conversions": daily_conv.get(start_30 + timedelta(days=i), 0), "users": daily_users.get(start_30 + timedelta(days=i), 0)} for i in range(30)]
+    daily = [{
+        "date": (start_30 + timedelta(days=i)).isoformat(),
+        "conversions": daily_conv.get(start_30 + timedelta(days=i), 0),
+        "users": daily_users.get(start_30 + timedelta(days=i), 0),
+        "active_converters": daily_active_conv_users.get(start_30 + timedelta(days=i), 0),
+    } for i in range(30)]
 
     this_month_users = (await db.execute(select(func.count(User.user_id)).where(User.joined_at >= this_month_start))).scalar() or 0
     last_month_users = (await db.execute(select(func.count(User.user_id)).where(User.joined_at >= last_month_start, User.joined_at < this_month_start))).scalar() or 0

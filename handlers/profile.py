@@ -20,22 +20,22 @@ async def profile_handler(message: types.Message, db: AsyncSession):
     lang = await user_service.get_lang(message.from_user.id)
 
     if not user:
-        return await message.answer("⚠️ Not registered.")
+        return await message.answer(i18n.get_text("not-registered", lang))
 
     conversions = await user_service.get_conversion_count(user.user_id)
     rank = await user_service.get_user_rank(user.user_id)
     total_users = await user_service.total_users()
 
     if user.is_premium:
-        status = "👑 Premium"
+        status = i18n.get_text("profile-status-premium", lang)
         diamonds_text = "♾️"
     else:
-        status = "Free"
+        status = i18n.get_text("profile-status-free", lang)
         diamonds_text = str(user.diamonds or 0)
 
     text = i18n.get_text("profile", lang).format(
         name=user.name or "—",
-        username=user.username or "N/A",
+        username=user.username or i18n.get_text("username-na", lang),
         user_id=user.user_id,
         conversions=_fmt(conversions),
         rank=rank or "—",

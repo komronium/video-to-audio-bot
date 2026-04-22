@@ -17,7 +17,7 @@ from services.redis_queue import queue_manager
 from services.user_service import UserService
 from utils.i18n import i18n
 
-MAX_FILE_SIZE = 25 * 1024 * 1024
+MAX_FILE_SIZE = 50 * 1024 * 1024
 DAILY_LIMIT = 5
 MAX_QUEUE_SIZE = 50
 MAX_CONCURRENT = 5
@@ -85,7 +85,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
                 await message.answer(i18n.get_text("large-used", lang))
             else:
                 await message.reply(
-                    "💎 <b>No diamonds left!</b> Please buy more diamonds to continue.",
+                    i18n.get_text("no-diamonds", lang),
                     reply_markup=get_buy_more_keyboard(lang),
                 )
                 return
@@ -119,7 +119,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
                 await message.answer(i18n.get_text("extra-used", lang))
             else:
                 await message.reply(
-                    "💎 <b>No diamonds left!</b> Please buy more diamonds to continue.",
+                    i18n.get_text("no-diamonds", lang),
                     reply_markup=get_buy_more_keyboard(lang),
                 )
                 return
@@ -131,12 +131,12 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         await message.reply(
             i18n.get_text("server-busy", lang)
             if i18n.get_text("server-busy", lang) != "server-busy"
-            else "⚠️ Server is busy right now. Please try again in a few minutes."
+            else i18n.get_text("error-server", lang)
         )
         return
 
     if queue_manager.user_in_queue(user_id):
-        await message.reply("⏳ Your previous video is still processing. Please wait.")
+        await message.reply(i18n.get_text("queue-wait", lang))
         return
 
     queue_position = queue_manager.add_to_queue(user_id, video.file_id, timestamp)
@@ -164,7 +164,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     except Exception as e:
         logging.exception(f"Error processing video for user {user_id}")
         try:
-            await message.reply("⚠️ An error occurred. Please try again later.")
+            await message.reply(i18n.get_text("error-server", lang))
         except TelegramAPIError:
             pass
         try:
@@ -188,6 +188,7 @@ async def document_handler(message: Message, db: AsyncSession):
 
 async def process_video(message: Message, db: AsyncSession, video, lang: str):
     user_id = message.from_user.id
+    user_service = UserService(db)
     processing_msg = None
     video_path = None
     audio_path = None
@@ -206,11 +207,11 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
                 video_path, f"audios/{file_name}"
             )
         except NoAudioError:
-            await processing_msg.edit_text("🔇 This video has no audio track.")
+            await processing_msg.edit_text(i18n.get_text("no-audio", lang))
             return
 
         if type(audio_path) is dict:
-            await processing_msg.edit_text("❌ Error. Please try again later!")
+            await processing_msg.edit_text(i18n.get_text("error-server", lang))
             await message.bot.send_message(
                 settings.ADMIN_ID,
                 f"<b>❌ Video converting ERROR</b>\n"
@@ -242,10 +243,22 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
         else:
             r.incr(key)
 
+        # Referral reward check
+        should_reward, inviter_id = await user_service.check_referral_reward(user_id)
+        if should_reward:
+            await user_service.grant_referral_reward(user_id)
+            await message.answer(i18n.get_text("referral-bonus", lang))
+
+        # Milestone reward check
+        milestone_diamonds = await user_service.check_milestone_rewards(user_id)
+        if milestone_diamonds > 0:
+            await user_service.grant_milestone_reward(user_id, milestone_diamonds)
+            await message.answer(i18n.get_text("milestone-bonus", lang).format(milestone_diamonds))
+
     except Exception:
         if processing_msg:
             try:
-                await processing_msg.edit_text("⚠️ Error. Please try again.")
+                await processing_msg.edit_text(i18n.get_text("error-server", lang))
             except TelegramAPIError:
                 pass
         raise

@@ -44,6 +44,9 @@ async def buy_any_diamonds_callback(call: CallbackQuery):
         lang = await service.get_lang(call.from_user.id)
         diamonds_count = int(call.data.split(":")[2])
         amount = settings.DIAMONDS_PRICES[diamonds_count]
+        extra_offer = ""
+        if diamonds_count == 50:
+            extra_offer = f"\n\n{i18n.get_text('save-30-line', lang)}"
 
         prices = [
             LabeledPrice(
@@ -53,7 +56,7 @@ async def buy_any_diamonds_callback(call: CallbackQuery):
         ]
         await call.message.answer_invoice(
             title=i18n.get_text("buy-title", lang).format(diamonds_count),
-            description=i18n.get_text("buy-desc", lang).format(diamonds_count, amount),
+            description=i18n.get_text("buy-desc", lang).format(diamonds_count, amount) + extra_offer,
             prices=prices,
             provider_token="",
             payload="channel_support",

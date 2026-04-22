@@ -134,7 +134,7 @@ export default function Analytics() {
       {/* 30-day dual bar chart */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
         <h2 className="text-sm font-semibold text-gray-900 mb-1">Last 30 Days</h2>
-        <p className="text-xs text-gray-400 mb-5">Daily new users and conversions</p>
+        <p className="text-xs text-gray-400 mb-5">Daily new users, conversions, and active converters</p>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={data.daily} margin={{ top: 0, right: 0, left: -24, bottom: 0 }} barGap={2}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
@@ -156,10 +156,11 @@ export default function Analytics() {
             />
             <Bar dataKey="users" fill="#3b82f6" name="New Users" radius={[3, 3, 0, 0]} maxBarSize={14} />
             <Bar dataKey="conversions" fill="#8b5cf6" name="Conversions" radius={[3, 3, 0, 0]} maxBarSize={14} />
+            <Bar dataKey="active_converters" fill="#10b981" name="Active Converters" radius={[3, 3, 0, 0]} maxBarSize={14} />
           </BarChart>
         </ResponsiveContainer>
         <div className="flex gap-4 mt-2 pl-1">
-          {[{ color: "#3b82f6", label: "New Users" }, { color: "#8b5cf6", label: "Conversions" }].map(({ color, label }) => (
+          {[{ color: "#3b82f6", label: "New Users" }, { color: "#8b5cf6", label: "Conversions" }, { color: "#10b981", label: "Active Converters" }].map(({ color, label }) => (
             <div key={label} className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ background: color }} />
               <span className="text-xs text-gray-400">{label}</span>

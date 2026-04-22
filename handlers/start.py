@@ -47,14 +47,30 @@ def get_menu_keyboard(lang: str, is_admin: bool = False):
 async def command_start(message: types.Message, db: AsyncSession):
     service = UserService(db)
     lang = await service.get_lang(message.from_user.id)
+    referral_code = None
+
+    args = message.text.split()
+    if len(args) > 1:
+        referral_code = args[1].upper()
 
     if not lang:
+        if referral_code:
+            async with get_db() as db2:
+                service2 = UserService(db2)
+                await service2.apply_referral(message.from_user.id, referral_code)
         return await message.answer(
             i18n.get_text('choose_language'),
             reply_markup=get_language_keyboard()
         )
 
-    
+    if referral_code:
+        applied = await service.apply_referral(message.from_user.id, referral_code)
+        await message.answer(
+            i18n.get_text("referral-applied", lang)
+            if applied
+            else i18n.get_text("referral-invalid", lang)
+        )
+
 
     await message.reply(
         i18n.get_text('start', lang),

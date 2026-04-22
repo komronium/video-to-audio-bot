@@ -14,13 +14,14 @@ router = Router()
 )
 async def command_top(message: types.Message, db: AsyncSession):
     user_service = UserService(db)
+    lang = await user_service.get_lang(message.from_user.id)
     top_users = await user_service.get_top_users()
 
     if not top_users:
-        await message.answer("🚀 No top users yet.")
+        await message.answer(i18n.get_text("top-empty", lang))
         return
 
-    text = "🏆 <b>TOP 10 MOST ACTIVE USERS:</b>\n\n"
+    text = i18n.get_text("top-title", lang) + "\n\n"
     for idx, user in enumerate(top_users):
         text += f"{EMOJIES[idx]}  <b>{user.name}</b> – {user.conversation_count}\n"
 
@@ -29,11 +30,12 @@ async def command_top(message: types.Message, db: AsyncSession):
 
 async def rank_internal(message: types.Message, db: AsyncSession):
     service = UserService(db)
+    lang = await service.get_lang(message.from_user.id)
     user = await service.get_user(message.from_user.id)
     if not user:
-        await message.answer("⚠️ You are not registered.")
+        await message.answer(i18n.get_text("not-registered", lang))
         return
     rank = await service.get_user_rank(user.user_id)
     await message.answer(
-        f"🏅 Your rank: <b>#{rank}</b> — conversations: <code>{user.conversation_count}</code>"
+        i18n.get_text("rank-text", lang).format(rank=rank, conversions=user.conversation_count)
     )

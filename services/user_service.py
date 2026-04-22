@@ -1,3 +1,4 @@
+import secrets
 from datetime import date
 
 from aiogram import Bot
@@ -6,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from database.models import Conversion, Payment, User
+from database.models import Conversion, Payment, Referral, User
 from utils.notification import notify_group, notify_milestone
 
 
@@ -31,7 +32,7 @@ class UserService:
         self, user_id: int, username: str, name: str, lang: str, bot: Bot
     ):
         try:
-            user = User(user_id=user_id, username=username, name=name)
+            user = User(user_id=user_id, username=username, name=name, lang=lang)
             self.db.add(user)
             await self.db.commit()
             await self.db.refresh(user)
@@ -156,10 +157,14 @@ class UserService:
 
     async def get_lang(self, user_id: int):
         user = await self.get_user(user_id)
-        return user.lang
+        if not user:
+            return "en"
+        return user.lang or "en"
 
     async def set_lang(self, user_id: int, lang: str):
         user = await self.get_user(user_id)
+        if not user:
+            return
         user.lang = lang
         await self.db.commit()
 
@@ -188,3 +193,73 @@ class UserService:
         result = await self.db.execute(stmt)
         row = result.first()
         return row[0] if row else None
+
+    async def generate_referral_code(self, user_id: int) -> str:
+        user = await self.get_user(user_id)
+        if not user:
+            return None
+        if user.referral_code:
+            return user.referral_code
+        while True:
+            code = secrets.token_urlsafe(8)[:10].upper()
+            stmt = select(User).where(User.referral_code == code)
+            result = await self.db.execute(stmt)
+            if not result.scalars().first():
+                user.referral_code = code
+                await self.db.commit()
+                return code
+
+    async def get_user_by_referral_code(self, code: str):
+        stmt = select(User).where(User.referral_code == code)
+        result = await self.db.execute(stmt)
+        return result.scalars().first()
+
+    async def apply_referral(self, user_id: int, referral_code: str) -> bool:
+        user = await self.get_user(user_id)
+        if not user or user.referral_code_id:
+            return False
+        inviter = await self.get_user_by_referral_code(referral_code)
+        if not inviter or inviter.id == user.id:
+            return False
+        user.referral_code_id = inviter.id
+        await self.db.commit()
+        return True
+
+    async def check_referral_reward(self, user_id: int) -> tuple[bool, int | None]:
+        user = await self.get_user(user_id)
+        if not user or user.referral_rewarded or not user.referral_code_id:
+            return False, None
+        return True, user.referral_code_id
+
+    async def grant_referral_reward(self, user_id: int):
+        user = await self.get_user(user_id)
+        if not user or user.referral_rewarded:
+            return False
+        inviter_id = user.referral_code_id
+        if not inviter_id:
+            return False
+        inviter = await self.db.get(User, inviter_id)
+        if inviter:
+            await self.add_diamonds(inviter.user_id, 2, record_payment=False)
+        await self.add_diamonds(user_id, 1, record_payment=False)
+        user.referral_rewarded = True
+        referral = Referral(inviter_id=inviter_id, invited_id=user.id)
+        self.db.add(referral)
+        await self.db.commit()
+        return True
+
+    async def check_milestone_rewards(self, user_id: int) -> int:
+        user = await self.get_user(user_id)
+        if not user:
+            return 0
+        count = user.conversation_count or 0
+        milestones = {50: 5, 100: 10, 200: 20, 500: 50}
+        reward = 0
+        for threshold, bonus in milestones.items():
+            if count == threshold:
+                reward = bonus
+                break
+        return reward
+
+    async def grant_milestone_reward(self, user_id: int, diamonds: int):
+        await self.add_diamonds(user_id, diamonds, record_payment=False)

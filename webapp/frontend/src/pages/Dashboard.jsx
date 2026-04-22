@@ -165,7 +165,7 @@ export default function Dashboard() {
           icon={Activity}
           label="Today"
           value={fmt(stats.today_conversions)}
-          sub={`conversions · ${stats.new_today} new signups`}
+          sub={`${fmt(stats.today_active_converters)} active converters · ${stats.new_today} new signups`}
           accent="rose"
         />
       </div>
@@ -203,6 +203,10 @@ export default function Dashboard() {
                 <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.12} />
                 <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
               </linearGradient>
+              <linearGradient id="gA" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#10b981" stopOpacity={0.12} />
+                <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+              </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
             <XAxis
@@ -224,10 +228,11 @@ export default function Dashboard() {
             />
             <Area type="monotone" dataKey="users" stroke="#3b82f6" strokeWidth={2} fill="url(#gU)" name="New Users" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
             <Area type="monotone" dataKey="conversions" stroke="#8b5cf6" strokeWidth={2} fill="url(#gC)" name="Conversions" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
+            <Area type="monotone" dataKey="active_converters" stroke="#10b981" strokeWidth={2} fill="url(#gA)" name="Active Converters" dot={false} activeDot={{ r: 4, strokeWidth: 0 }} />
           </AreaChart>
         </ResponsiveContainer>
         <div className="flex gap-4 mt-1 pl-1">
-          {[{ color: "#3b82f6", label: "New Users" }, { color: "#8b5cf6", label: "Conversions" }].map(({ color, label }) => (
+          {[{ color: "#3b82f6", label: "New Users" }, { color: "#8b5cf6", label: "Conversions" }, { color: "#10b981", label: "Active Converters" }].map(({ color, label }) => (
             <div key={label} className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full" style={{ background: color }} />
               <span className="text-xs text-gray-400">{label}</span>

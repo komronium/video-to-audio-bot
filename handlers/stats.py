@@ -25,6 +25,7 @@ def _fmt(n: int) -> str:
     F.text.in_([i18n.get_text("stats-button", lang) for lang in i18n.LANGUAGES])
 )
 async def command_stats(message: types.Message, db: AsyncSession):
+    lang = "en"
     try:
         service = UserService(db)
         lang = await service.get_lang(message.from_user.id)
@@ -45,7 +46,7 @@ async def command_stats(message: types.Message, db: AsyncSession):
         )
         await message.answer(text)
     except Exception:
-        await message.answer("❌ Error getting statistics")
+        await message.answer(i18n.get_text("stats-error", lang))
         raise
 
 

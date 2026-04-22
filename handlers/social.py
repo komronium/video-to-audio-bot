@@ -82,7 +82,10 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
             for _ in range(SOCIAL_DIAMOND_COST):
                 await user_service.use_diamond(user_id)
             await message.answer(
-                f"💎 <b>{SOCIAL_DIAMOND_COST} diamonds used</b> — {platform.capitalize()} download activated."
+                i18n.get_text("social-diamonds-used", lang).format(
+                    count=SOCIAL_DIAMOND_COST,
+                    platform=platform.capitalize(),
+                )
             )
         else:
             now = datetime.now()
@@ -100,7 +103,12 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
             return
 
     emoji = "📸" if platform == "instagram" else "🎵"
-    processing_msg = await message.reply(f"{emoji} Downloading from {platform.capitalize()}...")
+    processing_msg = await message.reply(
+        i18n.get_text("social-downloading", lang).format(
+            emoji=emoji,
+            platform=platform.capitalize(),
+        )
+    )
     file_path = None
 
     try:
@@ -111,11 +119,11 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         duration = info.get("duration") or 0
         if duration > MAX_DURATION:
             await processing_msg.edit_text(
-                f"⏱️ Video too long. Maximum is <b>{MAX_DURATION // 60} minutes</b>."
+                i18n.get_text("social-too-long", lang).format(MAX_DURATION // 60)
             )
             return
 
-        await processing_msg.edit_text("🎧 Processing audio...")
+        await processing_msg.edit_text(i18n.get_text("social-processing", lang))
         file_path = await loop.run_in_executor(None, _social_download, url, name)
 
         bot_me = await message.bot.get_me()
@@ -137,17 +145,29 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         else:
             r.incrby(key, SOCIAL_SLOT_COST)
 
+        # Referral reward check
+        should_reward, inviter_id = await user_service.check_referral_reward(user_id)
+        if should_reward:
+            await user_service.grant_referral_reward(user_id)
+            await message.answer(i18n.get_text("referral-bonus", lang))
+
+        # Milestone reward check
+        milestone_diamonds = await user_service.check_milestone_rewards(user_id)
+        if milestone_diamonds > 0:
+            await user_service.grant_milestone_reward(user_id, milestone_diamonds)
+            await message.answer(i18n.get_text("milestone-bonus", lang).format(milestone_diamonds))
+
     except Exception as e:
         logging.exception(f"{platform} error for user {user_id}")
         err_str = str(e).lower()
         if "blocked" in err_str or "ip address" in err_str:
-            user_msg = f"Your IP is blocked by {platform.capitalize()}. Try again later or use VPN."
+            user_msg = i18n.get_text("social-error-blocked", lang).format(platform.capitalize())
         elif "not available" in err_str or "unavailable" in err_str:
-            user_msg = f"This {platform.capitalize()} content is not available."
+            user_msg = i18n.get_text("social-error-unavailable", lang).format(platform.capitalize())
         elif "copyright" in err_str or "blocked in your country" in err_str:
-            user_msg = f"Content blocked by copyright in your region."
+            user_msg = i18n.get_text("social-error-copyright", lang)
         else:
-            user_msg = "Please try again later."
+            user_msg = i18n.get_text("error-server", lang)
         try:
             await processing_msg.edit_text(user_msg)
         except TelegramAPIError:
