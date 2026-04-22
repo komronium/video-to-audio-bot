@@ -246,11 +246,16 @@ async def process_video(message: Message, db: AsyncSession, video, lang: str):
             await message.reply_document(
                 audio_file, caption=i18n.get_text("converted-by", lang).format(bot.username)
             )
+            # Also send as voice message
+            voice_file = FSInputFile(path=audio_path)
+            await message.reply_voice(voice_file)
         except TelegramRetryAfter as e:
             await asyncio.sleep(e.retry_after)
             await message.reply_document(
                 audio_file, caption=i18n.get_text("converted-by", lang).format(bot.username)
             )
+            voice_file = FSInputFile(path=audio_path)
+            await message.reply_voice(voice_file)
 
         today = datetime.today().strftime("%Y-%m-%d")
         key = f"user:{user_id}:{today}"
