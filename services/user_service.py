@@ -48,7 +48,8 @@ class UserService:
         user = await self.get_user(user_id)
         if not user:
             return
-        conversion = Conversion(user_id=user.id, type=conv_type)
+        # Conversion.user_id stores Telegram user_id (matches existing DB data)
+        conversion = Conversion(user_id=user_id, type=conv_type)
         if user.is_premium:
             conversion.is_premium = True
         user.conversation_count = (user.conversation_count or 0) + 1
@@ -56,11 +57,8 @@ class UserService:
         await self.db.commit()
 
     async def get_conversion_count(self, user_id: int) -> int:
-        user = await self.get_user(user_id)
-        if not user:
-            return 0
         result = await self.db.execute(
-            select(func.count(Conversion.id)).where(Conversion.user_id == user.id)
+            select(func.count(Conversion.id)).where(Conversion.user_id == user_id)
         )
         return result.scalar_one()
 
@@ -72,9 +70,10 @@ class UserService:
         return result.scalar() or 0
 
     async def total_active_users(self) -> int:
+        # JOIN on user_id (Telegram ID) — matches existing Conversion data
         stmt = (
             select(func.count(distinct(User.user_id)))
-            .join(Conversion, User.id == Conversion.user_id)
+            .join(Conversion, User.user_id == Conversion.user_id)
         )
         result = await self.db.execute(stmt)
         return result.scalar() or 0
