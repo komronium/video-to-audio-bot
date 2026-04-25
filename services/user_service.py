@@ -223,8 +223,8 @@ class UserService:
         inviter = await self.db.get(User, user.referral_code_id)
         if not inviter:
             return False, None
-        inviter.diamonds = (inviter.diamonds or 0) + 2
-        user.diamonds = (user.diamonds or 0) + 1
+        inviter.diamonds = (inviter.diamonds or 0) + 3
+        user.diamonds = (user.diamonds or 0) + 2
         user.referral_rewarded = True
         self.db.add(Referral(inviter_id=inviter.id, invited_id=user.id))
         await self.db.commit()

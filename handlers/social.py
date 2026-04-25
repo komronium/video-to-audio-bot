@@ -2,7 +2,7 @@ import asyncio
 import hashlib
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote_plus
 
@@ -14,7 +14,6 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
-from handlers.video import _get_bot_username
 from services.user_service import UserService
 from utils.i18n import i18n
 from utils.rewards import check_and_notify_rewards
@@ -23,13 +22,21 @@ YOUTUBE_REGEX = r".*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$
 INSTAGRAM_REGEX = r"https?://(www\.)?instagram\.com/(reel|p|tv)/[\w-]+"
 TIKTOK_REGEX = r"https?://((www\.|vm\.|vt\.)?tiktok\.com|tiktok\.com)/[\w/@.?=&%-]+"
 
-DAILY_LIMIT = 5
+DAILY_LIMIT = 3
 SOCIAL_SLOT_COST = 2
-SOCIAL_DIAMOND_COST = 2
-MAX_DURATION = 20 * 60  # 20 minutes in seconds
+MAX_DURATION = 20 * 60
 
 _redis = aioredis.Redis(host="localhost", port=6379, decode_responses=True)
+_bot_username: str | None = None
+
 router = Router()
+
+
+async def _get_bot_username(bot) -> str:
+    global _bot_username
+    if _bot_username is None:
+        _bot_username = (await bot.get_me()).username
+    return _bot_username
 
 
 async def _get_buy_keyboard(lang: str, user_service: UserService, user_id: int, bot):
@@ -44,6 +51,23 @@ async def _get_buy_keyboard(lang: str, user_service: UserService, user_id: int, 
     builder.button(text=i18n.get_text("invite-friend", lang), url=share_url)
     builder.adjust(1)
     return builder.as_markup()
+
+
+async def _get_daily_count(user_id: int) -> int:
+    today = datetime.today().strftime("%Y-%m-%d")
+    return int(await _redis.get(f"user:{user_id}:{today}") or 0)
+
+
+async def _get_daily_ttl(user_id: int) -> int:
+    today = datetime.today().strftime("%Y-%m-%d")
+    return await _redis.ttl(f"user:{user_id}:{today}")
+
+
+def _ttl_to_str(ttl: int) -> str:
+    if ttl <= 0:
+        return "soon"
+    h, m = ttl // 3600, (ttl % 3600) // 60
+    return f"{h}h {m}m" if h else f"{m}m"
 
 
 def _social_info(url: str) -> dict:
@@ -83,26 +107,20 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
     lang = user.lang or "en"
     is_lifetime = user.is_premium
 
-    today = datetime.today().strftime("%Y-%m-%d")
-    key = f"user:{user_id}:{today}"
-    current = int(await _redis.get(key) or 0)
+    current = await _get_daily_count(user_id)
 
     if not is_lifetime and current + SOCIAL_SLOT_COST > DAILY_LIMIT:
-        if user.diamonds >= SOCIAL_DIAMOND_COST:
-            for _ in range(SOCIAL_DIAMOND_COST):
+        if user.diamonds >= SOCIAL_SLOT_COST:
+            for _ in range(SOCIAL_SLOT_COST):
                 await user_service.use_diamond(user_id)
             await message.answer(
                 i18n.get_text("social-diamonds-used", lang).format(
-                    count=SOCIAL_DIAMOND_COST,
-                    platform=platform.capitalize(),
+                    count=SOCIAL_SLOT_COST, platform=platform.capitalize()
                 )
             )
         else:
-            now = datetime.now()
-            midnight = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
-            secs = int((midnight - now).total_seconds())
-            h, m = secs // 3600, (secs % 3600) // 60
-            time_str = f"\n⏳ <b>{h}h {m}m</b> remaining" if h else f"\n⏳ <b>{m}m</b> remaining"
+            ttl = await _get_daily_ttl(user_id)
+            time_str = f"\n⏳ <b>{_ttl_to_str(ttl)}</b>" if ttl > 0 else ""
             await message.answer(
                 i18n.get_text("social-limit", lang).format(
                     diamonds=user.diamonds or 0,
@@ -117,8 +135,7 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
     emoji = "📸" if platform == "instagram" else "🎵"
     processing_msg = await message.reply(
         i18n.get_text("social-downloading", lang).format(
-            emoji=emoji,
-            platform=platform.capitalize(),
+            emoji=emoji, platform=platform.capitalize()
         )
     )
     file_path = None
@@ -150,6 +167,8 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         await message.reply_document(FSInputFile(file_path), caption=caption)
         await message.reply_voice(FSInputFile(file_path))
 
+        today = datetime.today().strftime("%Y-%m-%d")
+        key = f"user:{user_id}:{today}"
         if not await _redis.exists(key):
             await _redis.set(key, SOCIAL_SLOT_COST)
             await _redis.expire(key, 86400)
@@ -157,6 +176,16 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
             await _redis.incrby(key, SOCIAL_SLOT_COST)
 
         await check_and_notify_rewards(message, user_id, user_service, lang)
+
+        # Post-conversion upsell for free users
+        if not is_lifetime:
+            new_count = await _get_daily_count(user_id)
+            if new_count >= DAILY_LIMIT:
+                ttl = await _get_daily_ttl(user_id)
+                await message.answer(
+                    i18n.get_text("used-last-free", lang).format(time=_ttl_to_str(ttl)),
+                    reply_markup=await _get_buy_keyboard(lang, user_service, user_id, message.bot),
+                )
 
     except Exception as e:
         logging.exception(f"{platform} error for user {user_id}")
@@ -176,7 +205,7 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         try:
             await message.bot.send_message(
                 settings.ADMIN_ID,
-                f"<b>❌ {platform.capitalize()} error</b>\n"
+                f"<b>❌ {platform} error</b>\n"
                 f"<b>User:</b> <code>{user_id}</code>\n"
                 f"<b>Error:</b> <code>{type(e).__name__}: {e}</code>",
             )

@@ -20,7 +20,7 @@ from utils.i18n import i18n
 from utils.rewards import check_and_notify_rewards
 
 MAX_FILE_SIZE = 50 * 1024 * 1024
-DAILY_LIMIT = 5
+DAILY_LIMIT = 3
 MAX_QUEUE_SIZE = 50
 MAX_CONCURRENT = 5
 
@@ -35,8 +35,7 @@ router = Router()
 async def _get_bot_username(bot) -> str:
     global _bot_username
     if _bot_username is None:
-        me = await bot.get_me()
-        _bot_username = me.username
+        _bot_username = (await bot.get_me()).username
     return _bot_username
 
 
@@ -62,12 +61,10 @@ def _generate_name(message: Message, video) -> str:
         clean = sanitize(message.caption[:25].lower().replace(" ", "_"))
         if clean:
             return clean
-
     if video.file_name:
         clean = sanitize(video.file_name.rsplit(".", 1)[0].lower().replace(" ", "_"))
         if clean:
             return clean
-
     return f"audio_{message.from_user.id}_{int(datetime.now().timestamp())}"
 
 
@@ -89,6 +86,13 @@ async def _increment_daily_count(user_id: int):
         await _redis.expire(key, 86400)
     else:
         await _redis.incr(key)
+
+
+def _ttl_to_str(ttl: int) -> str:
+    if ttl <= 0:
+        return "soon"
+    h, m = ttl // 3600, (ttl % 3600) // 60
+    return f"{h}h {m}m" if h else f"{m}m"
 
 
 @router.message(F.video)
@@ -140,14 +144,9 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
             await message.answer(i18n.get_text("extra-used", lang))
         else:
             ttl = await _get_daily_ttl(user_id)
-            if ttl > 0:
-                hours, minutes = ttl // 3600, (ttl % 3600) // 60
-                time_str = f"{hours}h {minutes}m" if hours else f"{minutes}m"
-                limit_text = i18n.get_text("daily-limit", lang) + f"\n\n⏳ <b>{time_str}</b>"
-            else:
-                limit_text = i18n.get_text("daily-limit", lang)
+            time_str = _ttl_to_str(ttl)
             await message.answer(
-                limit_text + "\n\n" + i18n.get_text("limit-invite-tip", lang),
+                i18n.get_text("daily-limit", lang).format(limit=DAILY_LIMIT, time=time_str),
                 reply_markup=await get_buy_more_keyboard(lang, user_service, user.user_id, message.bot),
             )
             return
@@ -181,7 +180,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
                     await queue_message.delete()
                 except TelegramAPIError:
                     pass
-            await _process_video(message, db, video, lang, user_service)
+            await _process_video(message, db, video, lang, user_service, is_lifetime, user.diamonds)
     except TelegramRetryAfter as e:
         logging.warning(f"FloodControl for user {user_id}, retry after {e.retry_after}s")
     except Exception as e:
@@ -196,7 +195,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
                 f"<b>❌ Video processing error</b>\n"
                 f"<b>User:</b> <code>{user_id}</code>\n"
                 f"<b>Error:</b> <code>{e}</code>\n"
-                f"<b>Queue size:</b> {await queue_manager.queue_length()}",
+                f"<b>Queue:</b> {await queue_manager.queue_length()}",
             )
         except TelegramAPIError:
             pass
@@ -215,6 +214,8 @@ async def _process_video(
     video,
     lang: str,
     user_service: UserService,
+    is_lifetime: bool = False,
+    user_diamonds: int = 0,
 ):
     user_id = message.from_user.id
     processing_msg = None
@@ -242,8 +243,7 @@ async def _process_video(
             await processing_msg.edit_text(i18n.get_text("error-server", lang))
             await message.bot.send_message(
                 settings.ADMIN_ID,
-                f"<b>❌ Video converting ERROR</b>\n"
-                f"<blockquote>{audio_path['message']}</blockquote>",
+                f"<b>❌ Video converting ERROR</b>\n<blockquote>{audio_path['message']}</blockquote>",
             )
             return
 
@@ -264,6 +264,25 @@ async def _process_video(
 
         await _increment_daily_count(user_id)
         await check_and_notify_rewards(message, user_id, user_service, lang)
+
+        # Post-conversion upsell for free users (right after satisfaction peak)
+        if not is_lifetime:
+            new_count = await _get_daily_count(user_id)
+            if new_count >= DAILY_LIMIT:
+                ttl = await _get_daily_ttl(user_id)
+                time_str = _ttl_to_str(ttl)
+                await message.answer(
+                    i18n.get_text("used-last-free", lang).format(time=time_str),
+                    reply_markup=await get_buy_more_keyboard(lang, user_service, user_id, message.bot),
+                )
+            elif new_count == DAILY_LIMIT - 1:
+                builder = InlineKeyboardBuilder()
+                builder.button(text=i18n.get_text("get-more-btn", lang), callback_data="diamond:list")
+                builder.adjust(1)
+                await message.answer(
+                    i18n.get_text("one-free-left", lang),
+                    reply_markup=builder.as_markup(),
+                )
 
     except Exception:
         if processing_msg:
