@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote_plus
 
-import redis
+import redis.asyncio as aioredis
 from aiogram import F, Router
 from aiogram.exceptions import TelegramAPIError
 from aiogram.types import FSInputFile, Message
@@ -14,8 +14,10 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
+from handlers.video import _get_bot_username
 from services.user_service import UserService
 from utils.i18n import i18n
+from utils.rewards import check_and_notify_rewards
 
 YOUTUBE_REGEX = r".*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$)).*"
 INSTAGRAM_REGEX = r"https?://(www\.)?instagram\.com/(reel|p|tv)/[\w-]+"
@@ -24,20 +26,18 @@ TIKTOK_REGEX = r"https?://((www\.|vm\.|vt\.)?tiktok\.com|tiktok\.com)/[\w/@.?=&%
 DAILY_LIMIT = 5
 SOCIAL_SLOT_COST = 2
 SOCIAL_DIAMOND_COST = 2
-MAX_DURATION = 20 * 60  # 30 minutes
+MAX_DURATION = 20 * 60  # 20 minutes in seconds
 
-r = redis.Redis(host="localhost", port=6379, decode_responses=True)
+_redis = aioredis.Redis(host="localhost", port=6379, decode_responses=True)
 router = Router()
 
 
-async def _get_buy_keyboard(
-    lang: str, user_service: UserService, user_id: int, bot
-):
+async def _get_buy_keyboard(lang: str, user_service: UserService, user_id: int, bot):
     builder = InlineKeyboardBuilder()
     builder.button(text=i18n.get_text("buy-extra", lang), callback_data="diamond:list")
     builder.button(text=i18n.get_text("get-lifetime", lang), callback_data="diamond:lifetime")
     code = await user_service.generate_referral_code(user_id)
-    bot_username = (await bot.get_me()).username
+    bot_username = await _get_bot_username(bot)
     referral_link = f"https://t.me/{bot_username}?start={code}"
     share_text = i18n.get_text("referral-share-text", lang)
     share_url = f"https://t.me/share/url?url={quote_plus(referral_link)}&text={quote_plus(share_text)}"
@@ -48,11 +48,7 @@ async def _get_buy_keyboard(
 
 def _social_info(url: str) -> dict:
     import yt_dlp
-    opts = {
-        "quiet": True,
-        "no_warnings": True,
-        "cookiefile": "cookies.txt",
-    }
+    opts = {"quiet": True, "no_warnings": True, "cookiefile": "cookies.txt"}
     with yt_dlp.YoutubeDL(opts) as ydl:
         return ydl.extract_info(url, download=False)
 
@@ -82,15 +78,14 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
     if not user:
         tg = message.from_user
         user = await user_service.add_user(
-            tg.id, tg.username, tg.full_name,
-            tg.language_code or "en", message.bot,
+            tg.id, tg.username, tg.full_name, tg.language_code or "en", message.bot
         )
     lang = user.lang or "en"
     is_lifetime = user.is_premium
 
     today = datetime.today().strftime("%Y-%m-%d")
     key = f"user:{user_id}:{today}"
-    current = int(r.get(key) or 0)
+    current = int(await _redis.get(key) or 0)
 
     if not is_lifetime and current + SOCIAL_SLOT_COST > DAILY_LIMIT:
         if user.diamonds >= SOCIAL_DIAMOND_COST:
@@ -104,10 +99,10 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
             )
         else:
             now = datetime.now()
-            midnight = (now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1))
-            seconds_until_midnight = int((midnight - now).total_seconds())
-            h, m = seconds_until_midnight // 3600, (seconds_until_midnight % 3600) // 60
-            time_str = f"\n⏳ <b>{'%dh %dm' % (h, m) if h else '%dm' % m}</b> remaining"
+            midnight = now.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+            secs = int((midnight - now).total_seconds())
+            h, m = secs // 3600, (secs % 3600) // 60
+            time_str = f"\n⏳ <b>{h}h {m}m</b> remaining" if h else f"\n⏳ <b>{m}m</b> remaining"
             await message.answer(
                 i18n.get_text("social-limit", lang).format(
                     diamonds=user.diamonds or 0,
@@ -115,9 +110,7 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
                 )
                 + "\n\n"
                 + i18n.get_text("limit-invite-tip", lang),
-                reply_markup=await _get_buy_keyboard(
-                    lang, user_service, user.user_id, message.bot
-                ),
+                reply_markup=await _get_buy_keyboard(lang, user_service, user.user_id, message.bot),
             )
             return
 
@@ -131,7 +124,7 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
     file_path = None
 
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         name = f"{platform}_{hashlib.md5(url.encode()).hexdigest()[:10]}"
 
         info = await loop.run_in_executor(None, _social_info, url)
@@ -145,50 +138,25 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         await processing_msg.edit_text(i18n.get_text("social-processing", lang))
         file_path = await loop.run_in_executor(None, _social_download, url, name)
 
-        bot_me = await message.bot.get_me()
+        bot_username = await _get_bot_username(message.bot)
+        caption = i18n.get_text("converted-by", lang).format(bot_username)
         await user_service.add_conversation(user_id, conv_type=platform)
 
         try:
             await processing_msg.delete()
-        except (Exception,):
+        except TelegramAPIError:
             pass
 
-        await message.reply_document(
-            FSInputFile(file_path),
-            caption=i18n.get_text("converted-by", lang).format(bot_me.username),
-        )
-        # Also send as voice message
-        await message.reply_voice(
-            FSInputFile(file_path),
-            caption=i18n.get_text("converted-by", lang).format(bot_me.username),
-        )
+        await message.reply_document(FSInputFile(file_path), caption=caption)
+        await message.reply_voice(FSInputFile(file_path))
 
-        if not r.exists(key):
-            r.set(key, SOCIAL_SLOT_COST)
-            r.expire(key, 86400)
+        if not await _redis.exists(key):
+            await _redis.set(key, SOCIAL_SLOT_COST)
+            await _redis.expire(key, 86400)
         else:
-            r.incrby(key, SOCIAL_SLOT_COST)
+            await _redis.incrby(key, SOCIAL_SLOT_COST)
 
-        # Referral reward check
-        should_reward, inviter_id = await user_service.check_referral_reward(user_id)
-        if should_reward:
-            granted, inviter_user_id = await user_service.grant_referral_reward(user_id)
-            if granted and inviter_user_id:
-                inviter_lang = await user_service.get_lang(inviter_user_id)
-                try:
-                    await message.bot.send_message(
-                        inviter_user_id,
-                        i18n.get_text("referral-inviter-bonus", inviter_lang),
-                    )
-                except TelegramAPIError:
-                    pass
-            await message.answer(i18n.get_text("referral-bonus", lang))
-
-        # Milestone reward check
-        milestone_diamonds = await user_service.check_milestone_rewards(user_id)
-        if milestone_diamonds > 0:
-            await user_service.grant_milestone_reward(user_id, milestone_diamonds)
-            await message.answer(i18n.get_text("milestone-bonus", lang).format(milestone_diamonds))
+        await check_and_notify_rewards(message, user_id, user_service, lang)
 
     except Exception as e:
         logging.exception(f"{platform} error for user {user_id}")
@@ -208,11 +176,11 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         try:
             await message.bot.send_message(
                 settings.ADMIN_ID,
-                f"<b>Video To Audio Bot | MP3: </b> {platform} error\n"
+                f"<b>❌ {platform.capitalize()} error</b>\n"
                 f"<b>User:</b> <code>{user_id}</code>\n"
                 f"<b>Error:</b> <code>{type(e).__name__}: {e}</code>",
             )
-        except (Exception,):
+        except TelegramAPIError:
             pass
     finally:
         if file_path and os.path.exists(file_path):

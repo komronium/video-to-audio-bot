@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     BOT_TOKEN: str
     DATABASE_URL: str = "sqlite+aiosqlite:///./database.db"
     CHANNEL_ID: int
+    CHANNEL_JOIN_LINK: str = ""
     GROUP_ID: int
     ADMIN_ID: int
     SERVER_IP: str = "89.169.47.171"

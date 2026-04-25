@@ -1,4 +1,3 @@
-import asyncio
 from datetime import date
 
 from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String, text
@@ -25,7 +24,7 @@ class User(Base):
     referral_code_id = Column(Integer, nullable=True)
     referral_rewarded = Column(Boolean, default=False)
 
-    conversions = relationship("Conversion", back_populates="user")
+    conversions = relationship("Conversion", back_populates="user", foreign_keys="Conversion.user_id")
     payments = relationship("Payment", back_populates="user")
     referrals_made = relationship("Referral", foreign_keys="Referral.inviter_id", back_populates="inviter")
 
@@ -40,14 +39,15 @@ class Conversion(Base):
     type = Column(String(20), default="video", nullable=True)
     created_at = Column(Date, default=date.today)
 
-    user = relationship("User", back_populates="conversions")
+    user = relationship("User", back_populates="conversions", foreign_keys=[user_id])
 
 
 class Payment(Base):
     __tablename__ = "payments"
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"))
-    diamonds = Column(Integer, default=0)  # 💎 sotib olingan diamondlar
+    diamonds = Column(Integer, default=0)
     is_lifetime = Column(Boolean, default=False)
     created_at = Column(Date, default=date.today)
 
@@ -65,25 +65,19 @@ class Referral(Base):
     inviter = relationship("User", foreign_keys=[inviter_id], back_populates="referrals_made")
 
 
+_MIGRATIONS = [
+    "ALTER TABLE conversions ADD COLUMN type VARCHAR DEFAULT 'video'",
+    "ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) UNIQUE",
+    "ALTER TABLE users ADD COLUMN referral_code_id INTEGER",
+    "ALTER TABLE users ADD COLUMN referral_rewarded BOOLEAN DEFAULT 0",
+]
+
+
 async def create_tables():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        try:
-            await conn.execute(text("ALTER TABLE conversions ADD COLUMN type VARCHAR DEFAULT 'video'"))
-        except Exception:
-            pass
-        try:
-            await conn.execute(text("ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) UNIQUE"))
-        except Exception:
-            pass
-        try:
-            await conn.execute(text("ALTER TABLE users ADD COLUMN referral_code_id INTEGER"))
-        except Exception:
-            pass
-        try:
-            await conn.execute(text("ALTER TABLE users ADD COLUMN referral_rewarded BOOLEAN DEFAULT 0"))
-        except Exception:
-            pass
-
-
-asyncio.run(create_tables())
+        for stmt in _MIGRATIONS:
+            try:
+                await conn.execute(text(stmt))
+            except Exception:
+                pass

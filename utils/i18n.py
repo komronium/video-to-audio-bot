@@ -3,24 +3,23 @@ from pathlib import Path
 
 
 class I18n:
-    def __init__(self, default_lang='en', locales_dir='locales'):
+    def __init__(self, default_lang: str = "en", locales_dir: str = "locales"):
         self.default_lang = default_lang
-        self.locales = {}
-        self.LANGUAGES = []
-        self.load_locales(locales_dir)
+        self.locales: dict[str, dict] = {}
+        self.LANGUAGES: list[str] = []
+        self._load(locales_dir)
 
-    def load_locales(self, locales_dir):
-        for loc_file in Path(locales_dir).glob('*.json'):
-            lang = loc_file.stem
-            with open(loc_file, encoding='utf-8') as f:
+    def _load(self, locales_dir: str):
+        for path in sorted(Path(locales_dir).glob("*.json")):
+            lang = path.stem
+            with open(path, encoding="utf-8") as f:
                 self.locales[lang] = json.load(f)
-                self.LANGUAGES.append(lang)
-            
-            self.LANGUAGES.sort()
+            self.LANGUAGES.append(lang)
 
-    def get_text(self, key, lang='en'):
+    def get_text(self, key: str, lang: str = "en") -> str:
         lang = lang or self.default_lang
-        return self.locales.get(lang, {}).get(key, self.locales[self.default_lang].get(key, key))
+        locale = self.locales.get(lang, {})
+        return locale.get(key) or self.locales[self.default_lang].get(key) or key
 
 
 i18n = I18n()

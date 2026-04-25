@@ -1,10 +1,6 @@
 import asyncio
 from pathlib import Path
 
-import requests
-
-from config import settings
-
 
 class NoAudioError(Exception):
     pass
@@ -12,59 +8,34 @@ class NoAudioError(Exception):
 
 class VideoConverter:
     def __init__(self):
-        self.output_dir = Path("videos")
-        self.output_dir.mkdir(exist_ok=True)
         Path("audios").mkdir(exist_ok=True)
 
     async def convert_video_to_audio(self, video_path: str, output_path: str) -> str:
-        try:
-            audio_path = f"{output_path}.mp3"
+        audio_path = f"{output_path}.mp3"
 
-            cmd = [
-                "ffmpeg",
-                "-v",
-                "error",
-                "-threads",
-                "1",
-                "-i",
-                video_path,
-                "-vn",
-                audio_path,
-            ]
+        cmd = [
+            "ffmpeg", "-v", "error",
+            "-threads", "1",
+            "-i", video_path,
+            "-vn", audio_path,
+        ]
 
-            process = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        _, stderr = await process.communicate()
+        err_text = stderr.decode()
+
+        if process.returncode != 0:
+            no_audio_hints = (
+                "matches no streams",
+                "does not contain any stream",
+                "Output file does not contain",
             )
+            if any(hint in err_text for hint in no_audio_hints):
+                raise NoAudioError("Video has no audio stream")
+            raise RuntimeError(f"ffmpeg failed: {err_text}")
 
-            _, stderr = await process.communicate()
-            err_text = stderr.decode()
-
-            if process.returncode != 0:
-                if "matches no streams" in err_text or "does not contain any stream" in err_text or "Output file does not contain" in err_text:
-                    raise NoAudioError("Video has no audio stream")
-                raise RuntimeError(f"ffmpeg failed: {err_text}")
-
-            return audio_path
-        except NoAudioError:
-            raise
-        except Exception as e:
-            raise RuntimeError(f"Error during conversion: {e}")
-
-    async def get_youtube_video(self, video_id: str):
-        done = False
-
-        while not done:
-            url = f"https://youtube-mp36.p.rapidapi.com/dl?id={video_id}"
-            headers = {
-                "x-rapidapi-host": settings.API_HOST,
-                "x-rapidapi-key": settings.API_KEY,
-            }
-
-            response = requests.get(url, headers=headers)
-            done = response.json().get("status") != "processing"
-        if response.status_code != 200:
-            raise RuntimeError(f"Error fetching video: {response.status_code}")
-
-        audio_data = response.json()
-
-        return audio_data
+        return audio_path

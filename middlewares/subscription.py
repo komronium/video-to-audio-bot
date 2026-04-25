@@ -1,4 +1,5 @@
 import logging
+
 from aiogram import BaseMiddleware
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.exceptions import TelegramAPIError, TelegramForbiddenError
@@ -13,49 +14,40 @@ from utils.i18n import i18n
 class SubscriptionMiddleware(BaseMiddleware):
 
     @staticmethod
-    async def check_subscription(bot, user_id, channel_id=settings.CHANNEL_ID):
+    async def check_subscription(bot, user_id: int, channel_id: int = settings.CHANNEL_ID) -> bool:
         try:
             member = await bot.get_chat_member(channel_id, user_id)
-            is_subscribed = member.status not in ['left', 'kicked', 'banned']
-            return is_subscribed
+            return member.status not in ("left", "kicked", "banned")
         except TelegramAPIError as e:
-            logging.error(f"Error while checking subscription: {e}")
+            logging.error(f"Error checking subscription for {user_id}: {e}")
             raise
 
-    async def __call__(
-        self,
-        handler,
-        event,
-        data
-    ):
+    @staticmethod
+    def subscription_keyboard(lang: str) -> InlineKeyboardMarkup:
+        return InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text=i18n.get_text("join-channel", lang), url=settings.CHANNEL_JOIN_LINK)],
+            [InlineKeyboardButton(text=i18n.get_text("check-subs", lang), callback_data="check_subscription")],
+        ])
+
+    async def __call__(self, handler, event, data):
         user_id = event.from_user.id
 
-        if not await self.check_subscription(event.bot, user_id, settings.CHANNEL_ID):
+        if not await self.check_subscription(event.bot, user_id):
             try:
                 async with get_db() as db:
-                    service = UserService(db)
-                    lang = await service.get_lang(event.from_user.id)
-
-                    if not lang:
-                        return await event.answer(
-                            i18n.get_text('choose_language'),
-                            reply_markup=get_language_keyboard()
-                        )
-
+                    lang = await UserService(db).get_lang(user_id)
+                if not lang:
                     await event.answer(
-                        i18n.get_text('subscribe', lang),
-                        reply_markup=SubscriptionMiddleware.subscription_keyboard(lang)
+                        i18n.get_text("choose_language"),
+                        reply_markup=get_language_keyboard(),
+                    )
+                else:
+                    await event.answer(
+                        i18n.get_text("subscribe", lang),
+                        reply_markup=self.subscription_keyboard(lang),
                     )
             except TelegramForbiddenError:
-                logging.warning(f"User {user_id} has blocked the bot. Cannot send message.")
+                logging.warning(f"User {user_id} has blocked the bot.")
             return None
 
         return await handler(event, data)
-
-    @staticmethod
-    def subscription_keyboard(lang: str):
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text=i18n.get_text('join-channel', lang), url=settings.CHANNEL_JOIN_LINK)],
-            [InlineKeyboardButton(text=i18n.get_text('check-subs', lang), callback_data='check_subscription')]
-        ])
-        return keyboard
