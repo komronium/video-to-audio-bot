@@ -64,7 +64,7 @@
 
   "milestone-bonus": "🏆 <b>Marraga yetildi!</b>\n\n💎 <b>+{}</b> olmos bonus — siz ajoyibsiz!",
 
-  "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Konvertatsiyalar:</b> <code>{conversions}</code>\n▸ <b>O'rin:</b> #{rank} / {total}\n▸ <b>Olmoslar:</b> <code>{diamonds}</code>\n▸ <b>Qo'shilgan:</b> <code>{joined}</code>",
+  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Konvertatsiyalar:</b> <code>{conversions}</code>\n▸ <b>O'rin:</b> #{rank} / {total}\n▸ <b>Olmoslar:</b> <code>{diamonds}</code>\n▸ <b>Qo'shilgan:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 Doimiy Premium",
   "profile-status-free": "⚡ Bepul (kuniga 3 ta)",
   "username-na": "Mavjud emas",
@@ -94,5 +94,8 @@
 
   "help-text": "❓ <b>Qanday foydalanish</b>\n\n1️⃣ <b>Video yuboring</b> — faylni yoki YouTube/TikTok havolasini\n2️⃣ <b>Kuting</b> — bot avtomatik ajratadi\n3️⃣ <b>MP3 yuklab oling</b> — saqlab yoki ulashing\n\n⚡ <b>Bepul limit:</b> kuniga <b>3 ta</b> konvertatsiya\n💎 <b>Ko'proq:</b> olmoslar yoki Lifetime Premium\n👥 <b>Bepul olmos:</b> do'stlarni taklif qiling\n🔥 <b>Streak:</b> 3, 7, 14, 30 kun ketma-ket → bonus olmoslar",
 
-  "throttled": "⏳ So'rovlar juda ko'p! Iltimos, biroz kuting."
+  "throttled": "⏳ So'rovlar juda ko'p! Iltimos, biroz kuting.",
+  "back-button": "⬅️ Orqaga",
+  "menu-placeholder": "Video yoki havola yuboring…",
+  "uploading": "📤 Audio yuborilmoqda..."
 }

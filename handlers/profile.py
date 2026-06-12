@@ -1,4 +1,5 @@
-from aiogram import F, Router, types
+from aiogram import F, Router, html, types
+from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
@@ -11,6 +12,7 @@ def _fmt(n: int) -> str:
     return f"{n:,}"
 
 
+@router.message(Command("profile"))
 @router.message(
     F.text.in_([i18n.get_text("profile-button", lang) for lang in i18n.LANGUAGES])
 )
@@ -34,8 +36,8 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         diamonds_text = str(user.diamonds or 0)
 
     text = i18n.get_text("profile", lang).format(
-        name=user.name or "—",
-        username=user.username or i18n.get_text("username-na", lang),
+        name=html.quote(user.name or "—"),
+        username=f"@{user.username}" if user.username else i18n.get_text("username-na", lang),
         user_id=user.user_id,
         conversions=_fmt(conversions),
         rank=rank or "—",

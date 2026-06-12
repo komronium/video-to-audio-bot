@@ -94,7 +94,7 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
             )
             return
 
-    emoji = "📸" if platform == "instagram" else "🎵"
+    emoji = {"youtube": "▶️", "instagram": "📸", "tiktok": "🎵"}.get(platform, "🎬")
     processing_msg = await message.reply(
         i18n.get_text("social-downloading", lang).format(
             emoji=emoji, platform=platform.capitalize()
@@ -123,12 +123,18 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         await user_service.add_conversation(user_id, conv_type=platform)
 
         try:
-            await processing_msg.delete()
+            await processing_msg.edit_text(i18n.get_text("uploading", lang))
+            await message.bot.send_chat_action(message.chat.id, "upload_document")
         except TelegramAPIError:
             pass
 
         await message.reply_document(FSInputFile(file_path), caption=caption)
         await message.reply_voice(FSInputFile(file_path))
+
+        try:
+            await processing_msg.delete()
+        except TelegramAPIError:
+            pass
 
         await increment_daily_count(user_id, SOCIAL_SLOT_COST)
         await check_and_notify_rewards(message.bot, message.chat.id, user_id, user_service, lang)

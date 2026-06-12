@@ -1,4 +1,5 @@
 from aiogram import Bot, F, Router
+from aiogram.filters import Command
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,11 +15,22 @@ router = Router()
 _STARS_TO_DIAMONDS: dict[int, int] = {v: k for k, v in settings.DIAMONDS_PRICES.items()}
 
 
+@router.message(Command("diamonds"))
 @router.message(F.text.in_([i18n.get_text("diamonds-button", lang) for lang in i18n.LANGUAGES]))
 async def diamonds_menu(message: Message):
     async with get_db() as db:
         lang = await UserService(db).get_lang(message.from_user.id)
     await message.answer(i18n.get_text("buy-diamonds", lang), reply_markup=get_prices_keyboard(lang))
+
+
+@router.callback_query(F.data == "diamond:back")
+async def back_callback(call: CallbackQuery):
+    # Close the price list (the reply-keyboard menu stays available below)
+    try:
+        await call.message.delete()
+    except Exception:
+        pass
+    await call.answer()
 
 
 @router.callback_query(F.data == "diamond:list")

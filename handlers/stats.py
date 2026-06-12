@@ -3,7 +3,8 @@ import logging
 from collections import Counter
 from datetime import date, timedelta
 
-from aiogram import Bot, F, Router, types
+from aiogram import Bot, F, Router, html, types
+from aiogram.filters import Command
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -21,6 +22,7 @@ def _fmt(n: int) -> str:
     return f"{n:,}"
 
 
+@router.message(Command("stats"))
 @router.message(
     F.text.in_([i18n.get_text("stats-button", lang) for lang in i18n.LANGUAGES])
 )
@@ -164,6 +166,6 @@ async def adminstats_internal(message: types.Message, db: AsyncSession):
             name = user.name or (
                 f"@{user.username}" if user.username else str(user.user_id)
             )
-            text += f"{medal} {name} — <code>{user.conversation_count}</code>\n"
+            text += f"{medal} {html.quote(name)} — <code>{user.conversation_count}</code>\n"
 
     await message.answer(text)

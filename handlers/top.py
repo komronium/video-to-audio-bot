@@ -1,4 +1,5 @@
-from aiogram import F, Router, types
+from aiogram import F, Router, html, types
+from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
@@ -9,6 +10,7 @@ EMOJIES = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7�
 router = Router()
 
 
+@router.message(Command("top"))
 @router.message(
     F.text.in_([i18n.get_text("top-button", lang) for lang in i18n.LANGUAGES])
 )
@@ -23,7 +25,8 @@ async def command_top(message: types.Message, db: AsyncSession):
 
     text = i18n.get_text("top-title", lang) + "\n\n"
     for idx, user in enumerate(top_users):
-        text += f"{EMOJIES[idx]}  <b>{user.name}</b> – {user.conversation_count}\n"
+        name = html.quote(user.name or str(user.user_id))
+        text += f"{EMOJIES[idx]}  <b>{name}</b> – {user.conversation_count}\n"
 
     await message.answer(text)
 

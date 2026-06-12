@@ -19,6 +19,10 @@ def get_prices_keyboard(lang: str):
             text=f"{diamonds} 💎  →  {stars} ⭐️{badge}",
             callback_data=f"diamond:buy:{diamonds}",
         )
-    builder.button(text="⬅️ Back", callback_data="diamond:back")
+    builder.button(
+        text=f"{i18n.get_text('get-lifetime', lang)} — {settings.LIFETIME_PREMIUM_PRICE} ⭐️",
+        callback_data="diamond:lifetime",
+    )
+    builder.button(text=i18n.get_text("back-button", lang), callback_data="diamond:back")
     builder.adjust(1)
     return builder.as_markup()

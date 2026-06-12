@@ -1,6 +1,6 @@
 import logging
 
-from aiogram import Bot
+from aiogram import Bot, html
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from config import settings
@@ -16,9 +16,9 @@ MESSAGE_TEMPLATE = (
 async def notify_group(bot: Bot, user, lang: str, db: AsyncSession):
     try:
         message = MESSAGE_TEMPLATE.format(
-            name=user.name,
+            name=html.quote(user.name or "—"),
             username=user.username or "N/A",
-            lang=lang,
+            lang=lang or "—",
         )
         await bot.send_message(
             chat_id=settings.GROUP_ID, text=message.strip(), message_thread_id=15

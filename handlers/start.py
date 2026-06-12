@@ -40,13 +40,20 @@ def get_menu_keyboard(lang: str, is_admin: bool = False):
     ]
     if is_admin:
         rows.append([types.KeyboardButton(text="Admin")])
-    return types.ReplyKeyboardMarkup(keyboard=rows, resize_keyboard=True)
+    return types.ReplyKeyboardMarkup(
+        keyboard=rows,
+        resize_keyboard=True,
+        input_field_placeholder=i18n.get_text("menu-placeholder", lang),
+    )
 
 
 @router.message(Command("start"))
 async def command_start(message: types.Message, db: AsyncSession):
     service = UserService(db)
-    lang = await service.get_lang(message.from_user.id)
+    user = await service.get_user(message.from_user.id)
+    # Show the language picker until the user has explicitly chosen a
+    # supported language (auto-detected unsupported codes don't count)
+    lang = user.lang if user and user.lang in i18n.LANGUAGES else None
     referral_code = None
 
     args = message.text.split()
@@ -92,6 +99,7 @@ async def set_language_callback(call: CallbackQuery):
         pass
 
 
+@router.message(Command("lang"))
 @router.message(F.text.in_([i18n.get_text("lang-button", lang) for lang in i18n.LANGUAGES]))
 async def language_button_handler(message: types.Message, db: AsyncSession):
     service = UserService(db)

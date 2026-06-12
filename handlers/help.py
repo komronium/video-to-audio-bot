@@ -1,4 +1,5 @@
 from aiogram import types, Router, F
+from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
@@ -7,6 +8,7 @@ from utils.i18n import i18n
 
 router = Router()
 
+@router.message(Command("help"))
 @router.message(F.text.in_([
     i18n.get_text('help-button', lang) for lang in i18n.LANGUAGES
 ]))

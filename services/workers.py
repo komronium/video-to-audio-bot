@@ -159,11 +159,11 @@ async def process_job(bot: Bot, job: dict):
         async with get_db() as db:
             await UserService(db).add_conversation(user_id=user_id)
 
-        if status_msg_id:
-            try:
-                await bot.delete_message(chat_id, status_msg_id)
-            except TelegramAPIError:
-                pass
+        await edit_status(i18n.get_text("uploading", lang))
+        try:
+            await bot.send_chat_action(chat_id, "upload_document")
+        except TelegramAPIError:
+            pass
 
         try:
             await bot.send_document(
@@ -176,6 +176,12 @@ async def process_job(bot: Bot, job: dict):
                 chat_id, FSInputFile(audio_path), caption=caption, reply_parameters=reply_params()
             )
             await bot.send_voice(chat_id, FSInputFile(audio_path), reply_parameters=reply_params())
+
+        if status_msg_id:
+            try:
+                await bot.delete_message(chat_id, status_msg_id)
+            except TelegramAPIError:
+                pass
 
         # The audio is delivered — nothing below may fail the job (it would
         # refund and show an error for a successful conversion).

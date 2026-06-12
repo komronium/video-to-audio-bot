@@ -64,7 +64,7 @@
 
   "milestone-bonus": "🏆 <b>وصلت إلى مرحلة جديدة!</b>\n\n💎 <b>+{}</b> ألماس — أنت رائع!",
 
-  "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>التحويلات:</b> <code>{conversions}</code>\n▸ <b>الترتيب:</b> #{rank} / {total}\n▸ <b>الألماس:</b> <code>{diamonds}</code>\n▸ <b>الانضمام:</b> <code>{joined}</code>",
+  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>التحويلات:</b> <code>{conversions}</code>\n▸ <b>الترتيب:</b> #{rank} / {total}\n▸ <b>الألماس:</b> <code>{diamonds}</code>\n▸ <b>الانضمام:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 اشتراك مدى الحياة",
   "profile-status-free": "⚡ مجاني (3/يوم)",
   "username-na": "غير متاح",
@@ -93,5 +93,8 @@
 
   "help-text": "❓ <b>كيفية الاستخدام</b>\n\n1️⃣ <b>أرسل فيديو</b> — ملف أو رابط YouTube/TikTok\n2️⃣ <b>انتظر</b> — البوت يستخرج الصوت تلقائياً\n3️⃣ <b>حمّل MP3</b> — احفظه أو شاركه\n\n⚡ <b>الحد المجاني:</b> <b>3 تحويلات</b> يومياً\n💎 <b>تريد المزيد:</b> اشترِ ألماساً أو اشتراكاً مدى الحياة\n👥 <b>ألماس مجاني:</b> ادعُ أصدقاءك\n🔥 <b>مكافأة الاستمرارية:</b> 3، 7، 14، 30 يوم متتالي",
 
-  "throttled": "⏳ طلبات كثيرة جدًا! الرجاء الانتظار قليلًا."
+  "throttled": "⏳ طلبات كثيرة جدًا! الرجاء الانتظار قليلًا.",
+  "back-button": "⬅️ رجوع",
+  "menu-placeholder": "أرسل فيديو أو رابطًا…",
+  "uploading": "📤 جارٍ إرسال الصوت..."
 }

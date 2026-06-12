@@ -64,7 +64,7 @@
 
   "milestone-bonus": "🏆 <b>Этап достигнут!</b>\n\n💎 <b>+{}</b> бриллиантов — так держать!",
 
-  "profile": "👤 <b>{name}</b> · @{username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Конвертаций:</b> <code>{conversions}</code>\n▸ <b>Место:</b> #{rank} / {total}\n▸ <b>Бриллианты:</b> <code>{diamonds}</code>\n▸ <b>С нами с:</b> <code>{joined}</code>",
+  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Конвертаций:</b> <code>{conversions}</code>\n▸ <b>Место:</b> #{rank} / {total}\n▸ <b>Бриллианты:</b> <code>{diamonds}</code>\n▸ <b>С нами с:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 Пожизненный Premium",
   "profile-status-free": "⚡ Бесплатно (3/день)",
   "username-na": "N/A",
@@ -93,5 +93,8 @@
 
   "help-text": "❓ <b>Как пользоваться</b>\n\n1️⃣ <b>Отправьте видео</b> — файл или ссылку YouTube/TikTok\n2️⃣ <b>Подождите</b> — бот извлекает аудио автоматически\n3️⃣ <b>Скачайте MP3</b> — сохраните или поделитесь\n\n⚡ <b>Бесплатный лимит:</b> <b>3 конвертации</b> в день\n💎 <b>Нужно больше:</b> купите бриллианты или Lifetime\n👥 <b>Бесплатные бриллианты:</b> приглашайте друзей\n🔥 <b>Серийный бонус:</b> 3, 7, 14, 30 дней подряд → бриллианты",
 
-  "throttled": "⏳ Слишком много запросов! Пожалуйста, подождите немного."
+  "throttled": "⏳ Слишком много запросов! Пожалуйста, подождите немного.",
+  "back-button": "⬅️ Назад",
+  "menu-placeholder": "Отправьте видео или ссылку…",
+  "uploading": "📤 Отправка аудио..."
 }
