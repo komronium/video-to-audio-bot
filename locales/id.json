@@ -91,5 +91,7 @@
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Berlian",
 
-  "help-text": "❓ <b>Cara penggunaan</b>\n\n1️⃣ <b>Kirim video</b> — file atau link YouTube/TikTok\n2️⃣ <b>Tunggu</b> — bot mengekstrak audio otomatis\n3️⃣ <b>Unduh MP3</b> — simpan atau bagikan\n\n⚡ <b>Batas gratis:</b> <b>3 konversi</b> per hari\n💎 <b>Butuh lebih:</b> beli berlian atau Premium Seumur Hidup\n👥 <b>Berlian gratis:</b> undang teman-temanmu\n🔥 <b>Bonus streak:</b> gunakan 3, 7, 14, 30 hari berturut-turut"
+  "help-text": "❓ <b>Cara penggunaan</b>\n\n1️⃣ <b>Kirim video</b> — file atau link YouTube/TikTok\n2️⃣ <b>Tunggu</b> — bot mengekstrak audio otomatis\n3️⃣ <b>Unduh MP3</b> — simpan atau bagikan\n\n⚡ <b>Batas gratis:</b> <b>3 konversi</b> per hari\n💎 <b>Butuh lebih:</b> beli berlian atau Premium Seumur Hidup\n👥 <b>Berlian gratis:</b> undang teman-temanmu\n🔥 <b>Bonus streak:</b> gunakan 3, 7, 14, 30 hari berturut-turut",
+
+  "throttled": "⏳ Terlalu banyak permintaan! Mohon tunggu sebentar."
 }

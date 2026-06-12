@@ -24,7 +24,12 @@ class User(Base):
     referral_code_id = Column(Integer, nullable=True)
     referral_rewarded = Column(Boolean, default=False)
 
-    conversions = relationship("Conversion", back_populates="user", foreign_keys="Conversion.user_id")
+    conversions = relationship(
+        "Conversion",
+        back_populates="user",
+        primaryjoin="User.user_id == foreign(Conversion.user_id)",
+        viewonly=True,
+    )
     payments = relationship("Payment", back_populates="user")
     referrals_made = relationship("Referral", foreign_keys="Referral.inviter_id", back_populates="inviter")
 
@@ -33,13 +38,20 @@ class Conversion(Base):
     __tablename__ = "conversions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    # Stores the Telegram user_id (users.user_id), NOT users.id — all existing
+    # rows and queries use it this way, so no FK to users.id here.
+    user_id = Column(Integer, index=True)
     success = Column(Boolean, default=True)
     is_premium = Column(Boolean, default=False)
     type = Column(String(20), default="video", nullable=True)
     created_at = Column(Date, default=date.today)
 
-    user = relationship("User", back_populates="conversions", foreign_keys=[user_id])
+    user = relationship(
+        "User",
+        back_populates="conversions",
+        primaryjoin="foreign(Conversion.user_id) == User.user_id",
+        viewonly=True,
+    )
 
 
 class Payment(Base):
@@ -70,6 +82,9 @@ _MIGRATIONS = [
     "ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) UNIQUE",
     "ALTER TABLE users ADD COLUMN referral_code_id INTEGER",
     "ALTER TABLE users ADD COLUMN referral_rewarded BOOLEAN DEFAULT 0",
+    "CREATE INDEX IF NOT EXISTS ix_conversions_user_id ON conversions(user_id)",
+    "CREATE INDEX IF NOT EXISTS ix_conversions_created_at ON conversions(created_at)",
+    "CREATE INDEX IF NOT EXISTS ix_users_joined_at ON users(joined_at)",
 ]
 
 

@@ -6,6 +6,7 @@ from .database import DatabaseMiddleware
 
 
 def setup_middlewares(dp: Dispatcher):
-    dp.message.middleware(DatabaseMiddleware())
+    # Throttling first: flooded messages must be dropped before opening a DB session
     dp.message.middleware(ThrottlingMiddleware())
+    dp.message.middleware(DatabaseMiddleware())
     # dp.message.middleware(SubscriptionMiddleware())

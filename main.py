@@ -9,11 +9,14 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.client.telegram import TelegramAPIServer
 
+from redis.exceptions import RedisError
+
 from config import settings
 from database.models import create_tables
 from middlewares import setup_middlewares
 from handlers import setup_handlers
-from services.redis_queue import queue_manager
+from services import workers
+from services.job_queue import job_queue
 from utils.set_commands import set_default_commands
 
 PID_FILE = "/tmp/video-to-audio-bot.pid"
@@ -43,11 +46,19 @@ def check_pid_lock():
 
 async def on_startup(bot: Bot):
     await create_tables()
-    await queue_manager.clear_queue()
+    try:
+        # Jobs that were mid-processing when the previous instance died
+        requeued = await job_queue.requeue_orphans()
+        if requeued:
+            logging.info(f"Requeued {requeued} interrupted conversion job(s)")
+    except RedisError:
+        logging.warning("Redis unavailable at startup; queued jobs will resume once it's back")
+    workers.start_workers(bot)
     await bot.send_message(settings.GROUP_ID, "<b>✅ THE BOT IS UP!</b>")
 
 
 async def on_shutdown(bot: Bot):
+    await workers.stop_workers()
     await bot.send_message(settings.GROUP_ID, "<b>❌ THE BOT HAS BEEN SUSPENDED!</b>")
     if os.path.exists(PID_FILE):
         os.remove(PID_FILE)

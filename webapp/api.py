@@ -24,7 +24,7 @@ from pydantic import BaseModel
 from typing import Optional
 from sqlalchemy import (
     Column, Integer, String, Boolean, Date, ForeignKey,
-    func, select, distinct,
+    func, select, distinct, event,
 )
 from sqlalchemy.ext.asyncio import (
     create_async_engine, AsyncSession, async_sessionmaker,
@@ -44,6 +44,19 @@ TOKEN_EXPIRE_HOURS = 24
 # ─── Database ─────────────────────────────────────────────
 
 engine = create_async_engine(DATABASE_URL, echo=False)
+
+
+# Same pragmas as the bot: WAL + busy_timeout so the admin panel and the bot
+# can hit the shared SQLite file concurrently without "database is locked".
+@event.listens_for(engine.sync_engine, "connect")
+def _set_sqlite_pragmas(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA journal_mode=WAL")
+    cursor.execute("PRAGMA busy_timeout=5000")
+    cursor.execute("PRAGMA synchronous=NORMAL")
+    cursor.close()
+
+
 SessionLocal = async_sessionmaker(
     bind=engine, expire_on_commit=False, class_=AsyncSession
 )

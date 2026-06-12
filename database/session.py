@@ -1,3 +1,4 @@
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
@@ -10,6 +11,17 @@ engine = create_async_engine(
     pool_pre_ping=True,
     echo=False
 )
+
+if engine.url.get_backend_name() == "sqlite":
+    # WAL lets readers and the single writer coexist; busy_timeout makes
+    # concurrent writers wait instead of failing with "database is locked".
+    @event.listens_for(engine.sync_engine, "connect")
+    def _set_sqlite_pragmas(dbapi_connection, connection_record):
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=5000")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.close()
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
     autoflush=False,

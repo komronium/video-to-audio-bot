@@ -92,5 +92,7 @@
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Olmoslar",
 
-  "help-text": "❓ <b>Qanday foydalanish</b>\n\n1️⃣ <b>Video yuboring</b> — faylni yoki YouTube/TikTok havolasini\n2️⃣ <b>Kuting</b> — bot avtomatik ajratadi\n3️⃣ <b>MP3 yuklab oling</b> — saqlab yoki ulashing\n\n⚡ <b>Bepul limit:</b> kuniga <b>3 ta</b> konvertatsiya\n💎 <b>Ko'proq:</b> olmoslar yoki Lifetime Premium\n👥 <b>Bepul olmos:</b> do'stlarni taklif qiling\n🔥 <b>Streak:</b> 3, 7, 14, 30 kun ketma-ket → bonus olmoslar"
+  "help-text": "❓ <b>Qanday foydalanish</b>\n\n1️⃣ <b>Video yuboring</b> — faylni yoki YouTube/TikTok havolasini\n2️⃣ <b>Kuting</b> — bot avtomatik ajratadi\n3️⃣ <b>MP3 yuklab oling</b> — saqlab yoki ulashing\n\n⚡ <b>Bepul limit:</b> kuniga <b>3 ta</b> konvertatsiya\n💎 <b>Ko'proq:</b> olmoslar yoki Lifetime Premium\n👥 <b>Bepul olmos:</b> do'stlarni taklif qiling\n🔥 <b>Streak:</b> 3, 7, 14, 30 kun ketma-ket → bonus olmoslar",
+
+  "throttled": "⏳ So'rovlar juda ko'p! Iltimos, biroz kuting."
 }

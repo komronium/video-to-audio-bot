@@ -8,3 +8,6 @@ __pycache__/
 .env
 *.db
 node_modules/
+cookies.txt
+audios/
+*.pid

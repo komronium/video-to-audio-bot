@@ -2,7 +2,7 @@ import secrets
 from datetime import date
 
 from aiogram import Bot
-from sqlalchemy import func, select, distinct
+from sqlalchemy import func, select, distinct, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -119,19 +119,32 @@ class UserService:
         user = await self.get_user(user_id)
         return user.diamonds or 0 if user else 0
 
+    async def use_diamonds(self, user_id: int, count: int = 1) -> bool:
+        # Atomic conditional decrement: never goes negative, safe under concurrency
+        result = await self.db.execute(
+            update(User)
+            .where(User.user_id == user_id, User.diamonds >= count)
+            .values(diamonds=User.diamonds - count)
+        )
+        await self.db.commit()
+        return result.rowcount > 0
+
     async def use_diamond(self, user_id: int) -> bool:
-        user = await self.get_user(user_id)
-        if user and user.diamonds > 0:
-            user.diamonds -= 1
-            await self.db.commit()
-            return True
-        return False
+        return await self.use_diamonds(user_id, 1)
+
+    async def refund_diamonds(self, user_id: int, count: int):
+        if count > 0:
+            await self.add_diamonds(user_id, count, record_payment=False)
 
     async def add_diamonds(self, user_id: int, count: int, record_payment: bool = True):
         user = await self.get_user(user_id)
         if not user:
             return
-        user.diamonds = (user.diamonds or 0) + count
+        await self.db.execute(
+            update(User)
+            .where(User.user_id == user_id)
+            .values(diamonds=func.coalesce(User.diamonds, 0) + count)
+        )
         if record_payment:
             self.db.add(Payment(user_id=user.id, diamonds=count, is_lifetime=False))
         await self.db.commit()

@@ -91,5 +91,7 @@
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Diamonds",
 
-  "help-text": "❓ <b>How to use</b>\n\n1️⃣ <b>Send a video</b> — file or YouTube/TikTok link\n2️⃣ <b>Wait</b> — the bot extracts audio automatically\n3️⃣ <b>Download MP3</b> — save or share it\n\n⚡ <b>Free limit:</b> <b>3 conversions</b> per day\n💎 <b>Need more:</b> buy diamonds or get Lifetime\n👥 <b>Free diamonds:</b> invite your friends\n🔥 <b>Streak bonus:</b> use the bot 3, 7, 14, 30 days in a row"
+  "help-text": "❓ <b>How to use</b>\n\n1️⃣ <b>Send a video</b> — file or YouTube/TikTok link\n2️⃣ <b>Wait</b> — the bot extracts audio automatically\n3️⃣ <b>Download MP3</b> — save or share it\n\n⚡ <b>Free limit:</b> <b>3 conversions</b> per day\n💎 <b>Need more:</b> buy diamonds or get Lifetime\n👥 <b>Free diamonds:</b> invite your friends\n🔥 <b>Streak bonus:</b> use the bot 3, 7, 14, 30 days in a row",
+
+  "throttled": "⏳ Too many requests! Please wait a moment."
 }
