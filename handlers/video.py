@@ -5,7 +5,8 @@ from datetime import datetime
 
 from aiogram import F, Router
 from aiogram.exceptions import TelegramAPIError
-from aiogram.types import Document, Message
+from aiogram.filters import Command
+from aiogram.types import Message
 from redis.exceptions import RedisError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +15,7 @@ from services.user_service import UserService
 from services.workers import fail_job, process_job
 from utils.daily_limit import DAILY_LIMIT, get_daily_count, reset_time_str
 from utils.i18n import i18n
-from utils.upsell import get_buy_more_keyboard
+from utils.upsell import get_bot_username, get_buy_more_keyboard
 
 MAX_FILE_SIZE = 50 * 1024 * 1024
 MAX_QUEUE_SIZE = 50
@@ -33,15 +34,55 @@ def _generate_name(message: Message, video) -> str:
         clean = sanitize(message.caption[:25].lower().replace(" ", "_"))
         if clean:
             return clean
-    if video.file_name:
-        clean = sanitize(video.file_name.rsplit(".", 1)[0].lower().replace(" ", "_"))
+    file_name = getattr(video, "file_name", None)
+    if file_name:
+        clean = sanitize(file_name.rsplit(".", 1)[0].lower().replace(" ", "_"))
         if clean:
             return clean
     return f"audio_{message.from_user.id}_{int(datetime.now().timestamp())}"
 
 
+async def _addressed_in_group(message: Message) -> bool:
+    """In groups the bot stays silent unless explicitly addressed: a video
+    captioned with @bot, or (handled separately) a /mp3 reply to a video."""
+    if message.chat.type == "private":
+        return True
+    bot_username = await get_bot_username(message.bot)
+    caption = (message.caption or "").lower()
+    return f"@{bot_username.lower()}" in caption
+
+
 @router.message(F.video)
-async def video_handler(message: Message, db: AsyncSession, document: Document = None):
+async def on_video(message: Message, db: AsyncSession):
+    if await _addressed_in_group(message):
+        await video_handler(message, db, message.video)
+
+
+@router.message(F.video_note)
+async def on_video_note(message: Message, db: AsyncSession):
+    if await _addressed_in_group(message):
+        await video_handler(message, db, message.video_note)
+
+
+@router.message(F.document.mime_type.startswith("video"))
+async def on_document(message: Message, db: AsyncSession):
+    if await _addressed_in_group(message):
+        await video_handler(message, db, message.document)
+
+
+@router.message(Command("mp3"))
+async def on_mp3_command(message: Message, db: AsyncSession):
+    """Convert the video this command replies to — the group-friendly path."""
+    target = message.reply_to_message
+    video = (target.video or target.video_note) if target else None
+    if not video:
+        lang = await UserService(db).get_lang(message.from_user.id)
+        await message.reply(i18n.get_text("mp3-hint", lang))
+        return
+    await video_handler(message, db, video, reply_to_id=target.message_id)
+
+
+async def video_handler(message: Message, db: AsyncSession, video, reply_to_id: int = None):
     user_service = UserService(db)
     user = await user_service.get_user(message.from_user.id)
     is_new = False
@@ -54,8 +95,6 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
     lang = user.lang or "en"
     is_lifetime = user.is_premium
     user_id = message.from_user.id
-
-    video = message.video if document is None else document
 
     # Queue checks come before charging so rejections never need a refund
     pending = 0
@@ -73,7 +112,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
 
     # One diamond covers a large file and/or going over the daily limit —
     # a single video never charges twice.
-    is_large = video.file_size > MAX_FILE_SIZE
+    is_large = (video.file_size or 0) > MAX_FILE_SIZE
     current = await get_daily_count(user_id)
     over_limit = current + 1 > DAILY_LIMIT
     charged = 0
@@ -120,7 +159,7 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         "type": "video",
         "user_id": user_id,
         "chat_id": message.chat.id,
-        "reply_to": message.message_id,
+        "reply_to": reply_to_id or message.message_id,
         "file_id": video.file_id,
         "file_name": _generate_name(message, video),
         "lang": lang,
@@ -146,8 +185,3 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
         except Exception as e:
             logging.exception(f"Inline video processing failed for user {user_id}")
             await fail_job(message.bot, job, e)
-
-
-@router.message(F.document.mime_type.startswith("video"))
-async def document_handler(message: Message, db: AsyncSession):
-    await video_handler(message, db, message.document)

@@ -86,5 +86,8 @@
   "start-status": "⚡ Bugun qoldi: <b>{left}/{limit}</b> · 💎 Olmoslar: <b>{diamonds}</b>",
   "start-status-premium": "👑 Doimiy Premium — cheksiz",
   "payment-issue": "❌ To'lov qabul qilindi, lekin xatolik yuz berdi.\nIltimos, qo'llab-quvvatlashga murojaat qiling — to'lovingiz xavfsiz.",
-  "social-error-retry": "⏳ {} hozir band yoki so'rovlarni cheklayapti. Iltimos, bir necha daqiqadan keyin urinib ko'ring."
+  "social-error-retry": "⏳ {} hozir band yoki so'rovlarni cheklayapti. Iltimos, bir necha daqiqadan keyin urinib ko'ring.",
+  "unsupported": "🤔 Men <b>videolar</b> va <b>YouTube / TikTok / Instagram havolalari</b> bilan ishlayman.\n\n🎬 Bittasini yuboring — audioga aylantiraman. Batafsil: ❓ Yordam.",
+  "mp3-hint": "↩️ Videoga /mp3 deb reply qiling — audioga aylantiraman.",
+  "referral-progress": "📈 <b>Takliflaringiz:</b> {invited} qo'shildi · {converted} faol · 💎 {earned} ishlandi"
 }

@@ -1,6 +1,6 @@
 from aiogram import Dispatcher
 
-from . import start, help, stats, top, profile, subscription, video, post, social, referral, error, diamonds, admin
+from . import start, help, stats, top, profile, subscription, video, post, social, referral, error, diamonds, admin, fallback
 
 
 def setup_handlers(dp: Dispatcher):
@@ -17,3 +17,5 @@ def setup_handlers(dp: Dispatcher):
     dp.include_router(error.router)
     dp.include_router(diamonds.router)
     dp.include_router(admin.router)
+    # Catch-all — must stay last so it only sees genuinely unhandled messages
+    dp.include_router(fallback.router)

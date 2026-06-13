@@ -86,5 +86,8 @@
   "start-status": "⚡ Sisa hari ini: <b>{left}/{limit}</b> · 💎 Berlian: <b>{diamonds}</b>",
   "start-status-premium": "👑 Premium Seumur Hidup — tanpa batas",
   "payment-issue": "❌ Pembayaran diterima, tetapi terjadi kesalahan.\nSilakan hubungi dukungan — pembayaran Anda aman.",
-  "social-error-retry": "⏳ {} sedang sibuk atau membatasi permintaan saat ini. Silakan coba lagi beberapa menit lagi."
+  "social-error-retry": "⏳ {} sedang sibuk atau membatasi permintaan saat ini. Silakan coba lagi beberapa menit lagi.",
+  "unsupported": "🤔 Saya bekerja dengan <b>video</b> dan <b>tautan YouTube / TikTok / Instagram</b>.\n\n🎬 Kirim salah satu, saya ubah jadi audio. Selengkapnya: ❓ Bantuan.",
+  "mp3-hint": "↩️ Balas sebuah video dengan /mp3 dan saya ubah jadi audio.",
+  "referral-progress": "📈 <b>Undanganmu:</b> {invited} bergabung · {converted} aktif · 💎 {earned} didapat"
 }

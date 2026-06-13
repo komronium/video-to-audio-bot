@@ -86,5 +86,8 @@
   "start-status": "⚡ Left today: <b>{left}/{limit}</b> · 💎 Diamonds: <b>{diamonds}</b>",
   "start-status-premium": "👑 Lifetime Premium — unlimited",
   "payment-issue": "❌ Payment received, but something went wrong.\nPlease contact support — your payment is safe.",
-  "social-error-retry": "⏳ {} is busy or limiting requests right now. Please try again in a few minutes."
+  "social-error-retry": "⏳ {} is busy or limiting requests right now. Please try again in a few minutes.",
+  "unsupported": "🤔 I work with <b>videos</b> and <b>YouTube / TikTok / Instagram links</b>.\n\n🎬 Send me one and I'll turn it into audio. Tap ❓ Help for more.",
+  "mp3-hint": "↩️ Reply to a video with /mp3 and I'll convert it to audio.",
+  "referral-progress": "📈 <b>Your invites:</b> {invited} joined · {converted} active · 💎 {earned} earned"
 }

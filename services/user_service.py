@@ -212,6 +212,21 @@ class UserService:
         result = await self.db.execute(select(User).where(User.referral_code == code))
         return result.scalars().first()
 
+    async def get_referral_stats(self, user_id: int) -> tuple[int, int]:
+        """Return (invited_total, converted) for this inviter.
+        invited_total = people who started via the link; converted = those who
+        made their first conversion (and so the inviter earned diamonds)."""
+        user = await self.get_user(user_id)
+        if not user:
+            return 0, 0
+        invited = await self.db.scalar(
+            select(func.count()).select_from(User).where(User.referral_code_id == user.id)
+        )
+        converted = await self.db.scalar(
+            select(func.count()).select_from(Referral).where(Referral.inviter_id == user.id)
+        )
+        return int(invited or 0), int(converted or 0)
+
     async def apply_referral(self, user_id: int, referral_code: str) -> bool:
         user = await self.get_user(user_id)
         if not user or user.referral_code_id:

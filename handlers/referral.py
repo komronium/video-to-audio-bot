@@ -30,6 +30,11 @@ async def referral_command(message: Message, db: AsyncSession):
     bot_username = (await message.bot.get_me()).username
     referral_link = f"https://t.me/{bot_username}?start={code}"
 
+    invited, converted = await user_service.get_referral_stats(user_id)
+    progress = i18n.get_text("referral-progress", lang).format(
+        invited=invited, converted=converted, earned=converted * 3
+    )
+
     builder = InlineKeyboardBuilder()
     builder.button(
         text=i18n.get_text("referral-share", lang),
@@ -38,6 +43,6 @@ async def referral_command(message: Message, db: AsyncSession):
     builder.adjust(1)
 
     await message.answer(
-        i18n.get_text("referral-info", lang).format(link=referral_link),
+        progress + "\n\n" + i18n.get_text("referral-info", lang).format(link=referral_link),
         reply_markup=builder.as_markup(),
     )
