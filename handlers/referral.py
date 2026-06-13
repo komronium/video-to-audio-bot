@@ -11,6 +11,7 @@ router = Router()
 
 
 @router.message(F.text.startswith("/referral"))
+@router.message(F.text.in_([i18n.get_text("invite-friend", lang) for lang in i18n.LANGUAGES]))
 async def referral_command(message: Message, db: AsyncSession):
     user_id = message.from_user.id
     user_service = UserService(db)

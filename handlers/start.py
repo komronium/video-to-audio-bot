@@ -39,18 +39,20 @@ async def _status_line(user, lang: str) -> str:
 
 
 def get_menu_keyboard(lang: str, is_admin: bool = False):
+    # Keep the menu to what an end user actually needs. Sending a video needs
+    # no button; we surface diamonds + invite (the growth lever) prominently
+    # and keep profile/help/language one tap away. Stats/Top stay as commands.
     rows = [
         [
-            types.KeyboardButton(text=i18n.get_text("stats-button", lang)),
-            types.KeyboardButton(text=i18n.get_text("profile-button", lang)),
+            types.KeyboardButton(text=i18n.get_text("diamonds-button", lang)),
+            types.KeyboardButton(text=i18n.get_text("invite-friend", lang)),
         ],
         [
-            types.KeyboardButton(text=i18n.get_text("diamonds-button", lang)),
-            types.KeyboardButton(text=i18n.get_text("top-button", lang)),
+            types.KeyboardButton(text=i18n.get_text("profile-button", lang)),
+            types.KeyboardButton(text=i18n.get_text("help-button", lang)),
         ],
         [
             types.KeyboardButton(text=i18n.get_text("lang-button", lang)),
-            types.KeyboardButton(text=i18n.get_text("help-button", lang)),
         ],
     ]
     if is_admin:
@@ -93,7 +95,7 @@ async def command_start(message: types.Message, db: AsyncSession):
         )
 
     text = i18n.get_text("start", lang) + "\n\n" + await _status_line(user, lang)
-    await message.reply(
+    await message.answer(
         text,
         reply_markup=get_menu_keyboard(lang, is_admin=(message.from_user.id == settings.ADMIN_ID)),
     )

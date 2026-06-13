@@ -20,7 +20,12 @@ from utils.daily_limit import (
 )
 from utils.i18n import i18n
 from utils.rewards import check_and_notify_rewards
-from utils.upsell import get_bot_username, get_buy_more_keyboard, post_conversion_upsell
+from utils.upsell import (
+    get_bot_username,
+    get_buy_more_keyboard,
+    post_conversion_upsell,
+    result_keyboard,
+)
 
 YOUTUBE_REGEX = r".*(youtu.*be.*)\/(watch\?v=|embed\/|v|shorts|)(.*?((?=[&#?])|$)).*"
 INSTAGRAM_REGEX = r"https?://(www\.)?instagram\.com/(reel|p|tv)/[\w-]+"
@@ -149,17 +154,27 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         file_path = await loop.run_in_executor(None, _social_download, url, name)
 
         bot_username = await get_bot_username(message.bot)
-        caption = i18n.get_text("converted-by", lang).format(bot_username)
+        title = (info.get("title") or platform.capitalize())[:60]
+        caption = i18n.get_text("result-caption", lang).format(
+            title=title, bot=bot_username
+        )
         await user_service.add_conversation(user_id, conv_type=platform)
+        keyboard = await result_keyboard(lang, user_id, user_service, message.bot)
 
         try:
             await processing_msg.edit_text(i18n.get_text("uploading", lang))
-            await message.bot.send_chat_action(message.chat.id, "upload_document")
+            await message.bot.send_chat_action(message.chat.id, "upload_voice")
         except TelegramAPIError:
             pass
 
-        await message.reply_document(FSInputFile(file_path), caption=caption)
-        await message.reply_voice(FSInputFile(file_path))
+        # One playable + downloadable MP3 message, with the share-and-earn CTA.
+        await message.reply_audio(
+            FSInputFile(file_path),
+            caption=caption,
+            title=title,
+            performer=bot_username,
+            reply_markup=keyboard,
+        )
 
         try:
             await processing_msg.delete()

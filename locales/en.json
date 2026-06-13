@@ -1,8 +1,7 @@
 {
   "lang": "🇺🇸 English",
   "choose_language": "🌍 Select your language to continue:",
-  "start": "👋 Welcome!\n\n🎬 Send a video, or a YouTube / TikTok / Instagram link — I'll convert it to MP3 instantly.\n\n⚡ Free: <b>3 conversions</b> per day\n💎 Need more? Get Diamonds!",
-
+  "start": "🎬 <b>Send me a video</b> — or a YouTube / TikTok / Instagram link — and I'll turn it into audio in seconds.\n\n🎙 Play it right here, or save the MP3.\n\n✨ Go ahead — send something to try it now!",
   "buy-diamonds": "💎 <b>Get Diamonds</b>\n\nEach diamond = 1 extra conversion today.\n\n📦 <b>What diamonds unlock:</b>\n• Extra conversions beyond daily limit\n• Large files (50 MB+)\n• YouTube, TikTok, Instagram downloads\n\n💡 <b>Pro tip:</b> <b>10 💎</b> pack is the most popular!\n🔥 <b>50 💎</b> pack saves you <b>30%</b>\n\n⭐ Pay with Telegram Stars",
   "diamond-count": "{} Diamonds 💎",
   "buy-title": "Buy {} Diamonds 💎",
@@ -15,30 +14,26 @@
   "popular-badge": "Popular",
   "save-30-badge": "Save 30%",
   "save-30-line": "🔥 Save 30% with the 50 diamond pack!",
-
   "too-large": "⚠️ <b>File too large</b>\n\nThis video exceeds the free limit ({} MB).\nUse 💎 1 diamond or upgrade to Premium.",
   "large-used": "💎 <b>1 diamond used</b> — large file unlocked.",
   "no-diamonds": "💎 <b>No diamonds left!</b>\nBuy more diamonds to continue.",
   "extra-used": "💎 <b>1 diamond used</b> — extra conversion activated.",
-
   "daily-limit": "⛔ <b>Daily limit reached</b>\n\nYou've used all <b>{limit}</b> free conversions for today.\n⏳ Resets in: <b>{time}</b>\n\n<b>Continue right now:</b>\n💎 Buy diamonds (1 = 1 extra)\n👑 Get Lifetime (unlimited forever)\n👥 Invite a friend (earn free diamonds)",
   "social-limit": "⛔ <b>Daily limit reached</b>\n\nThis type of download costs <b>2 diamonds</b>.\n💎 Your balance: <b>{diamonds}</b> diamonds.{time}",
-
   "one-free-left": "⚡ You have <b>1 free conversion</b> left today!\n\n💡 Running low? Get diamonds to keep going:",
   "used-last-free": "✅ Audio ready!\n\n⚠️ That was your last free conversion for today.\n⏳ Resets in: <b>{time}</b>\n\n💎 Get more conversions now:",
-
   "streak-bonus": "🔥 <b>{n}-day streak!</b>\n💎 +{reward} diamonds added to your balance!",
-
   "queue": "⏳ Processing in queue...\nYour position: <code>{} / {}</code>",
   "queue-wait": "⏳ Your previous video is still processing. Please wait.",
   "server-busy": "⚠️ Server is busy right now. Please try again in a few minutes.",
-
   "downloading": "⬇️ Downloading...",
   "converting": "🎧 Converting to audio...",
   "converted-by": "via @{}",
+  "first-video": "👋 <b>Welcome!</b> Converting your first video…",
+  "result-caption": "🎵 <b>{title}</b>\n\n🎬 Turn your videos into audio — @{bot}",
+  "result-share-btn": "📤 Share & earn 💎",
   "no-audio": "🔇 This video has no audio track.",
   "error-server": "❌ An error occurred. Please try again.",
-
   "social-diamonds-used": "💎 <b>{count} diamonds used</b> — {platform} download activated.",
   "social-downloading": "{emoji} Downloading from {platform}...",
   "social-too-long": "⏱️ Video too long. Maximum is <b>{} minutes</b>.",
@@ -46,11 +41,9 @@
   "social-error-blocked": "Your IP is blocked by {}. Try again later or use a VPN.",
   "social-error-unavailable": "This {} content is not available.",
   "social-error-copyright": "Content is blocked by copyright in your region.",
-
   "congrats": "🎉 <b>Success!</b>\n\n💎 {} diamonds have been added to your account!",
   "congrats-lifetime": "🎉 <b>Lifetime Premium Activated!</b>\n\n👑 You now have unlimited access — forever!",
   "admin-gift": "🎁 <b>Gift from Admin!</b>\n\n💎 <b>{count}</b> diamonds have been added to your account.",
-
   "referral-applied": "🎁 Referral code applied!\nYou'll receive <b>2 💎 diamonds</b> after your first conversion.",
   "referral-first-start": "Please start the bot first with /start",
   "referral-share": "📤 Share",
@@ -59,40 +52,32 @@
   "referral-inviter-bonus": "🎉 <b>Referral reward!</b>\n\nYour invited friend just made their first conversion.\n💎 <b>+3 diamonds</b> added to your balance!",
   "referral-invalid": "⚠️ Invalid referral code or already applied.",
   "referral-share-text": "Join this bot with my link and get 2 free diamonds after your first conversion!",
-  "invite-friend": "👥 Invite a Friend",
+  "invite-friend": "👥 Invite & earn 💎",
   "limit-invite-tip": "👥 Invite a friend — earn +3 💎 per invite.",
-
   "milestone-bonus": "🏆 <b>Milestone reached!</b>\n\n💎 <b>+{}</b> diamonds — you're on fire!",
-
   "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Conversions:</b> <code>{conversions}</code>\n▸ <b>Rank:</b> #{rank} / {total}\n▸ <b>Diamonds:</b> <code>{diamonds}</code>\n▸ <b>Streak:</b> 🔥 {streak}\n▸ <b>Left today:</b> ⚡ {left}\n▸ <b>Joined:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 Lifetime Premium",
   "profile-status-free": "⚡ Free (3/day)",
   "username-na": "N/A",
   "not-registered": "⚠️ You are not registered.",
-
   "top-title": "🏆 <b>TOP 10 MOST ACTIVE USERS:</b>",
   "top-empty": "🚀 No top users yet. Be the first!",
   "rank-text": "🏅 Your rank: <b>#{rank}</b> — conversions: <code>{conversions}</code>",
-
   "stat-text": "📊 <b>Bot Statistics</b>\n\n▸ <b>Users:</b> <code>{total}</code>\n▸ <b>Active:</b> <code>{active}</code> ({pct}%)\n▸ <b>Conversions:</b> <code>{conversions}</code>\n▸ <b>New today:</b> <code>{today}</code>",
   "stats-error": "❌ Error getting statistics.",
   "promo-links": "🔗 <b>Useful links</b>",
-
   "subscribe": "📢 Please subscribe to our channel to continue.",
   "join-channel": "🔗 Join Channel",
   "check-subs": "✅ Check subscription",
   "not-sub": "❌ You haven't subscribed to the channel yet.",
   "thank-sub": "✅ Thanks for subscribing! You can now use the bot.\n\n🎬 Send a video and I'll extract the audio.",
-
   "lang-button": "🌐 Language",
   "help-button": "❓ Help",
   "stats-button": "📊 Statistics",
   "profile-button": "👤 Profile",
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Diamonds",
-
   "help-text": "❓ <b>How to use</b>\n\n🎬 <b>Video file</b> — send any video, get MP3 audio\n🔗 <b>Link</b> — YouTube, TikTok or Instagram\n🎙 You receive both an MP3 file and a voice message\n\n⚡ <b>Free:</b> 3 conversions a day (resets at midnight)\n📦 <b>Large file</b> (over 50 MB): 1 💎\n🔗 <b>Link download</b> over the limit: 2 💎\n\n<b>Earn free diamonds:</b>\n👥 /referral — invite friends, +3 💎 each\n🔥 Streaks: use the bot 3, 7, 14, 30 days in a row\n🏆 Milestones: 50, 100, 200, 500 conversions\n\n💎 /diamonds — buy diamonds\n👑 Lifetime Premium — unlimited forever",
-
   "throttled": "⏳ Too many requests! Please wait a moment.",
   "back-button": "⬅️ Back",
   "menu-placeholder": "Send a video or a link…",

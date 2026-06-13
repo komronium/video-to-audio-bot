@@ -44,11 +44,13 @@ def _generate_name(message: Message, video) -> str:
 async def video_handler(message: Message, db: AsyncSession, document: Document = None):
     user_service = UserService(db)
     user = await user_service.get_user(message.from_user.id)
+    is_new = False
     if not user:
         tg = message.from_user
         user = await user_service.add_user(
             tg.id, tg.username, tg.full_name, tg.language_code or "en", message.bot
         )
+        is_new = True
     lang = user.lang or "en"
     is_lifetime = user.is_premium
     user_id = message.from_user.id
@@ -93,10 +95,17 @@ async def video_handler(message: Message, db: AsyncSession, document: Document =
                 )
             return
         charged = 1
-        await message.answer(i18n.get_text("large-used" if is_large else "extra-used", lang))
+
+    # Fold every preamble (first-time welcome, diamond notice) into the single
+    # status message instead of sending separate messages.
+    prefix = ""
+    if is_new:
+        prefix += i18n.get_text("first-video", lang) + "\n\n"
+    if charged:
+        prefix += i18n.get_text("large-used" if is_large else "extra-used", lang) + "\n\n"
 
     status_msg_id = None
-    status_text = (
+    status_text = prefix + (
         i18n.get_text("queue", lang).format(pending + 1, pending + 1)
         if redis_ok and pending > 0
         else i18n.get_text("downloading", lang)

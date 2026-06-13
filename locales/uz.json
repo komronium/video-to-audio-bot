@@ -1,8 +1,7 @@
 {
   "lang": "🇺🇿 O'zbekcha",
   "choose_language": "🌍 Davom etish uchun tilni tanlang:",
-  "start": "👋 Salom!\n\n🎬 Video, YouTube, TikTok yoki Instagram havolasini yuboring — men MP3 formatda audioga aylantiraman.\n\n⚡ Bepul: kuniga <b>3 ta</b> audio\n💎 Ko'proq kerakmi? Olmoslar oling!",
-
+  "start": "🎬 <b>Menga video yuboring</b> — yoki YouTube / TikTok / Instagram havolasini — men uni bir necha soniyada audioga aylantiraman.\n\n🎙 Shu yerda tinglang yoki MP3 ni saqlang.\n\n✨ Sinab ko'ring — biror narsa yuboring!",
   "buy-diamonds": "💎 <b>Olmoslar sotib olish</b>\n\nHar bir olmos = 1 ta qo'shimcha audio.\n\n📦 <b>Olmoslar nima beradi:</b>\n• Kunlik limitdan oshganda davom etish\n• Katta fayllar (50 MB+)\n• YouTube, TikTok, Instagram\n\n💡 <b>Maslahat:</b> <b>10 💎</b> paketi eng ommabop tanlov!\n🔥 <b>50 💎</b> paketida <b>30% tejamkor</b>\n\n⭐ To'lov: Telegram Stars",
   "diamond-count": "{} ta 💎 olmos",
   "buy-title": "{} ta olmos sotib olish 💎",
@@ -15,30 +14,26 @@
   "popular-badge": "Ommabop",
   "save-30-badge": "30% tejang",
   "save-30-line": "🔥 50 ta paketda 30% tejang!",
-
   "too-large": "⚠️ <b>Fayl juda katta</b>\n\nVideo hajmi bepul limitdan oshib ketdi ({} MB).\n💎 1 olmos ishlating yoki Premiumga o'ting.",
   "large-used": "💎 <b>1 olmos ishlatildi</b> — katta fayl ochildi.",
   "no-diamonds": "💎 <b>Olmos qolmadi!</b>\nDavom etish uchun qo'shimcha olmos sotib oling.",
   "extra-used": "💎 <b>1 olmos ishlatildi</b> — qo'shimcha audio faollashtirildi.",
-
   "daily-limit": "⛔ <b>Kunlik limit tugadi</b>\n\nBugungi <b>{limit} ta</b> bepul audio tugadi.\n⏳ Qayta yuklanadi: <b>{time}</b>\n\n<b>Hoziroq davom etish:</b>\n💎 Olmos sotib oling (1 = 1 qo'shimcha)\n👑 Lifetime oling (umrbod cheksiz)\n👥 Do'st taklif qiling (bepul olmos)",
   "social-limit": "⛔ <b>Kunlik limit tugadi</b>\n\nBu turdagi yuklab olish <b>2 olmos</b> talab qiladi.\n💎 Sizda: <b>{diamonds}</b> ta olmos bor.{time}",
-
   "one-free-left": "⚡ Bugun <b>1 ta bepul</b> imkoniyat qoldi!\n\n💡 Limitni uzaytirish uchun:",
   "used-last-free": "✅ Audio tayyor!\n\n⚠️ Bugungi oxirgi bepul imkoniyatingizni ishlatdingiz.\n⏳ Qayta yuklanadi: <b>{time}</b>\n\n💎 Davom etish uchun olmoslar oling:",
-
   "streak-bonus": "🔥 <b>{n} kun ketma-ket!</b>\n💎 +{reward} olmos bonus sizning hisobingizga qo'shildi!",
-
   "queue": "⏳ Navbatda...\nSizning o'rningiz: <code>{} / {}</code>",
   "queue-wait": "⏳ Oldingi videoyingiz hali qayta ishlanmoqda. Iltimos, kuting.",
   "server-busy": "⚠️ Server hozir band. Iltimos, bir necha daqiqadan keyin urinib ko'ring.",
-
   "downloading": "⬇️ Video yuklanmoqda...",
   "converting": "🎧 Audio ajratilmoqda...",
   "converted-by": "@{} orqali",
+  "first-video": "👋 <b>Xush kelibsiz!</b> Birinchi videongiz aylantirilyapti…",
+  "result-caption": "🎵 <b>{title}</b>\n\n🎬 Videolaringizni audioga aylantiring — @{bot}",
+  "result-share-btn": "📤 Ulashing — 💎 ishlang",
   "no-audio": "🔇 Bu videoda audio trek topilmadi.",
   "error-server": "❌ Xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
-
   "social-diamonds-used": "💎 <b>{count} olmos ishlatildi</b> — {platform} yuklab olish faollashtirildi.",
   "social-downloading": "{emoji} {platform} dan yuklanmoqda...",
   "social-too-long": "⏱️ Video juda uzun. Maksimal <b>{} daqiqa</b>.",
@@ -46,11 +41,9 @@
   "social-error-blocked": "Sizning IP manzilingiz {} tomonidan bloklangan. Keyinroq yoki VPN bilan urinib ko'ring.",
   "social-error-unavailable": "{} kontenti hozir mavjud emas.",
   "social-error-copyright": "Kontent sizning hududingizda mualliflik huquqi sababli bloklangan.",
-
   "congrats": "🎉 <b>Muvaffaqiyatli!</b>\n\n💎 {} ta olmos hisobingizga qo'shildi!",
   "congrats-lifetime": "🎉 <b>Doimiy Premium faollashtirildi!</b>\n\n👑 Endi cheksiz imkoniyatlar sizniki — umrbod!",
   "admin-gift": "🎁 <b>Admin sovg'asi!</b>\n\n💎 Hisobingizga <b>{count}</b> ta olmos qo'shildi.",
-
   "referral-applied": "🎁 Referral kod qabul qilindi!\nBirinchi audiodan keyin sizga <b>2 💎 olmos</b> beriladi.",
   "referral-first-start": "Avval botni /start orqali ishga tushiring.",
   "referral-share": "📤 Ulashish",
@@ -59,40 +52,32 @@
   "referral-inviter-bonus": "🎉 <b>Referral mukofoti!</b>\n\nTaklif qilgan do'stingiz birinchi audiosini oldi.\n💎 Balansingizga <b>+3 olmos</b> qo'shildi!",
   "referral-invalid": "⚠️ Referral kod noto'g'ri yoki allaqachon qo'llangan.",
   "referral-share-text": "Mening havolam orqali botga qo'shiling va <b>2 ta bepul olmos</b> oling!",
-  "invite-friend": "👥 Do'stni taklif qiling",
+  "invite-friend": "👥 Taklif qiling — 💎 ishlang",
   "limit-invite-tip": "👥 Do'stingizni taklif qiling — har biri uchun 3 💎 oling.",
-
   "milestone-bonus": "🏆 <b>Marraga yetildi!</b>\n\n💎 <b>+{}</b> olmos bonus — siz ajoyibsiz!",
-
   "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Audiolar:</b> <code>{conversions}</code>\n▸ <b>O'rin:</b> #{rank} / {total}\n▸ <b>Olmoslar:</b> <code>{diamonds}</code>\n▸ <b>Ketma-ketlik:</b> 🔥 {streak}\n▸ <b>Bugun qoldi:</b> ⚡ {left}\n▸ <b>Qo'shilgan:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 Doimiy Premium",
   "profile-status-free": "⚡ Bepul (kuniga 3 ta)",
   "username-na": "Mavjud emas",
   "not-registered": "⚠️ Siz ro'yxatdan o'tmagansiz.",
-
   "top-title": "🏆 <b>ENG FAOL 10 TA FOYDALANUVCHI:</b>",
   "top-empty": "🚀 Hali top foydalanuvchilar yo'q. Birinchi bo'ling!",
   "rank-text": "🏅 Sizning o'rningiz: <b>#{rank}</b> — audiolar: <code>{conversions}</code>",
-
   "stat-text": "📊 <b>Bot statistikasi</b>\n\n▸ <b>Foydalanuvchilar:</b> <code>{total}</code>\n▸ <b>Faol:</b> <code>{active}</code> ({pct}%)\n▸ <b>Audiolar:</b> <code>{conversions}</code>\n▸ <b>Bugun qo'shilgan:</b> <code>{today}</code>",
   "stats-error": "❌ Statistikani olishda xatolik.",
   "promo-links": "🔗 <b>Foydali havolalar</b>",
-
   "subscribe": "📢 Davom etish uchun kanalimizga obuna bo'ling.",
   "join-channel": "🔗 Kanalga qo'shilish",
   "check-subs": "✅ Obunani tekshirish",
   "not-sub": "❌ Siz hali kanalga obuna bo'lmagansiz.",
   "thank-sub": "✅ Rahmat! Endi botdan foydalanishingiz mumkin.\n\n🎬 Video yuboring — men audioga aylantiraman.",
-
   "lang-button": "🌐 Tilni o'zgartirish",
   "help-button": "❓ Yordam",
   "stats-button": "📊 Statistika",
   "profile-button": "👤 Profil",
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Olmoslar",
-
   "help-text": "❓ <b>Qanday ishlatiladi</b>\n\n🎬 <b>Video fayl</b> — istalgan videoni yuboring, MP3 oling\n🔗 <b>Havola</b> — YouTube, TikTok yoki Instagram\n🎙 Sizga MP3 fayl va ovozli xabar — ikkalasi ham keladi\n\n⚡ <b>Bepul:</b> kuniga 3 ta audio (yarim tunda yangilanadi)\n📦 <b>Katta fayl</b> (50 MB dan ortiq): 1 💎\n🔗 <b>Havoladan yuklash</b> limitdan keyin: 2 💎\n\n<b>Bepul olmos olish:</b>\n👥 /referral — do'st taklif qiling, har biri uchun +3 💎\n🔥 Ketma-ketlik: botni 3, 7, 14, 30 kun ketma-ket ishlating\n🏆 Marralar: 50, 100, 200, 500 audio\n\n💎 /diamonds — olmos sotib olish\n👑 Doimiy Premium — umrbod cheksiz",
-
   "throttled": "⏳ So'rovlar juda ko'p! Iltimos, biroz kuting.",
   "back-button": "⬅️ Orqaga",
   "menu-placeholder": "Video yoki havola yuboring…",

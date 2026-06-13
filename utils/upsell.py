@@ -17,6 +17,24 @@ async def get_bot_username(bot: Bot) -> str:
     return _bot_username
 
 
+async def result_keyboard(lang: str, user_id: int, user_service: UserService, bot: Bot):
+    """A single 'share & earn' button shown under every delivered audio —
+    the satisfaction-peak growth lever. Carries the user's referral link so
+    invites that convert reward them."""
+    code = await user_service.generate_referral_code(user_id)
+    bot_username = await get_bot_username(bot)
+    referral_link = f"https://t.me/{bot_username}?start={code}"
+    share_text = i18n.get_text("referral-share-text", lang)
+    share_url = (
+        f"https://t.me/share/url?url={quote_plus(referral_link)}"
+        f"&text={quote_plus(share_text)}"
+    )
+    builder = InlineKeyboardBuilder()
+    builder.button(text=i18n.get_text("result-share-btn", lang), url=share_url)
+    builder.adjust(1)
+    return builder.as_markup()
+
+
 async def get_buy_more_keyboard(lang: str, user_service: UserService, user_id: int, bot: Bot):
     builder = InlineKeyboardBuilder()
     builder.button(text=i18n.get_text("buy-extra", lang), callback_data="diamond:list")

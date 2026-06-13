@@ -1,8 +1,7 @@
 {
   "lang": "🇮🇩 Bahasa Indonesia",
   "choose_language": "🌍 Pilih bahasa Anda untuk melanjutkan:",
-  "start": "👋 Halo!\n\n🎬 Kirim video atau link YouTube / TikTok / Instagram — saya ubah jadi MP3 seketika.\n\n⚡ Gratis: <b>3 konversi</b> per hari\n💎 Butuh lebih? Dapatkan Berlian!",
-
+  "start": "🎬 <b>Kirim video</b> — atau tautan YouTube / TikTok / Instagram — dan saya ubah menjadi audio dalam hitungan detik.\n\n🎙 Putar langsung di sini, atau simpan MP3-nya.\n\n✨ Coba sekarang — kirim saja sesuatu!",
   "buy-diamonds": "💎 <b>Beli Berlian</b>\n\nSetiap berlian = 1 konversi ekstra hari ini.\n\n📦 <b>Apa yang dibuka berlian:</b>\n• Konversi ekstra melewati batas harian\n• File besar (50 MB+)\n• YouTube, TikTok, Instagram\n\n💡 <b>Tips:</b> paket <b>10 💎</b> paling populer!\n🔥 Paket <b>50 💎</b> hemat <b>30%</b>\n\n⭐ Bayar dengan Telegram Stars",
   "diamond-count": "{} Berlian 💎",
   "buy-title": "Beli {} Berlian 💎",
@@ -15,30 +14,26 @@
   "popular-badge": "Populer",
   "save-30-badge": "Hemat 30%",
   "save-30-line": "🔥 Hemat 30% dengan paket 50 berlian!",
-
   "too-large": "⚠️ <b>File terlalu besar</b>\n\nVideo ini melebihi batas gratis ({} MB).\nGunakan 💎 1 berlian atau upgrade ke Premium.",
   "large-used": "💎 <b>1 berlian digunakan</b> — file besar dibuka.",
   "no-diamonds": "💎 <b>Berlian habis!</b>\nBeli lebih untuk melanjutkan.",
   "extra-used": "💎 <b>1 berlian digunakan</b> — konversi ekstra diaktifkan.",
-
   "daily-limit": "⛔ <b>Batas harian tercapai</b>\n\nAnda telah menggunakan semua <b>{limit}</b> konversi gratis hari ini.\n⏳ Reset dalam: <b>{time}</b>\n\n<b>Lanjutkan sekarang:</b>\n💎 Beli berlian (1 = 1 ekstra)\n👑 Seumur hidup (tanpa batas forever)\n👥 Undang teman (dapat berlian gratis)",
   "social-limit": "⛔ <b>Batas harian tercapai</b>\n\nJenis unduhan ini membutuhkan <b>2 berlian</b>.\n💎 Saldo Anda: <b>{diamonds}</b> berlian.{time}",
-
   "one-free-left": "⚡ Tersisa <b>1 konversi gratis</b> untuk hari ini!\n\n💡 Hampir habis? Dapatkan berlian:",
   "used-last-free": "✅ Audio siap!\n\n⚠️ Itu adalah konversi gratis terakhir Anda hari ini.\n⏳ Reset dalam: <b>{time}</b>\n\n💎 Dapatkan lebih sekarang:",
-
   "streak-bonus": "🔥 <b>{n} hari berturut-turut!</b>\n💎 +{reward} berlian ditambahkan ke saldo Anda!",
-
   "queue": "⏳ Dalam antrean...\nPosisi Anda: <code>{} / {}</code>",
   "queue-wait": "⏳ Video sebelumnya masih diproses. Harap tunggu.",
   "server-busy": "⚠️ Server sedang sibuk. Coba lagi dalam beberapa menit.",
-
   "downloading": "⬇️ Mengunduh...",
   "converting": "🎧 Mengonversi ke audio...",
   "converted-by": "via @{}",
+  "first-video": "👋 <b>Selamat datang!</b> Mengonversi video pertamamu…",
+  "result-caption": "🎵 <b>{title}</b>\n\n🎬 Ubah videomu jadi audio — @{bot}",
+  "result-share-btn": "📤 Bagikan & dapatkan 💎",
   "no-audio": "🔇 Video ini tidak memiliki trek audio.",
   "error-server": "❌ Terjadi kesalahan. Silakan coba lagi.",
-
   "social-diamonds-used": "💎 <b>{count} berlian digunakan</b> — unduhan {platform} diaktifkan.",
   "social-downloading": "{emoji} Mengunduh dari {platform}...",
   "social-too-long": "⏱️ Video terlalu panjang. Maksimum <b>{} menit</b>.",
@@ -46,11 +41,9 @@
   "social-error-blocked": "IP Anda diblokir oleh {}. Coba lagi nanti atau gunakan VPN.",
   "social-error-unavailable": "Konten {} tidak tersedia saat ini.",
   "social-error-copyright": "Konten diblokir karena hak cipta di wilayah Anda.",
-
   "congrats": "🎉 <b>Berhasil!</b>\n\n💎 {} berlian ditambahkan ke akun Anda!",
   "congrats-lifetime": "🎉 <b>Premium Seumur Hidup Diaktifkan!</b>\n\n👑 Akses tanpa batas — selamanya!",
   "admin-gift": "🎁 <b>Hadiah dari Admin!</b>\n\n💎 <b>{count}</b> berlian ditambahkan ke akun Anda.",
-
   "referral-applied": "🎁 Kode referral diterapkan!\nAnda akan mendapatkan <b>2 💎 berlian</b> setelah konversi pertama.",
   "referral-first-start": "Silakan mulai bot terlebih dahulu dengan /start",
   "referral-share": "📤 Bagikan",
@@ -59,40 +52,32 @@
   "referral-inviter-bonus": "🎉 <b>Hadiah referral!</b>\n\nTeman yang Anda undang baru saja melakukan konversi pertama.\n💎 <b>+3 berlian</b> ditambahkan ke saldo Anda!",
   "referral-invalid": "⚠️ Kode referral tidak valid atau sudah digunakan.",
   "referral-share-text": "Gabung bot ini lewat link saya dan dapatkan 2 berlian gratis setelah konversi pertama!",
-  "invite-friend": "👥 Undang Teman",
+  "invite-friend": "👥 Undang & dapatkan 💎",
   "limit-invite-tip": "👥 Undang teman — dapatkan +3 💎 per undangan.",
-
   "milestone-bonus": "🏆 <b>Milestone tercapai!</b>\n\n💎 <b>+{}</b> berlian — luar biasa!",
-
   "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Konversi:</b> <code>{conversions}</code>\n▸ <b>Peringkat:</b> #{rank} / {total}\n▸ <b>Berlian:</b> <code>{diamonds}</code>\n▸ <b>Beruntun:</b> 🔥 {streak}\n▸ <b>Sisa hari ini:</b> ⚡ {left}\n▸ <b>Bergabung:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 Premium Seumur Hidup",
   "profile-status-free": "⚡ Gratis (3/hari)",
   "username-na": "N/A",
   "not-registered": "⚠️ Anda belum terdaftar.",
-
   "top-title": "🏆 <b>10 PENGGUNA PALING AKTIF:</b>",
   "top-empty": "🚀 Belum ada pengguna teratas. Jadilah yang pertama!",
   "rank-text": "🏅 Peringkat Anda: <b>#{rank}</b> — konversi: <code>{conversions}</code>",
-
   "stat-text": "📊 <b>Statistik Bot</b>\n\n▸ <b>Pengguna:</b> <code>{total}</code>\n▸ <b>Aktif:</b> <code>{active}</code> ({pct}%)\n▸ <b>Konversi:</b> <code>{conversions}</code>\n▸ <b>Baru hari ini:</b> <code>{today}</code>",
   "stats-error": "❌ Gagal mendapatkan statistik.",
   "promo-links": "🔗 <b>Tautan berguna</b>",
-
   "subscribe": "📢 Silakan berlangganan saluran kami untuk melanjutkan.",
   "join-channel": "🔗 Gabung ke Saluran",
   "check-subs": "✅ Periksa langganan",
   "not-sub": "❌ Anda belum berlangganan ke saluran.",
   "thank-sub": "✅ Terima kasih telah berlangganan! Sekarang Anda bisa menggunakan bot.\n\n🎬 Kirim video — saya akan ekstrak audionya.",
-
   "lang-button": "🌐 Bahasa",
   "help-button": "❓ Bantuan",
   "stats-button": "📊 Statistik",
   "profile-button": "👤 Profil",
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Berlian",
-
   "help-text": "❓ <b>Cara penggunaan</b>\n\n🎬 <b>File video</b> — kirim video apa pun, dapatkan MP3\n🔗 <b>Tautan</b> — YouTube, TikTok, atau Instagram\n🎙 Anda menerima file MP3 sekaligus pesan suara\n\n⚡ <b>Gratis:</b> 3 konversi per hari (direset tengah malam)\n📦 <b>File besar</b> (lebih dari 50 MB): 1 💎\n🔗 <b>Unduh via tautan</b> melebihi batas: 2 💎\n\n<b>Dapatkan berlian gratis:</b>\n👥 /referral — undang teman, +3 💎 per teman\n🔥 Beruntun: pakai bot 3, 7, 14, 30 hari berturut-turut\n🏆 Pencapaian: 50, 100, 200, 500 konversi\n\n💎 /diamonds — beli berlian\n👑 Premium Seumur Hidup — tanpa batas selamanya",
-
   "throttled": "⏳ Terlalu banyak permintaan! Mohon tunggu sebentar.",
   "back-button": "⬅️ Kembali",
   "menu-placeholder": "Kirim video atau tautan…",

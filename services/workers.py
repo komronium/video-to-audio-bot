@@ -16,7 +16,7 @@ from utils.admin_alert import notify_admin
 from utils.daily_limit import increment_daily_count
 from utils.i18n import i18n
 from utils.rewards import check_and_notify_rewards
-from utils.upsell import get_bot_username, post_conversion_upsell
+from utils.upsell import get_bot_username, post_conversion_upsell, result_keyboard
 
 MAX_CONCURRENT = 5
 MAX_ATTEMPTS = 2
@@ -166,40 +166,41 @@ async def process_job(bot: Bot, job: dict):
             await _refund(user_id, job.get("charged", 0))
             return
 
-        caption = i18n.get_text("converted-by", lang).format(
-            await get_bot_username(bot)
+        username = await get_bot_username(bot)
+        title = job["file_name"].replace("_", " ").strip() or "audio"
+        caption = i18n.get_text("result-caption", lang).format(
+            title=title, bot=username
         )
 
         async with get_db() as db:
-            await UserService(db).add_conversation(user_id=user_id)
+            user_service = UserService(db)
+            await user_service.add_conversation(user_id=user_id)
+            keyboard = await result_keyboard(lang, user_id, user_service, bot)
 
         await edit_status(i18n.get_text("uploading", lang))
         try:
-            await bot.send_chat_action(chat_id, "upload_document")
+            await bot.send_chat_action(chat_id, "upload_voice")
         except TelegramAPIError:
             pass
 
-        try:
-            await bot.send_document(
+        # send_audio gives a single message that plays inline (quick preview)
+        # *and* is the downloadable MP3 — no second message, no disk retention.
+        async def _deliver():
+            await bot.send_audio(
                 chat_id,
                 FSInputFile(audio_path),
                 caption=caption,
+                title=title,
+                performer=username,
+                reply_markup=keyboard,
                 reply_parameters=reply_params(),
             )
-            await bot.send_voice(
-                chat_id, FSInputFile(audio_path), reply_parameters=reply_params()
-            )
+
+        try:
+            await _deliver()
         except TelegramRetryAfter as e:
             await asyncio.sleep(e.retry_after)
-            await bot.send_document(
-                chat_id,
-                FSInputFile(audio_path),
-                caption=caption,
-                reply_parameters=reply_params(),
-            )
-            await bot.send_voice(
-                chat_id, FSInputFile(audio_path), reply_parameters=reply_params()
-            )
+            await _deliver()
 
         if status_msg_id:
             try:
