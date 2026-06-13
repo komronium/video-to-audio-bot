@@ -3,7 +3,9 @@ from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
+from utils.daily_limit import DAILY_LIMIT, get_daily_count
 from utils.i18n import i18n
+from utils.streak import get_streak
 
 router = Router()
 
@@ -27,13 +29,17 @@ async def profile_handler(message: types.Message, db: AsyncSession):
     conversions = await user_service.get_conversion_count(user.user_id)
     rank = await user_service.get_user_rank(user.user_id)
     total_users = await user_service.total_users()
+    streak = await get_streak(user.user_id)
 
     if user.is_premium:
         status = i18n.get_text("profile-status-premium", lang)
         diamonds_text = "♾️"
+        left_text = "♾️"
     else:
         status = i18n.get_text("profile-status-free", lang)
         diamonds_text = str(user.diamonds or 0)
+        used = await get_daily_count(user.user_id)
+        left_text = f"{max(DAILY_LIMIT - used, 0)}/{DAILY_LIMIT}"
 
     text = i18n.get_text("profile", lang).format(
         name=html.quote(user.name or "—"),
@@ -45,6 +51,8 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         diamonds=diamonds_text,
         joined=user.joined_at.strftime("%d.%m.%Y"),
         status=status,
+        streak=streak,
+        left=left_text,
     )
 
     return await message.answer(text.strip())

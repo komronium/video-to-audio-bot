@@ -64,7 +64,7 @@
 
   "milestone-bonus": "🏆 <b>Milestone reached!</b>\n\n💎 <b>+{}</b> diamonds — you're on fire!",
 
-  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Conversions:</b> <code>{conversions}</code>\n▸ <b>Rank:</b> #{rank} / {total}\n▸ <b>Diamonds:</b> <code>{diamonds}</code>\n▸ <b>Joined:</b> <code>{joined}</code>",
+  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Conversions:</b> <code>{conversions}</code>\n▸ <b>Rank:</b> #{rank} / {total}\n▸ <b>Diamonds:</b> <code>{diamonds}</code>\n▸ <b>Streak:</b> 🔥 {streak}\n▸ <b>Left today:</b> ⚡ {left}\n▸ <b>Joined:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 Lifetime Premium",
   "profile-status-free": "⚡ Free (3/day)",
   "username-na": "N/A",
@@ -91,10 +91,14 @@
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Diamonds",
 
-  "help-text": "❓ <b>How to use</b>\n\n1️⃣ <b>Send a video</b> — file or YouTube/TikTok link\n2️⃣ <b>Wait</b> — the bot extracts audio automatically\n3️⃣ <b>Download MP3</b> — save or share it\n\n⚡ <b>Free limit:</b> <b>3 conversions</b> per day\n💎 <b>Need more:</b> buy diamonds or get Lifetime\n👥 <b>Free diamonds:</b> invite your friends\n🔥 <b>Streak bonus:</b> use the bot 3, 7, 14, 30 days in a row",
+  "help-text": "❓ <b>How to use</b>\n\n🎬 <b>Video file</b> — send any video, get MP3 audio\n🔗 <b>Link</b> — YouTube, TikTok or Instagram\n🎙 You receive both an MP3 file and a voice message\n\n⚡ <b>Free:</b> 3 conversions a day (resets at midnight)\n📦 <b>Large file</b> (over 50 MB): 1 💎\n🔗 <b>Link download</b> over the limit: 2 💎\n\n<b>Earn free diamonds:</b>\n👥 /referral — invite friends, +3 💎 each\n🔥 Streaks: use the bot 3, 7, 14, 30 days in a row\n🏆 Milestones: 50, 100, 200, 500 conversions\n\n💎 /diamonds — buy diamonds\n👑 Lifetime Premium — unlimited forever",
 
   "throttled": "⏳ Too many requests! Please wait a moment.",
   "back-button": "⬅️ Back",
   "menu-placeholder": "Send a video or a link…",
-  "uploading": "📤 Uploading audio..."
+  "uploading": "📤 Uploading audio...",
+  "your-balance": "💎 Your balance: <b>{}</b>",
+  "start-status": "⚡ Left today: <b>{left}/{limit}</b> · 💎 Diamonds: <b>{diamonds}</b>",
+  "start-status-premium": "👑 Lifetime Premium — unlimited",
+  "payment-issue": "❌ Payment received, but something went wrong.\nPlease contact support — your payment is safe."
 }

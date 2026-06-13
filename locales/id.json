@@ -64,7 +64,7 @@
 
   "milestone-bonus": "🏆 <b>Milestone tercapai!</b>\n\n💎 <b>+{}</b> berlian — luar biasa!",
 
-  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Konversi:</b> <code>{conversions}</code>\n▸ <b>Peringkat:</b> #{rank} / {total}\n▸ <b>Berlian:</b> <code>{diamonds}</code>\n▸ <b>Bergabung:</b> <code>{joined}</code>",
+  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Konversi:</b> <code>{conversions}</code>\n▸ <b>Peringkat:</b> #{rank} / {total}\n▸ <b>Berlian:</b> <code>{diamonds}</code>\n▸ <b>Beruntun:</b> 🔥 {streak}\n▸ <b>Sisa hari ini:</b> ⚡ {left}\n▸ <b>Bergabung:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 Premium Seumur Hidup",
   "profile-status-free": "⚡ Gratis (3/hari)",
   "username-na": "N/A",
@@ -91,10 +91,14 @@
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Berlian",
 
-  "help-text": "❓ <b>Cara penggunaan</b>\n\n1️⃣ <b>Kirim video</b> — file atau link YouTube/TikTok\n2️⃣ <b>Tunggu</b> — bot mengekstrak audio otomatis\n3️⃣ <b>Unduh MP3</b> — simpan atau bagikan\n\n⚡ <b>Batas gratis:</b> <b>3 konversi</b> per hari\n💎 <b>Butuh lebih:</b> beli berlian atau Premium Seumur Hidup\n👥 <b>Berlian gratis:</b> undang teman-temanmu\n🔥 <b>Bonus streak:</b> gunakan 3, 7, 14, 30 hari berturut-turut",
+  "help-text": "❓ <b>Cara penggunaan</b>\n\n🎬 <b>File video</b> — kirim video apa pun, dapatkan MP3\n🔗 <b>Tautan</b> — YouTube, TikTok, atau Instagram\n🎙 Anda menerima file MP3 sekaligus pesan suara\n\n⚡ <b>Gratis:</b> 3 konversi per hari (direset tengah malam)\n📦 <b>File besar</b> (lebih dari 50 MB): 1 💎\n🔗 <b>Unduh via tautan</b> melebihi batas: 2 💎\n\n<b>Dapatkan berlian gratis:</b>\n👥 /referral — undang teman, +3 💎 per teman\n🔥 Beruntun: pakai bot 3, 7, 14, 30 hari berturut-turut\n🏆 Pencapaian: 50, 100, 200, 500 konversi\n\n💎 /diamonds — beli berlian\n👑 Premium Seumur Hidup — tanpa batas selamanya",
 
   "throttled": "⏳ Terlalu banyak permintaan! Mohon tunggu sebentar.",
   "back-button": "⬅️ Kembali",
   "menu-placeholder": "Kirim video atau tautan…",
-  "uploading": "📤 Mengunggah audio..."
+  "uploading": "📤 Mengunggah audio...",
+  "your-balance": "💎 Saldo Anda: <b>{}</b>",
+  "start-status": "⚡ Sisa hari ini: <b>{left}/{limit}</b> · 💎 Berlian: <b>{diamonds}</b>",
+  "start-status-premium": "👑 Premium Seumur Hidup — tanpa batas",
+  "payment-issue": "❌ Pembayaran diterima, tetapi terjadi kesalahan.\nSilakan hubungi dukungan — pembayaran Anda aman."
 }

@@ -54,7 +54,7 @@
   "referral-applied": "🎁 Referral kod qabul qilindi!\nBirinchi konvertatsiyadan keyin sizga <b>2 💎 olmos</b> beriladi.",
   "referral-first-start": "Avval botni /start orqali ishga tushiring.",
   "referral-share": "📤 Ulashish",
-  "referral-info": "🎁 <b>Sizning referral havolangiz</b>\n\n<code>{link}</code>\n\nHer bir do'stingiz uchun:\n• Siz: 💎 <b>+3 olmos</b>\n• Do'stingiz: 💎 <b>+2 olmos</b> (birinchi konvertatsiyadan keyin)\n\n🏆 <b>Marrali bonuslar:</b>\n• 50 → 5 💎 · 100 → 10 💎 · 200 → 20 💎 · 500 → 50 💎\n\n🔥 <b>3, 7, 14, 30 kun</b> ketma-ket ishlatsangiz — bonus olmoslar!",
+  "referral-info": "🎁 <b>Sizning referral havolangiz</b>\n\n<code>{link}</code>\n\nHar bir do'stingiz uchun:\n• Siz: 💎 <b>+3 olmos</b>\n• Do'stingiz: 💎 <b>+2 olmos</b> (birinchi konvertatsiyadan keyin)\n\n🏆 <b>Marrali bonuslar:</b>\n• 50 → 5 💎 · 100 → 10 💎 · 200 → 20 💎 · 500 → 50 💎\n\n🔥 <b>3, 7, 14, 30 kun</b> ketma-ket ishlatsangiz — bonus olmoslar!",
   "referral-bonus": "🎁 <b>Referral bonusi!</b>\n\n💎 Sizga <b>+2 olmos</b>\n💎 Taklif qilgan userga <b>+3 olmos</b>",
   "referral-inviter-bonus": "🎉 <b>Referral mukofoti!</b>\n\nTaklif qilgan do'stingiz birinchi konvertatsiyani qildi.\n💎 Balansingizga <b>+3 olmos</b> qo'shildi!",
   "referral-invalid": "⚠️ Referral kod noto'g'ri yoki allaqachon qo'llangan.",
@@ -64,7 +64,7 @@
 
   "milestone-bonus": "🏆 <b>Marraga yetildi!</b>\n\n💎 <b>+{}</b> olmos bonus — siz ajoyibsiz!",
 
-  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Konvertatsiyalar:</b> <code>{conversions}</code>\n▸ <b>O'rin:</b> #{rank} / {total}\n▸ <b>Olmoslar:</b> <code>{diamonds}</code>\n▸ <b>Qo'shilgan:</b> <code>{joined}</code>",
+  "profile": "👤 <b>{name}</b> · {username}\n<i>{status}</i>\n━━━━━━━━━━━━━━━\n▸ <b>ID:</b> <code>{user_id}</code>\n▸ <b>Konvertatsiyalar:</b> <code>{conversions}</code>\n▸ <b>O'rin:</b> #{rank} / {total}\n▸ <b>Olmoslar:</b> <code>{diamonds}</code>\n▸ <b>Ketma-ketlik:</b> 🔥 {streak}\n▸ <b>Bugun qoldi:</b> ⚡ {left}\n▸ <b>Qo'shilgan:</b> <code>{joined}</code>",
   "profile-status-premium": "👑 Doimiy Premium",
   "profile-status-free": "⚡ Bepul (kuniga 3 ta)",
   "username-na": "Mavjud emas",
@@ -84,7 +84,6 @@
   "not-sub": "❌ Siz hali kanalga obuna bo'lmagansiz.",
   "thank-sub": "✅ Rahmat! Endi botdan foydalanishingiz mumkin.\n\n🎬 Video yuboring — men audioga aylantiraman.",
 
-  "lang": "🇺🇿 O'zbekcha",
   "lang-button": "🌐 Tilni o'zgartirish",
   "help-button": "❓ Yordam",
   "stats-button": "📊 Statistika",
@@ -92,10 +91,14 @@
   "top-button": "🏆 Top",
   "diamonds-button": "💎 Olmoslar",
 
-  "help-text": "❓ <b>Qanday foydalanish</b>\n\n1️⃣ <b>Video yuboring</b> — faylni yoki YouTube/TikTok havolasini\n2️⃣ <b>Kuting</b> — bot avtomatik ajratadi\n3️⃣ <b>MP3 yuklab oling</b> — saqlab yoki ulashing\n\n⚡ <b>Bepul limit:</b> kuniga <b>3 ta</b> konvertatsiya\n💎 <b>Ko'proq:</b> olmoslar yoki Lifetime Premium\n👥 <b>Bepul olmos:</b> do'stlarni taklif qiling\n🔥 <b>Streak:</b> 3, 7, 14, 30 kun ketma-ket → bonus olmoslar",
+  "help-text": "❓ <b>Qanday ishlatiladi</b>\n\n🎬 <b>Video fayl</b> — istalgan videoni yuboring, MP3 oling\n🔗 <b>Havola</b> — YouTube, TikTok yoki Instagram\n🎙 Sizga MP3 fayl va ovozli xabar — ikkalasi ham keladi\n\n⚡ <b>Bepul:</b> kuniga 3 ta konvertatsiya (yarim tunda yangilanadi)\n📦 <b>Katta fayl</b> (50 MB dan ortiq): 1 💎\n🔗 <b>Havoladan yuklash</b> limitdan keyin: 2 💎\n\n<b>Bepul olmos olish:</b>\n👥 /referral — do'st taklif qiling, har biri uchun +3 💎\n🔥 Ketma-ketlik: botni 3, 7, 14, 30 kun ketma-ket ishlating\n🏆 Marralar: 50, 100, 200, 500 konvertatsiya\n\n💎 /diamonds — olmos sotib olish\n👑 Doimiy Premium — umrbod cheksiz",
 
   "throttled": "⏳ So'rovlar juda ko'p! Iltimos, biroz kuting.",
   "back-button": "⬅️ Orqaga",
   "menu-placeholder": "Video yoki havola yuboring…",
-  "uploading": "📤 Audio yuborilmoqda..."
+  "uploading": "📤 Audio yuborilmoqda...",
+  "your-balance": "💎 Balansingiz: <b>{}</b>",
+  "start-status": "⚡ Bugun qoldi: <b>{left}/{limit}</b> · 💎 Olmoslar: <b>{diamonds}</b>",
+  "start-status-premium": "👑 Doimiy Premium — cheksiz",
+  "payment-issue": "❌ To'lov qabul qilindi, lekin xatolik yuz berdi.\nIltimos, qo'llab-quvvatlashga murojaat qiling — to'lovingiz xavfsiz."
 }

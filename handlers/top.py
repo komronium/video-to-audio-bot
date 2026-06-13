@@ -23,10 +23,19 @@ async def command_top(message: types.Message, db: AsyncSession):
         await message.answer(i18n.get_text("top-empty", lang))
         return
 
+    top_ids = {u.user_id for u in top_users}
     text = i18n.get_text("top-title", lang) + "\n\n"
     for idx, user in enumerate(top_users):
         name = html.quote(user.name or str(user.user_id))
         text += f"{EMOJIES[idx]}  <b>{name}</b> – {user.conversation_count}\n"
+
+    # Show the caller's own rank below the list when they aren't already in it
+    me = await user_service.get_user(message.from_user.id)
+    if me and me.user_id not in top_ids:
+        rank = await user_service.get_user_rank(me.user_id)
+        text += "\n" + i18n.get_text("rank-text", lang).format(
+            rank=rank, conversions=me.conversation_count or 0
+        )
 
     await message.answer(text)
 

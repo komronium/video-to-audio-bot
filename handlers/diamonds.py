@@ -1,4 +1,5 @@
 from aiogram import Bot, F, Router
+from aiogram.exceptions import TelegramAPIError
 from aiogram.filters import Command
 from aiogram.types import CallbackQuery, LabeledPrice, PreCheckoutQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,12 +16,21 @@ router = Router()
 _STARS_TO_DIAMONDS: dict[int, int] = {v: k for k, v in settings.DIAMONDS_PRICES.items()}
 
 
+def _diamonds_text(lang: str, user) -> str:
+    text = i18n.get_text("buy-diamonds", lang)
+    if user and not user.is_premium:
+        text += "\n\n" + i18n.get_text("your-balance", lang).format(user.diamonds or 0)
+    return text
+
+
 @router.message(Command("diamonds"))
 @router.message(F.text.in_([i18n.get_text("diamonds-button", lang) for lang in i18n.LANGUAGES]))
 async def diamonds_menu(message: Message):
     async with get_db() as db:
-        lang = await UserService(db).get_lang(message.from_user.id)
-    await message.answer(i18n.get_text("buy-diamonds", lang), reply_markup=get_prices_keyboard(lang))
+        service = UserService(db)
+        lang = await service.get_lang(message.from_user.id)
+        user = await service.get_user(message.from_user.id)
+    await message.answer(_diamonds_text(lang, user), reply_markup=get_prices_keyboard(lang))
 
 
 @router.callback_query(F.data == "diamond:back")
@@ -36,11 +46,20 @@ async def back_callback(call: CallbackQuery):
 @router.callback_query(F.data == "diamond:list")
 async def buy_diamonds_callback(call: CallbackQuery):
     async with get_db() as db:
-        lang = await UserService(db).get_lang(call.from_user.id)
-    await call.message.edit_text(
-        i18n.get_text("buy-diamonds", lang),
-        reply_markup=get_prices_keyboard(lang),
-    )
+        service = UserService(db)
+        lang = await service.get_lang(call.from_user.id)
+        user = await service.get_user(call.from_user.id)
+    try:
+        await call.message.edit_text(
+            _diamonds_text(lang, user),
+            reply_markup=get_prices_keyboard(lang),
+        )
+    except TelegramAPIError:
+        await call.message.answer(
+            _diamonds_text(lang, user),
+            reply_markup=get_prices_keyboard(lang),
+        )
+    await call.answer()
 
 
 @router.callback_query(F.data.startswith("diamond:buy:"))
@@ -125,9 +144,7 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
                 message_thread_id=17,
             )
         else:
-            await message.answer(
-                "❌ Payment received, but no diamonds were credited. Please contact support!"
-            )
+            await message.answer(i18n.get_text("payment-issue", lang))
 
     elif payload == "channel_support_lifetime":
         await user_service.set_lifetime(user_id)
@@ -140,4 +157,4 @@ async def successful_payment_handler(message: Message, db: AsyncSession, bot: Bo
         await message.answer(i18n.get_text("congrats-lifetime", lang))
 
     else:
-        await message.answer("<b>Unknown payment type.</b>\nPlease contact support.")
+        await message.answer(i18n.get_text("payment-issue", lang))
