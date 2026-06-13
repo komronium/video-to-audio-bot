@@ -1,0 +1,23 @@
+# Local Telegram Bot API server (needed for 50 MB files and local file paths).
+# Runs via Docker so there's no 40-minute source build on a small VPS.
+#
+#   cd /root/video-to-audio-bot/deploy
+#   docker compose up -d
+#
+# Reads TELEGRAM_API_ID / TELEGRAM_API_HASH from ../.env
+
+services:
+  telegram-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    container_name: telegram-bot-api
+    restart: always
+    env_file:
+      - ../.env
+    command: ["--local"]
+    ports:
+      # Bound to localhost only — never exposed to the public internet
+      - "127.0.0.1:8081:8081"
+    volumes:
+      # Same path inside and outside the container, so the bot (running on the
+      # host) can read the file paths that get_file() returns in --local mode
+      - /var/lib/telegram-bot-api:/var/lib/telegram-bot-api

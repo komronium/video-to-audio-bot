@@ -1,0 +1,15 @@
+[Unit]
+Description=Video to Audio Telegram Bot
+After=network.target redis-server.service docker.service
+Wants=redis-server.service docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/video-to-audio-bot
+ExecStart=/root/video-to-audio-bot/venv/bin/python main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
