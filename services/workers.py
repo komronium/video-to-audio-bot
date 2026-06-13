@@ -7,8 +7,9 @@ from aiogram.exceptions import TelegramAPIError, TelegramRetryAfter
 from aiogram.types import FSInputFile, ReplyParameters
 from redis.exceptions import RedisError
 
+from config import settings
 from database.session import get_db
-from services.converter import VideoConverter, NoAudioError
+from services.converter import NoAudioError, VideoConverter
 from services.job_queue import job_queue
 from services.user_service import UserService
 from utils.admin_alert import notify_admin
@@ -19,6 +20,11 @@ from utils.upsell import get_bot_username, post_conversion_upsell
 
 MAX_CONCURRENT = 5
 MAX_ATTEMPTS = 2
+
+# Root data dir of the local telegram-bot-api server. get_file() may return a
+# path relative to <BOT_API_DIR>/<token>/ (non --local mode) or an absolute
+# path (--local mode); we normalise to an absolute path either way.
+BOT_API_DIR = os.getenv("TELEGRAM_BOT_API_DIR", "/var/lib/telegram-bot-api")
 
 _tasks: list[asyncio.Task] = []
 
@@ -128,13 +134,17 @@ async def process_job(bot: Bot, job: dict):
     async def edit_status(text: str):
         if status_msg_id:
             try:
-                await bot.edit_message_text(text, chat_id=chat_id, message_id=status_msg_id)
+                await bot.edit_message_text(
+                    text, chat_id=chat_id, message_id=status_msg_id
+                )
             except TelegramAPIError:
                 pass
 
     def reply_params() -> ReplyParameters | None:
         if job.get("reply_to"):
-            return ReplyParameters(message_id=job["reply_to"], allow_sending_without_reply=True)
+            return ReplyParameters(
+                message_id=job["reply_to"], allow_sending_without_reply=True
+            )
         return None
 
     try:
@@ -142,6 +152,8 @@ async def process_job(bot: Bot, job: dict):
 
         file = await bot.get_file(job["file_id"])
         video_path = file.file_path
+        if not os.path.isabs(video_path):
+            video_path = os.path.join(BOT_API_DIR, settings.BOT_TOKEN, video_path)
 
         await edit_status(i18n.get_text("converting", lang))
 
@@ -154,7 +166,9 @@ async def process_job(bot: Bot, job: dict):
             await _refund(user_id, job.get("charged", 0))
             return
 
-        caption = i18n.get_text("converted-by", lang).format(await get_bot_username(bot))
+        caption = i18n.get_text("converted-by", lang).format(
+            await get_bot_username(bot)
+        )
 
         async with get_db() as db:
             await UserService(db).add_conversation(user_id=user_id)
@@ -167,15 +181,25 @@ async def process_job(bot: Bot, job: dict):
 
         try:
             await bot.send_document(
-                chat_id, FSInputFile(audio_path), caption=caption, reply_parameters=reply_params()
+                chat_id,
+                FSInputFile(audio_path),
+                caption=caption,
+                reply_parameters=reply_params(),
             )
-            await bot.send_voice(chat_id, FSInputFile(audio_path), reply_parameters=reply_params())
+            await bot.send_voice(
+                chat_id, FSInputFile(audio_path), reply_parameters=reply_params()
+            )
         except TelegramRetryAfter as e:
             await asyncio.sleep(e.retry_after)
             await bot.send_document(
-                chat_id, FSInputFile(audio_path), caption=caption, reply_parameters=reply_params()
+                chat_id,
+                FSInputFile(audio_path),
+                caption=caption,
+                reply_parameters=reply_params(),
             )
-            await bot.send_voice(chat_id, FSInputFile(audio_path), reply_parameters=reply_params())
+            await bot.send_voice(
+                chat_id, FSInputFile(audio_path), reply_parameters=reply_params()
+            )
 
         if status_msg_id:
             try:
@@ -189,9 +213,16 @@ async def process_job(bot: Bot, job: dict):
         try:
             async with get_db() as db:
                 user_service = UserService(db)
-                await check_and_notify_rewards(bot, chat_id, user_id, user_service, lang)
+                await check_and_notify_rewards(
+                    bot, chat_id, user_id, user_service, lang
+                )
                 await post_conversion_upsell(
-                    bot, chat_id, user_id, lang, user_service, job.get("is_lifetime", False)
+                    bot,
+                    chat_id,
+                    user_id,
+                    lang,
+                    user_service,
+                    job.get("is_lifetime", False),
                 )
         except Exception:
             logging.exception(f"Post-conversion steps failed for user {user_id}")
