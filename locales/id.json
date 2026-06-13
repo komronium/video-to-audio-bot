@@ -100,5 +100,6 @@
   "your-balance": "💎 Saldo Anda: <b>{}</b>",
   "start-status": "⚡ Sisa hari ini: <b>{left}/{limit}</b> · 💎 Berlian: <b>{diamonds}</b>",
   "start-status-premium": "👑 Premium Seumur Hidup — tanpa batas",
-  "payment-issue": "❌ Pembayaran diterima, tetapi terjadi kesalahan.\nSilakan hubungi dukungan — pembayaran Anda aman."
+  "payment-issue": "❌ Pembayaran diterima, tetapi terjadi kesalahan.\nSilakan hubungi dukungan — pembayaran Anda aman.",
+  "social-error-retry": "⏳ {} sedang sibuk atau membatasi permintaan saat ini. Silakan coba lagi beberapa menit lagi."
 }

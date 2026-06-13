@@ -100,5 +100,6 @@
   "your-balance": "💎 Your balance: <b>{}</b>",
   "start-status": "⚡ Left today: <b>{left}/{limit}</b> · 💎 Diamonds: <b>{diamonds}</b>",
   "start-status-premium": "👑 Lifetime Premium — unlimited",
-  "payment-issue": "❌ Payment received, but something went wrong.\nPlease contact support — your payment is safe."
+  "payment-issue": "❌ Payment received, but something went wrong.\nPlease contact support — your payment is safe.",
+  "social-error-retry": "⏳ {} is busy or limiting requests right now. Please try again in a few minutes."
 }

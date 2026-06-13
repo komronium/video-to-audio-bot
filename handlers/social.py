@@ -9,8 +9,8 @@ from aiogram.exceptions import TelegramAPIError
 from aiogram.types import FSInputFile, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from config import settings
 from services.user_service import UserService
+from utils.admin_alert import notify_admin
 from utils.daily_limit import (
     DAILY_LIMIT,
     get_daily_count,
@@ -32,10 +32,21 @@ MAX_DURATION = 20 * 60
 router = Router()
 
 
+# Longer socket timeout + retries smooth over transient network blips
+# (e.g. Instagram "Read timed out") instead of failing on the first hiccup.
+_YDL_COMMON = {
+    "quiet": True,
+    "no_warnings": True,
+    "cookiefile": "cookies.txt",
+    "socket_timeout": 60,
+    "retries": 3,
+    "extractor_retries": 2,
+}
+
+
 def _social_info(url: str) -> dict:
     import yt_dlp
-    opts = {"quiet": True, "no_warnings": True, "cookiefile": "cookies.txt"}
-    with yt_dlp.YoutubeDL(opts) as ydl:
+    with yt_dlp.YoutubeDL(dict(_YDL_COMMON)) as ydl:
         return ydl.extract_info(url, download=False)
 
 
@@ -44,16 +55,35 @@ def _social_download(url: str, name: str) -> str:
     Path("audios").mkdir(exist_ok=True)
     output = f"audios/{name}"
     opts = {
+        **_YDL_COMMON,
         "format": "bestaudio/best",
         "outtmpl": f"{output}.%(ext)s",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
-        "quiet": True,
-        "no_warnings": True,
-        "cookiefile": "cookies.txt",
     }
     with yt_dlp.YoutubeDL(opts) as ydl:
         ydl.download([url])
     return f"{output}.mp3"
+
+
+def _classify_social_error(exc: Exception) -> tuple[str, str | None]:
+    """Map a download error to (user_message_key, admin_category).
+
+    admin_category is None for expected per-content failures (no admin alert);
+    otherwise it's a short label used both in the alert and as its dedupe key.
+    """
+    err = str(exc).lower()
+    if "rate-limit" in err or "rate limit" in err or "login required" in err or "cookies" in err:
+        # Expired/insufficient cookies or platform throttling — the owner must act
+        return "social-error-retry", "auth-or-rate-limit"
+    if "ip address" in err or "blocked from accessing" in err:
+        return "social-error-blocked", "ip-blocked"
+    if "timed out" in err or "timeout" in err or "read timed out" in err:
+        return "social-error-retry", "timeout"
+    if "copyright" in err or "blocked in your country" in err:
+        return "social-error-copyright", None
+    if "not available" in err or "unavailable" in err or "private" in err or "removed" in err:
+        return "social-error-unavailable", None
+    return "error-server", "unexpected"
 
 
 async def _handle_social(message: Message, db: AsyncSession, url: str, platform: str):
@@ -143,30 +173,29 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         )
 
     except Exception as e:
-        logging.exception(f"{platform} error for user {user_id}")
         await user_service.refund_diamonds(user_id, charged)
-        err_str = str(e).lower()
-        if "blocked" in err_str or "ip address" in err_str:
-            user_msg = i18n.get_text("social-error-blocked", lang).format(platform.capitalize())
-        elif "not available" in err_str or "unavailable" in err_str:
-            user_msg = i18n.get_text("social-error-unavailable", lang).format(platform.capitalize())
-        elif "copyright" in err_str or "blocked in your country" in err_str:
-            user_msg = i18n.get_text("social-error-copyright", lang)
+        user_key, admin_category = _classify_social_error(e)
+        if user_key == "social-error-copyright":
+            user_msg = i18n.get_text(user_key, lang)
         else:
-            user_msg = i18n.get_text("error-server", lang)
+            user_msg = i18n.get_text(user_key, lang).format(platform.capitalize())
         try:
             await processing_msg.edit_text(user_msg)
         except TelegramAPIError:
             pass
-        try:
-            await message.bot.send_message(
-                settings.ADMIN_ID,
-                f"<b>❌ {platform} error</b>\n"
-                f"<b>User:</b> <code>{user_id}</code>\n"
-                f"<b>Error:</b> <code>{type(e).__name__}: {e}</code>",
+        # Per-content failures (this clip is private/unavailable/copyright) are
+        # expected and need no admin alert. Systemic ones (IP block, rate-limit,
+        # expired cookies, timeouts) are alerted once per category per window.
+        if admin_category is None:
+            logging.info(f"{platform} content unavailable for user {user_id}: {e}")
+        else:
+            logging.warning(f"{platform} error for user {user_id}: {e}")
+            await notify_admin(
+                message.bot,
+                f"<b>❌ {platform} — {admin_category}</b>\n"
+                f"<b>Error:</b> <code>{type(e).__name__}: {str(e)[:300]}</code>",
+                dedupe_key=f"social:{platform}:{admin_category}",
             )
-        except TelegramAPIError:
-            pass
     finally:
         if file_path and os.path.exists(file_path):
             os.remove(file_path)

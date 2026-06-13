@@ -7,11 +7,11 @@ from aiogram.exceptions import TelegramAPIError, TelegramRetryAfter
 from aiogram.types import FSInputFile, ReplyParameters
 from redis.exceptions import RedisError
 
-from config import settings
 from database.session import get_db
 from services.converter import VideoConverter, NoAudioError
 from services.job_queue import job_queue
 from services.user_service import UserService
+from utils.admin_alert import notify_admin
 from utils.daily_limit import increment_daily_count
 from utils.i18n import i18n
 from utils.rewards import check_and_notify_rewards
@@ -97,16 +97,16 @@ async def fail_job(bot: Bot, job: dict, exc: Exception):
             await bot.send_message(chat_id, error_text)
     except TelegramAPIError:
         pass
-    try:
-        await bot.send_message(
-            settings.ADMIN_ID,
-            f"<b>❌ Conversion job failed</b>\n"
-            f"<b>User:</b> <code>{user_id}</code>\n"
-            f"<b>Attempts:</b> {job.get('attempts', 0)}\n"
-            f"<b>Error:</b> <code>{type(exc).__name__}: {exc}</code>",
-        )
-    except TelegramAPIError:
-        pass
+    # Dedupe by error type: a recurring failure (e.g. network timeouts to the
+    # local Bot API) alerts the admin once per window, not once per user.
+    await notify_admin(
+        bot,
+        f"<b>❌ Conversion job failed</b>\n"
+        f"<b>User:</b> <code>{user_id}</code>\n"
+        f"<b>Attempts:</b> {job.get('attempts', 0)}\n"
+        f"<b>Error:</b> <code>{type(exc).__name__}: {str(exc)[:300]}</code>",
+        dedupe_key=f"job-failed:{type(exc).__name__}",
+    )
 
 
 async def _refund(user_id: int, count: int):
