@@ -36,15 +36,17 @@ async def result_keyboard(lang: str, user_id: int, user_service: UserService, bo
 
 
 async def get_buy_more_keyboard(lang: str, user_service: UserService, user_id: int, bot: Bot):
-    builder = InlineKeyboardBuilder()
-    builder.button(text=i18n.get_text("buy-extra", lang), callback_data="diamond:list")
-    builder.button(text=i18n.get_text("get-lifetime", lang), callback_data="diamond:lifetime")
+    """Limit-reached keyboard: invite-first (free for the user, growth-positive
+    for the bot), then paid options."""
     code = await user_service.generate_referral_code(user_id)
     bot_username = await get_bot_username(bot)
     referral_link = f"https://t.me/{bot_username}?start={code}"
     share_text = i18n.get_text("referral-share-text", lang)
     share_url = f"https://t.me/share/url?url={quote_plus(referral_link)}&text={quote_plus(share_text)}"
+    builder = InlineKeyboardBuilder()
     builder.button(text=i18n.get_text("invite-friend", lang), url=share_url)
+    builder.button(text=i18n.get_text("buy-extra", lang), callback_data="diamond:list")
+    builder.button(text=i18n.get_text("get-lifetime", lang), callback_data="diamond:lifetime")
     builder.adjust(1)
     return builder.as_markup()
 

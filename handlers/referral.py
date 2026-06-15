@@ -32,7 +32,9 @@ async def referral_command(message: Message, db: AsyncSession):
 
     invited, converted = await user_service.get_referral_stats(user_id)
     progress = i18n.get_text("referral-progress", lang).format(
-        invited=invited, converted=converted, earned=converted * 3
+        invited=invited,
+        converted=converted,
+        earned=converted * UserService.REFERRAL_INVITER_REWARD,
     )
 
     builder = InlineKeyboardBuilder()

@@ -102,12 +102,12 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
             tg.id, tg.username, tg.full_name, tg.language_code or "en", message.bot
         )
     lang = user.lang or "en"
-    is_lifetime = user.is_premium
+    is_premium_now = user.is_active_premium
 
     current = await get_daily_count(user_id)
     charged = 0
 
-    if not is_lifetime and current + SOCIAL_SLOT_COST > DAILY_LIMIT:
+    if not is_premium_now and current + SOCIAL_SLOT_COST > DAILY_LIMIT:
         # Atomic: charges all SOCIAL_SLOT_COST diamonds or none
         if await user_service.use_diamonds(user_id, SOCIAL_SLOT_COST):
             charged = SOCIAL_SLOT_COST
@@ -184,7 +184,7 @@ async def _handle_social(message: Message, db: AsyncSession, url: str, platform:
         await increment_daily_count(user_id, SOCIAL_SLOT_COST)
         await check_and_notify_rewards(message.bot, message.chat.id, user_id, user_service, lang)
         await post_conversion_upsell(
-            message.bot, message.chat.id, user_id, lang, user_service, is_lifetime
+            message.bot, message.chat.id, user_id, lang, user_service, is_premium_now
         )
 
     except Exception as e:

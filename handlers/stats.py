@@ -126,6 +126,8 @@ async def adminstats_internal(message: types.Message, db: AsyncSession):
         f"{lang or '??'}: {_fmt(c)}" for lang, c in langs_rows
     ) if langs_rows else "—"
 
+    blocked_count = await service.total_blocked_users()
+
     diamonds_stmt = select(func.coalesce(func.sum(Payment.diamonds), 0))
     diamonds_total = (await db.execute(diamonds_stmt)).scalar() or 0
 
@@ -143,10 +145,11 @@ async def adminstats_internal(message: types.Message, db: AsyncSession):
         "━━━━━━━━━━━━━━━\n\n"
 
         "👥 <b>Users</b>\n"
-        f"├ Total: <code>{_fmt(total_users)}</code>\n"
+        f"├ Reachable: <code>{_fmt(total_users)}</code>\n"
         f"├ Active: <code>{_fmt(total_active)}</code> ({active_pct}%)\n"
         f"├ Avg per user: <code>{avg_conv}</code>\n"
         f"├ Today: <code>+{today_joined}</code> · 7d: <code>+{week_joined}</code>\n"
+        f"├ Blocked us: <code>{_fmt(blocked_count)}</code>\n"
         f"└ Langs: {top_langs}\n\n"
 
         "🎧 <b>Conversions</b>\n"

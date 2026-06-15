@@ -1,6 +1,6 @@
 from datetime import date
 
-from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String, text
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, text
 from sqlalchemy.orm import declarative_base, relationship
 
 from .session import engine
@@ -23,6 +23,19 @@ class User(Base):
     referral_code = Column(String(20), unique=True, nullable=True)
     referral_code_id = Column(Integer, nullable=True)
     referral_rewarded = Column(Boolean, default=False)
+    last_active = Column(DateTime, nullable=True, index=True)
+    source = Column(String(30), nullable=True, index=True)
+    reengaged_at = Column(Date, nullable=True)
+    # Monthly Stars-paid subscription. is_premium stays for lifetime (sticky
+    # for life), so a user can hold either or both. Active premium =
+    # is_premium OR subscription_until >= today.
+    subscription_until = Column(Date, nullable=True, index=True)
+    subscription_reminded_at = Column(Date, nullable=True)
+    # Set when the user blocks the bot (broadcast/reengage detects 403 etc).
+    # Auto-cleared on the next interaction — if they unblock and message us
+    # again, they're alive. Hard-deletion would orphan their payments and
+    # referrals, so we soft-flag instead.
+    blocked_at = Column(DateTime, nullable=True, index=True)
 
     conversions = relationship(
         "Conversion",
@@ -32,6 +45,14 @@ class User(Base):
     )
     payments = relationship("Payment", back_populates="user")
     referrals_made = relationship("Referral", foreign_keys="Referral.inviter_id", back_populates="inviter")
+
+    @property
+    def is_active_premium(self) -> bool:
+        """Either lifetime or an unexpired monthly subscription unlocks
+        unlimited usage. Reads only loaded columns — no DB hit."""
+        if self.is_premium:
+            return True
+        return bool(self.subscription_until and self.subscription_until >= date.today())
 
 
 class Conversion(Base):
@@ -82,9 +103,19 @@ _MIGRATIONS = [
     "ALTER TABLE users ADD COLUMN referral_code VARCHAR(20) UNIQUE",
     "ALTER TABLE users ADD COLUMN referral_code_id INTEGER",
     "ALTER TABLE users ADD COLUMN referral_rewarded BOOLEAN DEFAULT 0",
+    "ALTER TABLE users ADD COLUMN last_active DATETIME",
+    "ALTER TABLE users ADD COLUMN source VARCHAR(30)",
+    "ALTER TABLE users ADD COLUMN reengaged_at DATE",
+    "ALTER TABLE users ADD COLUMN subscription_until DATE",
+    "ALTER TABLE users ADD COLUMN subscription_reminded_at DATE",
+    "ALTER TABLE users ADD COLUMN blocked_at DATETIME",
+    "CREATE INDEX IF NOT EXISTS ix_users_subscription_until ON users(subscription_until)",
+    "CREATE INDEX IF NOT EXISTS ix_users_blocked_at ON users(blocked_at)",
     "CREATE INDEX IF NOT EXISTS ix_conversions_user_id ON conversions(user_id)",
     "CREATE INDEX IF NOT EXISTS ix_conversions_created_at ON conversions(created_at)",
     "CREATE INDEX IF NOT EXISTS ix_users_joined_at ON users(joined_at)",
+    "CREATE INDEX IF NOT EXISTS ix_users_last_active ON users(last_active)",
+    "CREATE INDEX IF NOT EXISTS ix_users_source ON users(source)",
 ]
 
 

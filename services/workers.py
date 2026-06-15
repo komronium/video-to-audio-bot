@@ -223,7 +223,7 @@ async def process_job(bot: Bot, job: dict):
                     user_id,
                     lang,
                     user_service,
-                    job.get("is_lifetime", False),
+                    job.get("is_premium_now", job.get("is_lifetime", False)),
                 )
         except Exception:
             logging.exception(f"Post-conversion steps failed for user {user_id}")

@@ -25,5 +25,10 @@ class DatabaseMiddleware(BaseMiddleware):
                     lang,
                     event.bot,
                 )
+            else:
+                # Heartbeat for re-engagement / retention analytics. One UPDATE
+                # per interaction is fine at this scale; if it ever bites,
+                # cache the last write and skip if < ~5 min.
+                await user_service.touch_last_active(tg_user.id)
 
             return await handler(event, data)

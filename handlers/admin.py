@@ -1,7 +1,7 @@
 import asyncio
 
 from aiogram import types, Router, F, Bot
-from aiogram.filters import StateFilter
+from aiogram.filters import Command, StateFilter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import (
     ReplyKeyboardMarkup, KeyboardButton,
@@ -62,6 +62,22 @@ def _confirm_keyboard(action: str) -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="✅ Yes", callback_data=f"admin:{action}:yes"),
         InlineKeyboardButton(text="❌ No", callback_data=f"admin:{action}:no"),
     ]])
+
+
+@router.message(Command("demo_id"), F.from_user.id == settings.ADMIN_ID)
+async def demo_capture(message: types.Message):
+    """Reply to any audio message with /demo_id — bot returns the file_id to
+    paste into ONBOARDING_DEMO_FILE_ID in .env."""
+    target = message.reply_to_message
+    if not target or not target.audio:
+        await message.reply(
+            "↩️ Reply with /demo_id to an audio message to capture its file_id."
+        )
+        return
+    await message.reply(
+        f"<code>{target.audio.file_id}</code>\n\n"
+        "Paste this into <code>ONBOARDING_DEMO_FILE_ID</code> in .env and restart."
+    )
 
 
 @router.message(F.text == BTN_ADMIN)

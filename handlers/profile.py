@@ -35,6 +35,12 @@ async def profile_handler(message: types.Message, db: AsyncSession):
         status = i18n.get_text("profile-status-premium", lang)
         diamonds_text = "♾️"
         left_text = "♾️"
+    elif user.is_active_premium:
+        status = i18n.get_text("profile-status-subscription", lang).format(
+            until=user.subscription_until.strftime("%d.%m.%Y"),
+        )
+        diamonds_text = "♾️"
+        left_text = "♾️"
     else:
         status = i18n.get_text("profile-status-free", lang)
         diamonds_text = str(user.diamonds or 0)

@@ -11,6 +11,7 @@ from database.session import get_db
 from services.user_service import UserService
 from utils.daily_limit import DAILY_LIMIT, get_daily_count
 from utils.i18n import i18n
+from utils.onboarding import maybe_send_demo
 
 router = Router()
 
@@ -30,6 +31,11 @@ def get_language_keyboard(current: str | None = None):
 async def _status_line(user, lang: str) -> str:
     if user.is_premium:
         return i18n.get_text("start-status-premium", lang)
+    if user.is_active_premium:
+        # Active monthly subscription — show expiry so renewal is on the radar
+        return i18n.get_text("start-status-subscription", lang).format(
+            until=user.subscription_until.strftime("%d %b"),
+        )
     used = await get_daily_count(user.user_id)
     return i18n.get_text("start-status", lang).format(
         left=max(DAILY_LIMIT - used, 0),
@@ -75,7 +81,14 @@ async def command_start(message: types.Message, db: AsyncSession):
 
     args = message.text.split()
     if len(args) > 1:
-        referral_code = args[1].upper()
+        arg = args[1]
+        # `src_<tag>` (or just `src-<tag>`) marks acquisition source so we can
+        # tell which channels bring users that actually retain. Anything else
+        # is treated as a referral code (existing behaviour).
+        if arg.lower().startswith(("src_", "src-")):
+            await service.set_source(message.from_user.id, arg[4:])
+        else:
+            referral_code = arg.upper()
 
     if not lang:
         if referral_code:
@@ -120,6 +133,9 @@ async def set_language_callback(call: CallbackQuery):
         await call.message.delete()
     except TelegramAPIError:
         pass
+    # First-time arrivals get a one-shot demo MP3 so the value prop is obvious
+    # before they upload anything themselves. Idempotent.
+    await maybe_send_demo(call.bot, call.message.chat.id, call.from_user.id, lang)
 
 
 @router.message(Command("lang"))

@@ -3,7 +3,15 @@ from aiogram.exceptions import TelegramAPIError
 
 from services.user_service import UserService
 from utils.i18n import i18n
-from utils.streak import update_streak
+from utils.streak import STREAK_REWARDS, update_streak
+
+
+def _next_streak_milestone(current: int) -> tuple[int, int] | None:
+    """Closest upcoming milestone above the current streak (days, reward)."""
+    upcoming = [(d, r) for d, r in STREAK_REWARDS.items() if d > current]
+    if not upcoming:
+        return None
+    return min(upcoming, key=lambda dr: dr[0])
 
 
 async def check_and_notify_rewards(
@@ -44,3 +52,20 @@ async def check_and_notify_rewards(
             chat_id,
             i18n.get_text("streak-bonus", lang).format(n=streak_days, reward=streak_reward),
         )
+    elif streak_days >= 2:
+        # Habit hook: show progress to the next streak milestone so the user
+        # knows there's a concrete reward waiting if they come back tomorrow.
+        upcoming = _next_streak_milestone(streak_days)
+        if upcoming:
+            target_days, target_reward = upcoming
+            try:
+                await bot.send_message(
+                    chat_id,
+                    i18n.get_text("streak-progress", lang).format(
+                        n=streak_days,
+                        days_left=target_days - streak_days,
+                        reward=target_reward,
+                    ),
+                )
+            except TelegramAPIError:
+                pass

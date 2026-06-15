@@ -93,7 +93,7 @@ async def video_handler(message: Message, db: AsyncSession, video, reply_to_id: 
         )
         is_new = True
     lang = user.lang or "en"
-    is_lifetime = user.is_premium
+    is_premium_now = user.is_active_premium
     user_id = message.from_user.id
 
     # Queue checks come before charging so rejections never need a refund
@@ -117,7 +117,7 @@ async def video_handler(message: Message, db: AsyncSession, video, reply_to_id: 
     over_limit = current + 1 > DAILY_LIMIT
     charged = 0
 
-    if not is_lifetime and (is_large or over_limit):
+    if not is_premium_now and (is_large or over_limit):
         if not await user_service.use_diamond(user_id):
             if is_large:
                 size_mb = MAX_FILE_SIZE // (1024 * 1024)
@@ -129,7 +129,9 @@ async def video_handler(message: Message, db: AsyncSession, video, reply_to_id: 
                 )
             else:
                 await message.answer(
-                    i18n.get_text("daily-limit", lang).format(limit=DAILY_LIMIT, time=reset_time_str()),
+                    i18n.get_text("daily-limit", lang).format(limit=DAILY_LIMIT, time=reset_time_str())
+                    + "\n\n"
+                    + i18n.get_text("limit-invite-tip", lang),
                     reply_markup=await get_buy_more_keyboard(lang, user_service, user_id, message.bot),
                 )
             return
@@ -164,7 +166,7 @@ async def video_handler(message: Message, db: AsyncSession, video, reply_to_id: 
         "file_name": _generate_name(message, video),
         "lang": lang,
         "charged": charged,
-        "is_lifetime": is_lifetime,
+        "is_premium_now": is_premium_now,
         "status_msg_id": status_msg_id,
         "attempts": 0,
         "enqueued_at": int(message.date.timestamp()),

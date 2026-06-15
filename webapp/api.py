@@ -31,6 +31,8 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import declarative_base
 
+from webapp.miniapp_routes import router as miniapp_router
+
 # ─── Config ───────────────────────────────────────────────
 
 DB_PATH = Path(__file__).resolve().parent.parent / "database.db"
@@ -149,6 +151,7 @@ class BroadcastRequest(BaseModel):
 STATIC_DIR = Path(__file__).resolve().parent / "frontend" / "dist"
 
 app = FastAPI(title="Bot Admin API")
+app.include_router(miniapp_router)
 
 
 @app.on_event("startup")

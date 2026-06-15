@@ -1,6 +1,23 @@
 from aiogram import Dispatcher
 
-from . import start, help, stats, top, profile, subscription, video, post, social, referral, error, diamonds, admin, fallback
+from . import (
+    admin,
+    contest,
+    diamonds,
+    error,
+    fallback,
+    help,
+    post,
+    profile,
+    promo,
+    referral,
+    social,
+    start,
+    stats,
+    subscription,
+    top,
+    video,
+)
 
 
 def setup_handlers(dp: Dispatcher):
@@ -11,6 +28,10 @@ def setup_handlers(dp: Dispatcher):
     dp.include_router(profile.router)
     dp.include_router(subscription.router)
     dp.include_router(video.router)
+    # Admin flows that hold FSM state must register before the broadcast
+    # handler — otherwise their text inputs get swallowed as broadcast content.
+    dp.include_router(promo.router)
+    dp.include_router(contest.router)
     dp.include_router(post.router)
     dp.include_router(social.router)
     dp.include_router(referral.router)

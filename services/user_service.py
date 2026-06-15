@@ -1,5 +1,5 @@
 import secrets
-from datetime import date
+from datetime import date, datetime, timedelta
 
 from aiogram import Bot
 from sqlalchemy import func, select, distinct, update
@@ -26,9 +26,24 @@ class UserService:
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def add_user(self, user_id: int, username: str, name: str, lang: str, bot: Bot) -> User:
+    async def add_user(
+        self,
+        user_id: int,
+        username: str,
+        name: str,
+        lang: str,
+        bot: Bot,
+        source: str | None = None,
+    ) -> User:
         try:
-            user = User(user_id=user_id, username=username, name=name, lang=lang)
+            user = User(
+                user_id=user_id,
+                username=username,
+                name=name,
+                lang=lang,
+                source=source,
+                last_active=datetime.utcnow(),
+            )
             self.db.add(user)
             await self.db.commit()
             await self.db.refresh(user)
@@ -39,6 +54,32 @@ class UserService:
         except IntegrityError:
             await self.db.rollback()
             return await self.get_user(user_id)
+
+    async def touch_last_active(self, user_id: int) -> None:
+        """Heartbeat. Also auto-clears blocked_at — a user we hear from again
+        has clearly unblocked us."""
+        await self.db.execute(
+            update(User)
+            .where(User.user_id == user_id)
+            .values(last_active=datetime.utcnow(), blocked_at=None)
+        )
+        await self.db.commit()
+
+    async def mark_blocked(self, user_id: int) -> None:
+        await self.db.execute(
+            update(User).where(User.user_id == user_id).values(blocked_at=datetime.utcnow())
+        )
+        await self.db.commit()
+
+    async def set_source(self, user_id: int, source: str) -> bool:
+        """First-write wins so the original acquisition channel sticks."""
+        result = await self.db.execute(
+            update(User)
+            .where(User.user_id == user_id, User.source.is_(None))
+            .values(source=source[:30])
+        )
+        await self.db.commit()
+        return result.rowcount > 0
 
     async def is_user_exists(self, user_id: int) -> bool:
         result = await self.db.execute(select(User.id).where(User.user_id == user_id))
@@ -62,11 +103,21 @@ class UserService:
         )
         return result.scalar_one()
 
-    async def total_users(self, exclude_admin: bool = False) -> int:
+    async def total_users(self, exclude_admin: bool = False, exclude_blocked: bool = True) -> int:
+        """Reachable user count. exclude_blocked defaults to True so the
+        public stats line stays honest — block-flagged users are not reachable."""
         stmt = select(func.count(User.user_id))
         if exclude_admin:
             stmt = stmt.where(User.user_id != settings.ADMIN_ID)
+        if exclude_blocked:
+            stmt = stmt.where(User.blocked_at.is_(None))
         result = await self.db.execute(stmt)
+        return result.scalar() or 0
+
+    async def total_blocked_users(self) -> int:
+        result = await self.db.execute(
+            select(func.count(User.user_id)).where(User.blocked_at.is_not(None))
+        )
         return result.scalar() or 0
 
     async def total_active_users(self) -> int:
@@ -74,6 +125,7 @@ class UserService:
         stmt = (
             select(func.count(distinct(User.user_id)))
             .join(Conversion, User.user_id == Conversion.user_id)
+            .where(User.blocked_at.is_(None))
         )
         result = await self.db.execute(stmt)
         return result.scalar() or 0
@@ -162,6 +214,47 @@ class UserService:
         user = await self.get_user(user_id)
         return bool(user and user.diamonds >= 99999)
 
+    async def extend_subscription(self, user_id: int, days: int) -> date | None:
+        """Add N days to the user's subscription. If they already have an
+        active sub, stack the days on top. Returns the new expiry date."""
+        user = await self.get_user(user_id)
+        if not user:
+            return None
+        today = date.today()
+        base = user.subscription_until if (
+            user.subscription_until and user.subscription_until >= today
+        ) else today
+        new_until = base + timedelta(days=days)
+        await self.db.execute(
+            update(User)
+            .where(User.user_id == user_id)
+            .values(subscription_until=new_until, subscription_reminded_at=None)
+        )
+        # Record as a payment (diamonds=0, not lifetime) for revenue tracking
+        self.db.add(Payment(user_id=user.id, diamonds=0, is_lifetime=False))
+        await self.db.commit()
+        return new_until
+
+    async def has_active_premium(self, user_id: int) -> bool:
+        """Lifetime OR active monthly subscription."""
+        user = await self.get_user(user_id)
+        if not user:
+            return False
+        if user.is_premium:
+            return True
+        return bool(
+            user.subscription_until and user.subscription_until >= date.today()
+        )
+
+    async def subscription_status(self, user_id: int) -> tuple[bool, date | None]:
+        """Returns (is_active_subscription, expires_on). Lifetime is treated
+        as separate — this only reports the monthly tier."""
+        user = await self.get_user(user_id)
+        if not user or not user.subscription_until:
+            return False, None
+        active = user.subscription_until >= date.today()
+        return active, user.subscription_until
+
     async def get_lang(self, user_id: int) -> str:
         user = await self.get_user(user_id)
         if not user:
@@ -244,6 +337,9 @@ class UserService:
             return False, None
         return True, user.referral_code_id
 
+    REFERRAL_INVITER_REWARD = 5
+    REFERRAL_INVITEE_REWARD = 3
+
     async def grant_referral_reward(self, user_id: int) -> tuple[bool, int | None]:
         user = await self.get_user(user_id)
         if not user or user.referral_rewarded or not user.referral_code_id:
@@ -251,8 +347,8 @@ class UserService:
         inviter = await self.db.get(User, user.referral_code_id)
         if not inviter:
             return False, None
-        inviter.diamonds = (inviter.diamonds or 0) + 3
-        user.diamonds = (user.diamonds or 0) + 2
+        inviter.diamonds = (inviter.diamonds or 0) + self.REFERRAL_INVITER_REWARD
+        user.diamonds = (user.diamonds or 0) + self.REFERRAL_INVITEE_REWARD
         user.referral_rewarded = True
         self.db.add(Referral(inviter_id=inviter.id, invited_id=user.id))
         await self.db.commit()
